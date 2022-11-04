@@ -1,6 +1,6 @@
 # Simple OpenID
 
-> Simple and opinionated OpenID-Connect relying party (client) implementation 
+> Simple and opinionated OpenID-Connect relying party (client) implementation
 
 
 ## Development philosophy
@@ -21,4 +21,3 @@
 
   Tell the user about function requirements clearly but don't try any fancy internal persistence or caching mechanisms that will only fail in different usage scenarios.
   Instead, abstract the underlying OpenID protocol into usable, clear functions but nothing more.
-
