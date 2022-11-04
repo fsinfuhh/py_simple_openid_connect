@@ -2,7 +2,7 @@ API Documentation
 =================
 
 .. autosummary::
-    :toctree: generated
+    :toctree: _generated
 
     simple_openid
     simple_openid.data
