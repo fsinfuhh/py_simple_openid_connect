@@ -5,6 +5,12 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import sys
+from pathlib import Path
+
+BASE_PATH = Path(__file__).parent.parent
+sys.path.append(str(BASE_PATH / "src"))
+
 
 project = "simple_openid"
 copyright = "2022, Finn-Thorben Sell"
