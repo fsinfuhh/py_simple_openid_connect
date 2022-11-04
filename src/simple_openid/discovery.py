@@ -5,10 +5,10 @@ import requests
 from pydantic import ValidationError
 
 from simple_openid.exceptions import OpenidProtocolError
-from simple_openid import data
+from simple_openid.data import ProviderMetadata
 
 
-def discover_configuration_from_issuer(issuer: str):
+def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
     """
     Retrieve configuration information about an OpenID provider (issuer)
 
@@ -31,7 +31,7 @@ def discover_configuration_from_issuer(issuer: str):
         )
 
     try:
-        result = data.ProviderMetadata.parse_raw(response.content)
+        result = ProviderMetadata.parse_raw(response.content)
         assert result.issuer == issuer
     except ValidationError or AssertionError as e:
         raise OpenidProtocolError(
