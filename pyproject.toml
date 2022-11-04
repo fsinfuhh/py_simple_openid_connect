@@ -1,0 +1,20 @@
+[project]
+name = "simple_openid"
+description = "Simple and opinionated OpenID-Connect relying party (client) implementation"
+authors = [{name = "Finn-Thorben Sell", email = "dev@finn-thorben.me"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version"]
+requires-python = "~=3.9"
+dependencies = [
+    "pydantic~=1.10"
+]
+
+[project.urls]
+Home = "https://github.com/fsinfuhh/simple_openid"
+Source = "https://github.com/fsinfuhh/simple_openid"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
