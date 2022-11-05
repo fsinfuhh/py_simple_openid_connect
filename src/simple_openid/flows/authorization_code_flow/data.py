@@ -222,7 +222,7 @@ class TokenErrorResponse(OpenidMessage):
 
     class ErrorType(enum.Enum):
         """
-        Possible values for :data:`error <AuthenticationErrorResponse.error>`
+        Possible values for :data:`error <TokenErrorResponse.error>`
         """
 
         invalid_request = "invalid_request"
