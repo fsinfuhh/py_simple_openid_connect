@@ -2,7 +2,7 @@
 Datatypes and models for various OpenID messages
 """
 import abc
-from typing import List, Optional, Type, TypeVar
+from typing import List, Literal, Optional, Type, TypeVar
 
 from furl import Query, furl
 from pydantic import BaseModel, Extra, HttpUrl
@@ -15,23 +15,24 @@ class OpenidMessage(BaseModel, metaclass=abc.ABCMeta):
     A base class for messages sent to and received from an Openid issuer
     """
 
-    def encode_x_www_form_urlencoded(self, prepend_endpoint: str = None) -> str:
+    def encode_x_www_form_urlencoded(self) -> str:
         """
         Encode this message as a `x-www-form-urlencoded` formatted string.
 
         This is useful to send the message to an OP (if it is a request) either directly as GET url parameters or as an
         `x-www-form-urlencoded` request body
 
-        :param prepend_endpoint: If given, prepend this endpoint URL to the encoded query string.
-            Otherwise, only the plain query string is returned.
         """
-        if prepend_endpoint is not None:
-            url = furl(prepend_endpoint, query_params=self.dict(exclude_defaults=True))
-            return url.tostr()
-        else:
-            query = Query()
-            query.set(self.dict(exclude_defaults=True))
-            return query.encode()
+        query = Query()
+        query.set(self.dict(exclude_defaults=True))
+        return query.encode()
+
+    def encode_url(self, url: str) -> str:
+        """
+        Encode this message as query string parameters into the existing url.
+        """
+        url = furl(url, query_params=self.dict(exclude_defaults=True))
+        return url.tostr()
 
     @classmethod
     def parse_x_www_form_urlencoded(cls: Type[Self], s: str) -> Self:
@@ -41,6 +42,13 @@ class OpenidMessage(BaseModel, metaclass=abc.ABCMeta):
         query = Query(s)
         one_value_params = {key: query.params[key] for key in query.params.keys()}
         return cls.parse_obj(one_value_params)
+
+    @classmethod
+    def parse_url(cls: Type[Self], url: str) -> Self:
+        """
+        Parse a received message that is encoded as part of the URL as query parameters.
+        """
+        return cls.parse_x_www_form_urlencoded(str(furl(url).query))
 
 
 class ProviderMetadata(BaseModel):

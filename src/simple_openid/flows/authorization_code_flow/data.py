@@ -29,6 +29,9 @@ class AuthenticationRequest(OpenidMessage):
     state: Optional[str]
     "RECOMMENDED. Opaque value used to maintain state between the request and the callback. " "Typically, Cross-Site Request Forgery (CSRF, XSRF) mitigation is done by cryptographically binding the value of this parameter with a browser cookie."
 
+    response_mode: Optional[str]
+    "OPTIONAL. Informs the Authorization Server of the mechanism to be used for returning parameters from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the Response Mode that would be requested is the default mode specified for the Response Type."
+
     nonce: Optional[str]
     "OPTIONAL. String value used to associate a Client session with an ID Token, and to mitigate replay attacks. " "The value is passed through unmodified from the Authentication Request to the ID Token. " "Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values."
 

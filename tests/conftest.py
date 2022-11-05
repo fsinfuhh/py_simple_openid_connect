@@ -1,5 +1,88 @@
+import random
+import string
+from typing import Callable, Dict, List, Tuple
+
 import pytest
+import requests
 import responses
+from furl import furl
+from requests import PreparedRequest
+
+from simple_openid.flows.authorization_code_flow import (
+    AuthenticationRequest,
+    AuthenticationSuccessResponse,
+)
+
+
+def rand_str() -> str:
+    return "".join(random.choices(string.ascii_letters + string.digits, k=16))
+
+
+class DummyOpenidProvider:
+    iss = "https://provider.example.com/openid-connect"
+    endpoints = {"authorization": f"{iss}/auth"}
+
+    test_client_id = "test-client"
+    test_client_secret = "foobar123"
+    test_client_redirect_uri = "https://app.example.com/auth/callback"
+
+    def __init__(self, requests_mock: responses.RequestsMock):
+        self.setup_authorization_endpoint(requests_mock)
+
+    def setup_authorization_endpoint(self, requests_mock: responses.RequestsMock):
+        def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
+            request_url = furl(request.url)
+            auth_request = AuthenticationRequest.parse_x_www_form_urlencoded(
+                request_url.query.encode()
+            )
+            response = AuthenticationSuccessResponse(
+                code=rand_str(), state=auth_request.state
+            )
+            return 301, {"Location": response.encode_url(auth_request.redirect_uri)}, ""
+
+        requests_mock.add_callback(
+            method=responses.GET,
+            url=self.endpoints["authorization"],
+            callback=callback,
+        )
+
+
+@pytest.fixture
+def dummy_openid_provider(
+    mocked_responses: responses.RequestsMock,
+) -> DummyOpenidProvider:
+    yield DummyOpenidProvider(mocked_responses)
+
+
+class DummyUserAgent:
+    def naviagte_to(self, url: str) -> requests.Response:
+        """
+        Mimic navigating to the given URL
+        """
+        return requests.get(url, allow_redirects=True)
+
+
+@pytest.fixture
+def dummy_ua() -> DummyUserAgent:
+    yield DummyUserAgent()
+
+
+class DummyAppServer:
+    callback_url = "https://app.example.com/auth/callback"
+
+    def __init__(self, requests_mock: responses.RequestsMock):
+        requests_mock.get(
+            url=self.callback_url,
+            status=200,
+            body="dumm app server callback response",
+        )
+
+
+@pytest.fixture
+def dummy_app_server(
+    mocked_responses: responses.RequestsMock, dummy_openid_provider: DummyOpenidProvider
+) -> DummyAppServer:
+    return DummyAppServer(mocked_responses)
 
 
 @pytest.fixture(autouse=True)
@@ -12,7 +95,7 @@ def mocked_responses():
 
 
 @pytest.fixture
-def openid_provider_configs(mocked_responses: responses.RequestsMock):
+def mock_known_provider_configs(mocked_responses: responses.RequestsMock):
     """
     Mock requests to known OpenID provider config URLs to return static content
     """
