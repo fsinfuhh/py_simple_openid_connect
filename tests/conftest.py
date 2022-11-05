@@ -77,6 +77,15 @@ class DummyOpenidProvider:
                 )
             elif request_msg.code in self._valid_auth_codes:
                 self._valid_auth_codes.remove(request_msg.code)
+                return (
+                    200,
+                    {},
+                    TokenSuccessResponse(
+                        access_token=rand_str(),
+                        token_type="Bearer",
+                        id_token=rand_str(),
+                    ).json(),
+                )
             else:
                 return (
                     400,
