@@ -46,9 +46,15 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
   - ❌ ID Token handling (it is right now just an opaque string)
   - ❌ Extensive response validation (signatures, validating responses with external expected conditions)
   - ❌ Using refresh tokens
-  - ❌ Fragment based response parsing
 
 - (✔️) Partial [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html).
   *Provider Configuration Discovery* is implemented, *Provider Issuer Discovery* is not.
 
   This means that a known issuer can be introspected for its supported algorithms, endpoint locations and so forth but discovering that issuer in the first hand is not possible.
+
+- ✔️ Full [OAuth 2.0 Multiple Response Type Encoding Practices](https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html)
+
+  Only the following features are implemented and supported:
+  - ✔️  Response modes (fragment based response parsing)
+  - ✔️  Multiple-Valued Response Types <br>
+    No explicit support, but it is possible to supply one of the multivalued `response_type` values to an authentication request and then parse multiple responses from the resulting redirect uri.
