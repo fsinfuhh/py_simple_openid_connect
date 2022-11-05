@@ -1,7 +1,7 @@
 import enum
 from typing import Optional, List
 
-from pydantic import Extra
+from pydantic import Extra, Field
 
 from simple_openid.data import OpenidMessage
 
@@ -17,7 +17,7 @@ class AuthenticationRequest(OpenidMessage):
     scope: str
     "REQUIRED. OpenID Connect authentication requests MUST contain the openid scope value." "Multiple scopes are encoded space separated. " "If the openid scope value is not present, the behavior is entirely unspecified. " "Other scope values MAY be present."
 
-    response_type: str = "code"
+    response_type: str = Field(default="code", const=True)
     "REQUIRED. OAuth 2.0 Response Type value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used. " "When using the Authorization Code Flow, this value is code. "
 
     client_id: str
@@ -59,7 +59,7 @@ class AuthenticationSuccessResponse(OpenidMessage):
     A response that is sent by the Authorization Server if a previous :class:`.AuthenticationRequest` could successfully
     be parsed and handled.
 
-     When using the Authorization Code Flow (this flow), the Authorization Response MUST return the parameters defined by adding them as query parameters to the redirect_uri specified in the Authorization Request using the application/x-www-form-urlencoded format, unless a different Response Mode was specified.
+    When using the Authorization Code Flow (this flow), the Authorization Response MUST return the parameters defined by adding them as query parameters to the redirect_uri specified in the Authorization Request using the application/x-www-form-urlencoded format, unless a different Response Mode was specified.
     """
 
     class Config:
@@ -151,3 +151,103 @@ class AuthenticationErrorResponse(OpenidMessage):
 
     state: Optional[str]
     "REQUIRED if a `state` parameter was present in the client authorization request. " "The exact value received from the client."
+
+
+class TokenRequest(OpenidMessage):
+    """
+    A Client makes a Token Request by presenting its Authorization Grant (in the form of an Authorization Code) to the Token Endpoint.
+    If the Client is a Confidential Client, then it MUST authenticate to the Token Endpoint using the authentication method registered for its client_id.
+
+    This request MUST be sent to the token endpoint using POST with "application/x-www-form-urlencoded" body.
+    """
+
+    class Config:
+        extra = Extra.allow
+
+    grant_type: str = Field(default="authorization_code", const=True)
+    'REQUIRED. Value MUST be set to "authorization_code".'
+
+    code: str
+    "REQUIRED. The authorization code received from the authorization server."
+
+    redirect_uri: str
+    "REQUIRED, must be identical to the value that was included in the :data:`AuthenticationRequest <AuthenticationRequest.redirect_uri>`."
+
+    client_id: Optional[str]
+    "REQUIRED, if the client is not authenticating with the authorization server." "Basically, confidential clients don't need to include it but others do."
+
+
+class TokenSuccessResponse(OpenidMessage):
+    """
+    After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an ID Token and an Access Token.
+    (The response uses the `application/json` media type.)
+    """
+
+    # TODO Implement ID Token validation
+    # https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+
+    class Config:
+        allow_mutation = False
+
+    access_token: str
+    "REQUIRED. The access token issued by the authorization server."
+
+    token_type: str
+    "REQUIRED. The type of the token issued. " "Value is case insensitive." "Usually this is `Bearer` which is a type that MUST be supported by all OPs."
+
+    expires_in: Optional[int]
+    "RECOMMENDED.  The lifetime in seconds of the access token. " 'For example, the value "3600" denotes that the access token will expire in one hour from the time the response was generated. ' "If omitted, the authorization server SHOULD provide the expiration time via other means or document the default value."
+
+    refresh_token: Optional[str]
+    "OPTIONAL. The refresh token, which can be used to obtain new access tokens using the same authorization grant as described in `Section 6 of RFC6749 <https://www.rfc-editor.org/rfc/rfc6749#section-6>`_."
+
+    scope: Optional[str]
+    "OPTIONAL, if identical to the scope requested by the client; otherwise, REQUIRED. " "The scope of the access token."
+
+    id_token: str
+    "ID Token value associated with the authenticated session."
+
+
+class TokenErrorResponse(OpenidMessage):
+    """
+    A response that is sent by the Authorization Server if a previous :class:`.TokenRequest` could not be
+    understood or handled.
+    It contains additional information about the error that occurred.
+    """
+
+    class Config:
+        extra = Extra.allow
+        allow_mutation = False
+        use_enum_values = True
+
+    class ErrorType(enum.Enum):
+        """
+        Possible values for :data:`error <AuthenticationErrorResponse.error>`
+        """
+
+        invalid_request = "invalid_request"
+        "The request is missing a required parameter, includes an unsupported parameter value (other than grant type), repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed."
+
+        invalid_client = "invalid_client"
+        "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method). " "The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported. " 'If the client attempted to authenticate via the "Authorization" request header field, the authorization server MUST respond with an HTTP 401 (Unauthorized) status code and include the "WWW-Authenticate" response header field matching the authentication scheme used by the client.'
+
+        invalid_grant = "invalid_grant"
+        "The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client."
+
+        unauthorized_client = "unauthorized_client"
+        "The authenticated client is not authorized to use this authorization grant type."
+
+        unsupported_grant_type = "unsupported_grant_type"
+        "The authorization grant type is not supported by the authorization server."
+
+        invalid_scope = "invalid_scope"
+        "The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner."
+
+    error: ErrorType
+    "REQUIRED. An error code"
+
+    error_description: Optional[str]
+    "OPTIONAL.  Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."
+
+    error_uri: Optional[str]
+    "OPTIONAL.  A URI identifying a human-readable web page with information about the error, used to provide the client developer with additional information about the error."
