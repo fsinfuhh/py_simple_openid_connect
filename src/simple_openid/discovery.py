@@ -3,8 +3,8 @@ Mechanisms for discovering information about an OpenID issuer
 """
 import requests
 
-from simple_openid.exceptions import OpenidProtocolError
 from simple_openid.data import ProviderMetadata
+from simple_openid.exceptions import OpenidProtocolError
 
 
 def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:

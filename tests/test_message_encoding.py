@@ -1,6 +1,6 @@
+import unittest
 from typing import Optional
 
-import unittest
 from hypothesis import given
 
 from simple_openid.data import OpenidMessage

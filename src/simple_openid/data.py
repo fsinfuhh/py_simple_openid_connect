@@ -2,9 +2,10 @@
 Datatypes and models for various OpenID messages
 """
 import abc
-from typing import Optional, List, Type, TypeVar
-from furl import furl, Query
-from pydantic import BaseModel, HttpUrl, Extra
+from typing import List, Optional, Type, TypeVar
+
+from furl import Query, furl
+from pydantic import BaseModel, Extra, HttpUrl
 
 Self = TypeVar("Self", bound="OpenidMessage")
 
