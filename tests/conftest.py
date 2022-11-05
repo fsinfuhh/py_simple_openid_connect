@@ -1,6 +1,6 @@
 import random
 import string
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 import pytest
 import requests
@@ -8,6 +8,7 @@ import responses
 from furl import furl
 from requests import PreparedRequest
 
+from simple_openid.data import ProviderMetadata
 from simple_openid.flows.authorization_code_flow import (
     AuthenticationRequest,
     AuthenticationSuccessResponse,
@@ -24,7 +25,7 @@ def rand_str() -> str:
 class DummyOpenidProvider:
     iss = "https://provider.example.com/openid-connect"
     endpoints = {
-        "authorization": f"{iss}/auth",
+        "authorization": f"{iss}/client_auth",
         "token": f"{iss}/token",
     }
 
@@ -171,6 +172,18 @@ def mock_known_provider_configs(mocked_responses: responses.RequestsMock):
         url="https://example.com/invalid-json-syntax/.well-known/openid-configuration",
         content_type="application/json",
         body="{ 'hello }",
+    )
+
+    mocked_responses.get(
+        url="https://provider.example.com/openid-connect/.well-known/openid-configuration",
+        json=ProviderMetadata(
+            issuer="https://provider.example.com/openid-connect",
+            authorization_endpoint="https://provider.example.com/openid-connect/client_auth",
+            token_endpoint="https://provider.example.com/openid-connect/token",
+            jwks_uri="https://provider.example.com/openid-connect/jwks",
+            subject_types_supported=["public"],
+            id_token_signing_alg_values_supported=["RS256"],
+        ).dict(exclude_defaults=True),
     )
 
     mocked_responses.get(

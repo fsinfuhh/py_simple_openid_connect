@@ -24,6 +24,9 @@ class ClientAuthenticationMethod(AuthBase, metaclass=abc.ABCMeta):
     This class also extends requests :class:`AuthBase` so that all derived implementations can directly be used with requests to authenticate something.
     """
 
+    NAME: str
+    "How this authentication method is called in the Openid spec"
+
     @property
     @abc.abstractmethod
     def client_id(self) -> str:
@@ -37,6 +40,8 @@ class NoneAuth(ClientAuthenticationMethod):
     """
     The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow (and so does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other authentication mechanism.
     """
+
+    NAME = "none"
 
     def __init__(self, client_id: str):
         self._client_id = client_id
@@ -53,6 +58,8 @@ class ClientSecretBasicAuth(ClientAuthenticationMethod, HTTPBasicAuth):
     """
     Clients that have received a `client_secret` value from the Authorization Server authenticate with the Authorization Server using the HTTP Basic authentication scheme.
     """
+
+    NAME = "client_secret_basic"
 
     @property
     def client_id(self) -> str:

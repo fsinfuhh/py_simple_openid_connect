@@ -5,10 +5,15 @@ The Authorization Server can also authenticate the Client before exchanging the 
 
 **The Authorization Code flow is suitable for Clients that can securely maintain a Client Secret between themselves and the Authorization Server.**
 """
+import copy
+import logging
+from typing import Literal
 
 import requests
+from furl import furl
 
 from simple_openid.client_authentication import ClientAuthenticationMethod
+from simple_openid.exceptions import AuthenticationFailedError
 
 from .data import (
     AuthenticationErrorResponse,
@@ -18,6 +23,8 @@ from .data import (
     TokenRequest,
     TokenSuccessResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def start_authentication(
@@ -35,6 +42,47 @@ def start_authentication(
     return request.encode_url(authorization_endpoint)
 
 
+def handle_authentication_result(
+    current_url: str,
+    token_endpoint: str,
+    client_authentication: ClientAuthenticationMethod,
+    redirect_uri: Literal["auto"] | str = "auto",
+) -> TokenSuccessResponse | TokenErrorResponse:
+    """
+    Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
+
+    :param current_url: The current URL which the user is visiting.
+        The authentication result should be encoded into this url by the authorization server.
+    :param token_endpoint: The endpoint of the OP at which tokens can be exchanged.
+        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid.data.ProviderMetadata.token_endpoint>`
+    :param client_authentication: A way for the client to authenticate itself
+    :param redirect_uri: The `redirect_uri` that was specified during the authentication initiation.
+        If the special value `auto` is used, it is assumed that `current_url` is the that callback and it is stripped of query parameters and fragments to reproduce the originally supplied one.
+
+    :raises AuthenticationFailedError: If the current url indicates an authentication failure that prevents an access token from being retrieved.
+    """
+    current_url = furl(current_url)
+    if "error" in current_url.query.params.keys():
+        auth_response_msg = AuthenticationErrorResponse.parse_url(str(current_url))
+        raise AuthenticationFailedError(auth_response_msg)
+
+    if redirect_uri == "auto":
+        redirect_uri = str(copy.deepcopy(current_url).remove(fragment=True, query=True))
+        logger.debug(
+            f"a redirect_uri value of 'auto' was specified. Reproducing redirect_uri (%s) from current_url (%s)",
+            redirect_uri,
+            current_url,
+        )
+
+    auth_response_msg = AuthenticationSuccessResponse.parse_url(str(current_url))
+    return exchange_code_for_tokens(
+        token_endpoint=token_endpoint,
+        authentication_response=auth_response_msg,
+        redirect_uri=redirect_uri,
+        client_authentication=client_authentication,
+    )
+
+
 def exchange_code_for_tokens(
     token_endpoint: str,
     authentication_response: AuthenticationSuccessResponse,
@@ -43,6 +91,8 @@ def exchange_code_for_tokens(
 ) -> TokenSuccessResponse | TokenErrorResponse:
     """
     Exchange a received code for access, refresh and id tokens.
+
+    You might want to use :func:`handle_authentication_result` if you don't want to parse an authentication result from the users current url yourself.
 
     :param token_endpoint: The endpoint of the OP at which tokens can be exchanged.
         Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid.data.ProviderMetadata.token_endpoint>`
@@ -53,6 +103,7 @@ def exchange_code_for_tokens(
 
     :return: The result of the token exchange
     """
+    logger.debug("exchanging authentication code for tokens")
     request_msg = TokenRequest(
         code=authentication_response.code,
         redirect_uri=redirect_uri,
