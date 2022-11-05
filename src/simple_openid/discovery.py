@@ -2,7 +2,6 @@
 Mechanisms for discovering information about an OpenID issuer
 """
 import requests
-from pydantic import ValidationError
 
 from simple_openid.exceptions import OpenidProtocolError
 from simple_openid.data import ProviderMetadata
@@ -33,7 +32,7 @@ def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
     try:
         result = ProviderMetadata.parse_raw(response.content)
         assert result.issuer == issuer
-    except ValidationError or AssertionError as e:
+    except Exception as e:
         raise OpenidProtocolError(
             "The provider did not respond with a provider configuration according to spec"
         ) from e
