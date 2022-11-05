@@ -24,7 +24,13 @@ class ClientAuthenticationMethod(AuthBase, metaclass=abc.ABCMeta):
     This class also extends requests :class:`AuthBase` so that all derived implementations can directly be used with requests to authenticate something.
     """
 
-    pass
+    @property
+    @abc.abstractmethod
+    def client_id(self) -> str:
+        """
+        The client id which is assigned to this app
+        """
+        raise NotImplementedError()
 
 
 class NoneAuth(ClientAuthenticationMethod):
@@ -32,14 +38,25 @@ class NoneAuth(ClientAuthenticationMethod):
     The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow (and so does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other authentication mechanism.
     """
 
+    def __init__(self, client_id: str):
+        self._client_id = client_id
+
     def __call__(self, r: models.PreparedRequest) -> models.PreparedRequest:
         return r
+
+    @property
+    def client_id(self) -> str:
+        return self._client_id
 
 
 class ClientSecretBasicAuth(ClientAuthenticationMethod, HTTPBasicAuth):
     """
     Clients that have received a `client_secret` value from the Authorization Server authenticate with the Authorization Server using the HTTP Basic authentication scheme.
     """
+
+    @property
+    def client_id(self) -> str:
+        return self.username
 
     def __init__(self, client_id: str, client_secret: str):
         """

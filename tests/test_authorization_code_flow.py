@@ -1,4 +1,6 @@
+from simple_openid.client_authentication import ClientSecretBasicAuth
 from simple_openid.flows import authorization_code_flow
+from simple_openid.flows.authorization_code_flow import AuthenticationSuccessResponse
 
 
 def test_authorization_request(dummy_ua, dummy_openid_provider, dummy_app_server):
@@ -17,3 +19,20 @@ def test_authorization_request(dummy_ua, dummy_openid_provider, dummy_app_server
     )
     assert response_msg.code is not None
     assert response_msg.code != ""
+
+
+def test_token_exchange(dummy_ua, dummy_openid_provider, dummy_app_server):
+    # act
+    response = authorization_code_flow.exchange_code_for_tokens(
+        dummy_openid_provider.endpoints["token"],
+        AuthenticationSuccessResponse(code=dummy_openid_provider.cheat_code),
+        dummy_app_server.callback_url,
+        ClientSecretBasicAuth(
+            dummy_openid_provider.test_client_id,
+            dummy_openid_provider.test_client_secret,
+        ),
+    )
+
+    # assert
+    assert response.access_token
+    assert response.id_token

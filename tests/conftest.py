@@ -11,6 +11,9 @@ from requests import PreparedRequest
 from simple_openid.flows.authorization_code_flow import (
     AuthenticationRequest,
     AuthenticationSuccessResponse,
+    TokenErrorResponse,
+    TokenRequest,
+    TokenSuccessResponse,
 )
 
 
@@ -20,14 +23,23 @@ def rand_str() -> str:
 
 class DummyOpenidProvider:
     iss = "https://provider.example.com/openid-connect"
-    endpoints = {"authorization": f"{iss}/auth"}
+    endpoints = {
+        "authorization": f"{iss}/auth",
+        "token": f"{iss}/token",
+    }
 
     test_client_id = "test-client"
     test_client_secret = "foobar123"
     test_client_redirect_uri = "https://app.example.com/auth/callback"
 
+    cheat_code = "master access code which can always be exchanged for tokens"
+
+    _valid_auth_codes: List[str]
+
     def __init__(self, requests_mock: responses.RequestsMock):
+        self._valid_auth_codes = []
         self.setup_authorization_endpoint(requests_mock)
+        self.setup_token_endpoint(requests_mock)
 
     def setup_authorization_endpoint(self, requests_mock: responses.RequestsMock):
         def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
@@ -35,15 +47,51 @@ class DummyOpenidProvider:
             auth_request = AuthenticationRequest.parse_x_www_form_urlencoded(
                 request_url.query.encode()
             )
+
+            code = rand_str()
+            self._valid_auth_codes.append(code)
             response = AuthenticationSuccessResponse(
-                code=rand_str(), state=auth_request.state
+                code=code, state=auth_request.state
             )
+
             return 301, {"Location": response.encode_url(auth_request.redirect_uri)}, ""
 
         requests_mock.add_callback(
             method=responses.GET,
             url=self.endpoints["authorization"],
             callback=callback,
+        )
+
+    def setup_token_endpoint(self, requests_mock: responses.RequestsMock):
+        def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
+            request_msg = TokenRequest.parse_x_www_form_urlencoded(request.body)
+            if request_msg.code == self.cheat_code:
+                return (
+                    200,
+                    {},
+                    TokenSuccessResponse(
+                        access_token=rand_str(),
+                        token_type="Bearer",
+                        id_token=rand_str(),
+                    ).json(),
+                )
+            elif request_msg.code in self._valid_auth_codes:
+                self._valid_auth_codes.remove(request_msg.code)
+            else:
+                return (
+                    400,
+                    {},
+                    TokenErrorResponse(
+                        error=TokenErrorResponse.ErrorType.invalid_grant,
+                        error_description="token is invalid",
+                    ).json(),
+                )
+
+        requests_mock.add_callback(
+            method=responses.POST,
+            url=self.endpoints["token"],
+            callback=callback,
+            content_type="application/json",
         )
 
 

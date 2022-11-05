@@ -4,11 +4,7 @@ import pytest
 import requests
 from responses import RequestsMock
 
-from simple_openid.client_authentication import (
-    ClientSecretBasicAuth,
-    ClientSecretPostAuth,
-    NoneAuth,
-)
+from simple_openid.client_authentication import ClientSecretBasicAuth, NoneAuth
 
 
 @pytest.fixture
@@ -18,7 +14,7 @@ def mock_empty_response(mocked_responses: RequestsMock):
 
 def test_none_auth(mock_empty_response):
     # arrange
-    auth = NoneAuth()
+    auth = NoneAuth("test-id")
 
     # act
     response = requests.get("https://example.com", auth=auth)
