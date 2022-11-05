@@ -1,3 +1,11 @@
+"""
+The Authorization Code Flow returns an Authorization Code to the Client, which can then exchange it for an ID Token and an Access Token.
+This provides the benefit of not exposing any tokens to the User Agent and possibly other malicious applications with access to the User Agent.
+The Authorization Server can also authenticate the Client before exchanging the Authorization Code for an Access Token.
+
+**The Authorization Code flow is suitable for Clients that can securely maintain a Client Secret between themselves and the Authorization Server.**
+"""
+
 import requests
 
 from simple_openid.client_authentication import ClientAuthenticationMethod
