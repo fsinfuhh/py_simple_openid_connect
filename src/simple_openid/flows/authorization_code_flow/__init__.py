@@ -60,6 +60,8 @@ def handle_authentication_result(
         If the special value `auto` is used, it is assumed that `current_url` is the that callback and it is stripped of query parameters and fragments to reproduce the originally supplied one.
 
     :raises AuthenticationFailedError: If the current url indicates an authentication failure that prevents an access token from being retrieved.
+
+    :returns: The result of the token exchange
     """
     current_url = furl(current_url)
     if "error" in current_url.query.params.keys():
@@ -101,7 +103,7 @@ def exchange_code_for_tokens(
     :param redirect_uri: The callback URI that was specified during the authentication initiation.
     :param client_authentication: A way for the client to authenticate itself
 
-    :return: The result of the token exchange
+    :returns: The result of the token exchange
     """
     logger.debug("exchanging authentication code for tokens")
     request_msg = TokenRequest(

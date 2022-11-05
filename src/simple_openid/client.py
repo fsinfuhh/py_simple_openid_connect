@@ -1,0 +1,112 @@
+from typing import Literal, Optional, Type, TypeVar
+
+from simple_openid.client_authentication import (
+    ClientAuthenticationMethod,
+    ClientSecretBasicAuth,
+    NoneAuth,
+)
+from simple_openid.data import ProviderMetadata
+from simple_openid.discovery import discover_configuration_from_issuer
+from simple_openid.flows.authorization_code_flow.client import (
+    AuthorizationCodeFlowClient,
+)
+
+Self = TypeVar("Self", bound="OpenidClient")
+
+
+class OpenidClient:
+    """
+    A more contiguous client implementation of the Openid-Connect protocol that offers simpler APIs at the cost of losing some flexibility.
+    """
+
+    provider_config: ProviderMetadata
+    client_auth: ClientAuthenticationMethod
+    scope: str
+
+    authorization_code_flow: AuthorizationCodeFlowClient
+    "*authorization code flow* related functionality"
+
+    def __init__(
+        self,
+        provider_config: ProviderMetadata,
+        authentication_redirect_uri: str,
+        client_id: str,
+        client_secret: Optional[str] = None,
+        scope: str = "openid",
+    ):
+        self.provider_config = provider_config
+        self.authorization_code_flow = AuthorizationCodeFlowClient(self)
+        self.scope = scope
+        self.authentication_redirect_uri = authentication_redirect_uri
+
+        if client_secret is None:
+            self.client_auth = NoneAuth(client_id)
+        else:
+            if (
+                ClientSecretBasicAuth.NAME
+                in provider_config.token_endpoint_auth_methods_supported
+            ):
+                self.client_auth = ClientSecretBasicAuth(client_id, client_secret)
+            else:
+                raise NotImplementedError(
+                    f"a client secret was given but the issuer does not support client_secret_basic authentication which is the only supported method"
+                )
+
+    @classmethod
+    def from_issuer_url(
+        cls: Type[Self],
+        url: str,
+        authentication_redirect_uri: str,
+        client_id: str,
+        client_secret: str = None,
+        scope: str = "openid",
+    ) -> Self:
+        """
+        Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
+
+        :param url: The url to an Openid issuer
+        :param client_id: The already known client id of your application.
+            It must be already registered with the issuer.
+        :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
+            If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
+        """
+
+        config = discover_configuration_from_issuer(url)
+        return cls.from_issuer_config(
+            config, authentication_redirect_uri, client_id, client_secret, scope
+        )
+
+    @classmethod
+    def from_issuer_config(
+        cls: Type[Self],
+        config: ProviderMetadata,
+        authentication_redirect_uri: str,
+        client_id: str,
+        client_secret: str = None,
+        scope: str = "openid",
+    ) -> Self:
+        """
+        Create a new client instance with a resolved issuer configuration as base.
+
+        If you don't have a configuration, use :func:`from_issuer_url` to automatically retrieve it.
+
+        :param config: The configuration of the used issuer.
+        :param client_id: The already known client id of your application.
+            It must be already registered with the issuer.
+        :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
+            If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
+        """
+
+        return cls(config, authentication_redirect_uri, client_id, client_secret, scope)
+
+    @property
+    def client_type(self) -> Literal["public", "confidential"]:
+        """
+        Which type of client behavior is used.
+
+        This is based on whether a client secret has been passed during client construction
+        """
+        if isinstance(self.client_auth, NoneAuth):
+            return "public"
+        else:
+            return "confidential"
