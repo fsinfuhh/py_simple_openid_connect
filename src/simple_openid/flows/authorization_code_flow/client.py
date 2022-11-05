@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from simple_openid.flows import authorization_code_flow as impl
 from simple_openid.flows.authorization_code_flow import (
     AuthenticationSuccessResponse,
     TokenErrorResponse,
@@ -8,8 +9,6 @@ from simple_openid.flows.authorization_code_flow import (
 
 if TYPE_CHECKING:
     from simple_openid.client import OpenidClient
-
-from simple_openid.flows import authorization_code_flow as impl
 
 
 class AuthorizationCodeFlowClient:

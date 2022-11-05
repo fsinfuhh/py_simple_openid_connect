@@ -27,6 +27,27 @@
 
 The list of [OpenID specifications](https://openid.net/developers/specs/) can be found on the official website.
 
+- (✔️) Partial [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
+
+  Only the following flows and features are implemented:
+  - ✔️ Authorization Code Flow
+  - ✔️ `client_secret_basic` client authentication
+  - ✔️ `none` client authentication
+  - ✔️ Query String serialization and parsing
+  - ❌ Implicit Flow
+  - ❌ Hybrid Flow
+  - ❌ Handling third party initiated login
+  - ❌ Retrieving userinfo
+  - ❌ Passing requests as JWTs (neither by value nor by reference)
+  - ❌ Self-Issued OpenID Provider
+  - ❌ `client_secret_post` client authentication
+  - ❌ `client_secret_jwt` client authentication
+  - ❌ `private_key_jwt` client authentication
+  - ❌ ID Token handling (it is right now just an opaque string)
+  - ❌ Extensive response validation (signatures, validating responses with external expected conditions)
+  - ❌ Using refresh tokens
+  - ❌ Fragment based response parsing
+
 - (✔️) Partial [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html).
   *Provider Configuration Discovery* is implemented, *Provider Issuer Discovery* is not.
 
