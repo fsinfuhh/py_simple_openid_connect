@@ -36,6 +36,7 @@ intersphinx_disabled_domains = ["std"]
 
 autodoc_default_options = {
     "members": True,
+    "special-members": "__init__",
 }
 
 templates_path = ["_templates"]
