@@ -3,4 +3,5 @@ venv
 docs/_build
 docs/_generated
 **/.pytest_cache
+**/.hypothesis
 **/__pycache__
