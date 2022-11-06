@@ -57,4 +57,4 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
   Only the following features are implemented and supported:
   - ✔️  Response modes (fragment based response parsing)
   - ✔️  Multiple-Valued Response Types <br>
-    No explicit support, but it is possible to supply one of the multivalued `response_type` values to an authentication request and then parse multiple responses from the resulting redirect uri.
+    No explicit support, but it is possible to supply one of the multivalued `response_type` values to an authentication request and then parse multiple responses from the resulting response.
