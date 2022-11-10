@@ -54,21 +54,21 @@ class UrlEncodingTestCase(unittest.TestCase):
         self.assertEqual(msg, reconstructed_msg)
 
     @given(msg=...)
-    def test_auto_decode(self, msg: DummyMessage):
-        with self.subTest("in fragment"):
-            # act
-            reconstructed_msg = DummyMessage.parse_url(
-                f"https://example.com#{msg.encode_x_www_form_urlencoded()}",
-                location="auto",
-            )
-            # assert
-            self.assertEqual(reconstructed_msg, msg)
+    def test_auto_decode_in_fragment(self, msg: DummyMessage):
+        # act
+        reconstructed_msg = DummyMessage.parse_url(
+            f"https://example.com#{msg.encode_x_www_form_urlencoded()}",
+            location="auto",
+        )
+        # assert
+        self.assertEqual(reconstructed_msg, msg)
 
-        with self.subTest("in query"):
-            # act
-            reconstructed_msg = DummyMessage.parse_url(
-                f"https://example.com?{msg.encode_x_www_form_urlencoded()}",
-                location="auto",
-            )
-            # assert
-            self.assertEqual(reconstructed_msg, msg)
+    @given(msg=...)
+    def test_auto_decode_in_query(self, msg: DummyMessage):
+        # act
+        reconstructed_msg = DummyMessage.parse_url(
+            f"https://example.com?{msg.encode_x_www_form_urlencoded()}",
+            location="auto",
+        )
+        # assert
+        self.assertEqual(reconstructed_msg, msg)
