@@ -29,5 +29,7 @@ markers = [
 ]
 testpaths = "tests"
 explicit-only = [
-    "interactive"
+    "interactive",
 ]
+log_cli = true
+log_cli_level = "info"
