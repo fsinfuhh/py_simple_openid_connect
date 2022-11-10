@@ -17,7 +17,7 @@ class AuthenticationRequest(OpenidMessage):
     scope: str
     "REQUIRED. OpenID Connect authentication requests MUST contain the openid scope value. Multiple scopes are encoded space separated If the openid scope value is not present, the behavior is entirely unspecified Other scope values MAY be present."
 
-    response_type: str = Field(default="code", const=True)
+    response_type: str
     "REQUIRED. OAuth 2.0 Response Type value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used When using the Authorization Code Flow, this value is code. "
 
     client_id: str
@@ -167,7 +167,7 @@ class TokenRequest(OpenidMessage):
     class Config:
         extra = Extra.allow
 
-    grant_type: str = Field(default="authorization_code", const=True)
+    grant_type: str
     'REQUIRED. Value MUST be set to "authorization_code".'
 
     code: str

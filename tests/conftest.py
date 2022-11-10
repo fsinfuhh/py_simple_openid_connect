@@ -1,6 +1,9 @@
+import logging
 import random
 import string
-from typing import Dict, List, Tuple
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from threading import Thread
+from typing import Callable, Dict, List, Mapping, Tuple
 
 import pytest
 import requests
@@ -16,6 +19,8 @@ from simple_openid.flows.authorization_code_flow import (
     TokenRequest,
     TokenSuccessResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def rand_str() -> str:
@@ -143,7 +148,58 @@ def dummy_app_server(
     return DummyAppServer(mocked_responses)
 
 
-@pytest.fixture(autouse=True)
+class RealAppServer(HTTPServer):
+    login_url = "http://127.0.0.1:8000/login"
+    login_callback_url = "http://127.0.0.1:8000/callback"
+
+    _on_login = None
+    _on_login_callback = None
+
+    _is_done = False
+
+    def __init__(self):
+        super().__init__(
+            ("127.0.0.1", 8000), self.RequestHandler, bind_and_activate=True
+        )
+
+    def serve_until_done(
+        self,
+        on_login: Callable[[furl], Tuple[int, Mapping[str, str], str]],
+        on_login_callback: Callable[[furl], Tuple[int, Mapping[str, str], str]],
+    ):
+        self._on_login = on_login
+        self._on_login_callback = on_login_callback
+        while not self._is_done:
+            self.handle_request()
+
+    def done(self):
+        self._is_done = True
+
+    class RequestHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            url = furl(self.path)
+            if url.path == "/login":
+                response = self.server._on_login(url)
+            elif url.path == "/callback":
+                response = self.server._on_login_callback(url)
+            else:
+                response = 404, {}, "Not found"
+
+            self.send_response(response[0])
+            for k, v in response[1].items():
+                self.send_header(k, v)
+            self.end_headers()
+            self.wfile.write(response[2].encode("UTF-8"))
+
+
+@pytest.fixture
+def real_app_server() -> RealAppServer:
+    server = RealAppServer()
+    yield server
+    server.done()
+
+
+@pytest.fixture()
 def mocked_responses():
     """
     A context manager that mocks and de-mocks http request responses

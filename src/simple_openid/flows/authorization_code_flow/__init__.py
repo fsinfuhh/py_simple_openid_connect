@@ -37,7 +37,10 @@ def start_authentication(
     :returns: A URL to which the user agent should be redirected
     """
     request = AuthenticationRequest(
-        scope=scope, client_id=client_id, redirect_uri=redirect_uri
+        scope=scope,
+        client_id=client_id,
+        redirect_uri=redirect_uri,
+        response_type="code",
     )
     return request.encode_url(authorization_endpoint)
 
@@ -110,6 +113,7 @@ def exchange_code_for_tokens(
         code=authentication_response.code,
         redirect_uri=redirect_uri,
         client_id=client_authentication.client_id,
+        grant_type="authorization_code",
     )
     response = requests.post(
         token_endpoint,
