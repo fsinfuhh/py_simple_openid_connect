@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 from typing import Mapping, Tuple
 
@@ -6,6 +7,8 @@ from furl import furl
 
 from simple_openid.client import OpenidClient
 from simple_openid.flows.authorization_code_flow import TokenSuccessResponse
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.interactive()
@@ -36,7 +39,7 @@ def test_complete_login(real_app_server):
         return HTTPStatus.OK, {}, f"Success. You can close this tab."
 
     # act (login)
-    print(f"Visit {real_app_server.login_url}")
+    logger.info(f"Visit {real_app_server.login_url}")
     real_app_server.serve_until_done(on_login, on_login_callback)
 
     # act (get userinfo)
