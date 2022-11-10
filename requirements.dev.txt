@@ -1,6 +1,7 @@
 sphinx
 sphinx_rtd_theme
 pytest
+pytest-explicit
 hypothesis
 responses
 coverage

@@ -1,9 +1,9 @@
 [project]
 name = "simple_openid"
 description = "Simple and opinionated OpenID-Connect relying party (client) implementation"
-authors = [{name = "Finn-Thorben Sell", email = "dev@finn-thorben.me"}]
+authors = [{ name = "Finn-Thorben Sell", email = "dev@finn-thorben.me" }]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = ["License :: OSI Approved :: MIT License"]
 dynamic = ["version"]
 requires-python = "~=3.9"
@@ -21,3 +21,13 @@ Source = "https://github.com/fsinfuhh/simple_openid"
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+markers = [
+    # run these tests by passing --run-interactive to pytest
+    "interactive: Tests that require user interaction and are only run explicitly",
+]
+testpaths = "tests"
+explicit-only = [
+    "interactive"
+]
