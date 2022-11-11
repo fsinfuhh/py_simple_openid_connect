@@ -7,7 +7,7 @@ The Authorization Server can also authenticate the Client before exchanging the 
 """
 import copy
 import logging
-from typing import Literal
+from typing import Literal, Union
 
 import requests
 from furl import furl
@@ -49,8 +49,8 @@ def handle_authentication_result(
     current_url: str,
     token_endpoint: str,
     client_authentication: ClientAuthenticationMethod,
-    redirect_uri: Literal["auto"] | str = "auto",
-) -> TokenSuccessResponse | TokenErrorResponse:
+    redirect_uri: Union[Literal["auto"], str] = "auto",
+) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
 
@@ -93,7 +93,7 @@ def exchange_code_for_tokens(
     authentication_response: AuthenticationSuccessResponse,
     redirect_uri: str,
     client_authentication: ClientAuthenticationMethod,
-) -> TokenSuccessResponse | TokenErrorResponse:
+) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Exchange a received code for access, refresh and id tokens.
 

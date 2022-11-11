@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Type, TypeVar
+from typing import List, Literal, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK
 
@@ -130,7 +130,7 @@ class OpenidClient:
 
     def fetch_userinfo(
         self, access_token: str
-    ) -> UserinfoSuccessResponse | UserinfoErrorResponse:
+    ) -> Union[UserinfoSuccessResponse, UserinfoErrorResponse]:
         """
         Fetch user information from the OP by doing a userinfo request.
 

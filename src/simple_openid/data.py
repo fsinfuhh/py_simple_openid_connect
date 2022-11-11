@@ -2,7 +2,7 @@
 Datatypes and models for various OpenID messages
 """
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Extra, HttpUrl
 
@@ -150,7 +150,7 @@ class IdToken(OpenidBaseModel):
     sub: str
     "REQUIRED. Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
 
-    aud: str | List[str]
+    aud: Union[str, List[str]]
     "REQUIRED. Audience(s) that this ID Token is intended for It MUST contain the OAuth 2.0 client_id of the Relying Party as an audience value It MAY also contain identifiers for other audiences In the general case, the aud value is an array of case sensitive strings In the common special case when there is one audience, the aud value MAY be a single case sensitive string."
 
     exp: int

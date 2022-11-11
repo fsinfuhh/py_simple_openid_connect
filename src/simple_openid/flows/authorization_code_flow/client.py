@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from simple_openid.flows import authorization_code_flow as impl
 from simple_openid.flows.authorization_code_flow import (
@@ -37,7 +37,7 @@ class AuthorizationCodeFlowClient:
 
     def handle_authentication_result(
         self, current_url: str
-    ) -> TokenSuccessResponse | TokenErrorResponse:
+    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
         """
         Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
 
@@ -57,7 +57,7 @@ class AuthorizationCodeFlowClient:
 
     def exchange_code_for_tokens(
         self, authentication_response: AuthenticationSuccessResponse
-    ) -> TokenSuccessResponse | TokenErrorResponse:
+    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
         """
         Exchange a received code for access, refresh and id tokens.
 

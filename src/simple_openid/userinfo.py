@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Union
 
 import requests
 
@@ -16,7 +16,7 @@ def fetch_userinfo(
     userinfo_endpoint: str,
     access_token: str,
     http_method: Literal["GET", "POST"] = "GET",
-) -> UserinfoSuccessResponse | UserinfoErrorResponse:
+) -> Union[UserinfoSuccessResponse, UserinfoErrorResponse]:
     request = UserinfoRequest()
     auth = AccessTokenBearerAuth(access_token)
 
