@@ -1,11 +1,16 @@
 from typing import Literal, Optional, Type, TypeVar
 
+from simple_openid import userinfo
 from simple_openid.client_authentication import (
     ClientAuthenticationMethod,
     ClientSecretBasicAuth,
     NoneAuth,
 )
-from simple_openid.data import ProviderMetadata
+from simple_openid.data import (
+    ProviderMetadata,
+    UserinfoErrorResponse,
+    UserinfoSuccessResponse,
+)
 from simple_openid.discovery import discover_configuration_from_issuer
 from simple_openid.flows.authorization_code_flow.client import (
     AuthorizationCodeFlowClient,
@@ -110,3 +115,10 @@ class OpenidClient:
             return "public"
         else:
             return "confidential"
+
+    def fetch_userinfo(
+        self, access_token: str
+    ) -> UserinfoSuccessResponse | UserinfoErrorResponse:
+        return userinfo.fetch_userinfo(
+            self.provider_config.userinfo_endpoint, access_token
+        )

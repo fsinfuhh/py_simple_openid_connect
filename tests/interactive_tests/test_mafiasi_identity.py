@@ -6,6 +6,7 @@ import pytest
 from furl import furl
 
 from simple_openid.client import OpenidClient
+from simple_openid.data import UserinfoSuccessResponse
 from simple_openid.flows.authorization_code_flow import TokenSuccessResponse
 
 logger = logging.getLogger(__name__)
@@ -19,8 +20,9 @@ def test_complete_login(real_app_server):
         real_app_server.login_callback_url,
         "dev-client",
     )
+    token_response: TokenSuccessResponse
 
-    def on_login(url: furl) -> Tuple[int, Mapping[str, str], str]:
+    def on_login(_url: furl) -> Tuple[int, Mapping[str, str], str]:
         url = oidc_client.authorization_code_flow.start_authentication()
         return (
             HTTPStatus.FOUND,
@@ -31,10 +33,12 @@ def test_complete_login(real_app_server):
         )
 
     def on_login_callback(url: furl) -> Tuple[int, Mapping[str, str], str]:
+        nonlocal token_response
         response = oidc_client.authorization_code_flow.handle_authentication_result(
             str(url)
         )
         assert isinstance(response, TokenSuccessResponse)
+        token_response = response
         real_app_server.done()
         return HTTPStatus.OK, {}, f"Success. You can close this tab."
 
@@ -43,4 +47,6 @@ def test_complete_login(real_app_server):
     real_app_server.serve_until_done(on_login, on_login_callback)
 
     # act (get userinfo)
-    # TODO Implement test for getting userinfo
+    response = oidc_client.fetch_userinfo(token_response.access_token)
+    assert isinstance(response, UserinfoSuccessResponse)
+    assert response.sub != ""

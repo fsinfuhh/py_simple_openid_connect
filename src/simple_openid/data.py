@@ -245,3 +245,23 @@ class IdToken(BaseModel):
 
     azp: Optional[str]
     "OPTIONAL. Authorized party - the party to which the ID Token was issued If present, it MUST contain the OAuth 2.0 Client ID of this party This Claim is only needed when the ID Token has a single audience value and that audience is different than the authorized party It MAY be included even when the authorized party is the same as the sole audience The azp value is a case sensitive string containing a StringOrURI value."
+
+
+class UserinfoRequest(OpenidMessage):
+    pass
+
+
+class UserinfoSuccessResponse(OpenidMessage):
+    class Config:
+        extra = Extra.allow
+        allow_mutation = False
+
+    sub: str
+
+
+class UserinfoErrorResponse(OpenidMessage):
+    class Config:
+        allow_mutation = False
+
+    error: str
+    error_description: Optional[str]

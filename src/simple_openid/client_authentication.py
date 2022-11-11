@@ -71,3 +71,25 @@ class ClientSecretBasicAuth(ClientAuthenticationMethod, HTTPBasicAuth):
         :param client_secret: The client secret which was issued during client registration
         """
         super().__init__(username=client_id, password=client_secret)
+
+
+class AccessTokenBearerAuth(AuthBase):
+    """
+    Authenticate requests using a given bearer token
+    """
+
+    access_token: str
+
+    def __init__(self, access_token: str):
+        super().__init__()
+        self.access_token = access_token
+
+    def __eq__(self, other):
+        return self.access_token == getattr(other, "access_token", None)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __call__(self, r: models.PreparedRequest) -> models.PreparedRequest:
+        r.headers["Authorization"] = f"Bearer {self.access_token}"
+        return r
