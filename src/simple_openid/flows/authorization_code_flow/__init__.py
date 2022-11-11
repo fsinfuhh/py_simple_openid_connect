@@ -13,9 +13,7 @@ import requests
 from furl import furl
 
 from simple_openid.client_authentication import ClientAuthenticationMethod
-from simple_openid.exceptions import AuthenticationFailedError
-
-from .data import (
+from simple_openid.data import (
     AuthenticationErrorResponse,
     AuthenticationRequest,
     AuthenticationSuccessResponse,
@@ -23,6 +21,7 @@ from .data import (
     TokenRequest,
     TokenSuccessResponse,
 )
+from simple_openid.exceptions import AuthenticationFailedError
 
 logger = logging.getLogger(__name__)
 

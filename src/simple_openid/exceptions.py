@@ -1,4 +1,4 @@
-from simple_openid.flows.authorization_code_flow.data import AuthenticationErrorResponse
+from simple_openid.data import AuthenticationErrorResponse
 
 
 class OpenidProtocolError(Exception):
