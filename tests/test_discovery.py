@@ -6,7 +6,7 @@ from simple_openid.exceptions import OpenidProtocolError
 
 def test_mafiasi_identity(mock_known_provider_configs):
     discovery.discover_configuration_from_issuer(
-        "https://identity.mafiasi.de/auth/realms/mafiasi/"
+        "https://identity.mafiasi.de/auth/realms/simple_openid_test/"
     )
 
 
