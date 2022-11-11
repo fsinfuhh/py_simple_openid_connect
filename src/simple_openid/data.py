@@ -139,6 +139,12 @@ class ProviderMetadata(OpenidBaseModel):
     frontchannel_logout_session_supported: bool = Field(default=False)
     "OPTIONAL. Boolean value specifying whether the OP can pass iss (issuer) and sid (session ID) query parameters to identify the RP session with the OP when the frontchannel_logout_uri is used. If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false."
 
+    backchannel_logout_supported: bool = Field(default=False)
+    "OPTIONAL. Boolean value specifying whether the OP supports back-channel logout, with true indicating support. If omitted, the default value is false."
+
+    backchannel_logout_session_supported: bool = Field(default=False)
+    "OPTIONAL. Boolean value specifying whether the OP can pass a sid (session ID) Claim in the Logout Token to identify the RP session with the OP. If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false. "
+
 
 class IdToken(OpenidBaseModel):
     """
@@ -183,6 +189,9 @@ class IdToken(OpenidBaseModel):
 
     azp: Optional[str]
     "OPTIONAL. Authorized party - the party to which the ID Token was issued If present, it MUST contain the OAuth 2.0 Client ID of this party This Claim is only needed when the ID Token has a single audience value and that audience is different than the authorized party It MAY be included even when the authorized party is the same as the sole audience The azp value is a case sensitive string containing a StringOrURI value."
+
+    sid: Optional[str]
+    "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
 
 
 class UserinfoRequest(OpenidMessage):
@@ -516,7 +525,7 @@ class RpInitiatedLogoutRequest(OpenidMessage):
 
 class FrontChannelLogoutNotification(OpenidMessage):
     """
-    A message which the Relying-Party receives when a user logs out.
+    A notification which the Relying-Party receives when a user logs out.
 
     This message is encoded as a url which is served by the Relying-Party and accessed by the user agent of the user
     when they log out at the OP.
@@ -530,3 +539,58 @@ class FrontChannelLogoutNotification(OpenidMessage):
 
     sid: Optional[str]
     "Identifier for the Session."
+
+
+class BackChannelLogoutNotification(OpenidMessage):
+    """
+    A notification which the Relying-Party receives from the OP when a user logs out.
+
+    This message is sent directly by the OP to the Relying-Party without involving the user agent.
+    """
+
+    logout_token: str
+    "A signed JWT containing a :class:`BackChannelLogoutToken`"
+
+
+class BackChannelLogoutToken(OpenidMessage):
+    """
+    OPs send a JWT similar to an ID Token to RPs called a Logout Token to request that they log out.
+    This token is sent as part of a :class:`BackChannelLogoutNotification`.
+
+    A Logout Token MUST contain either a sub or a sid Claim, and MAY contain both.
+    If a sid Claim is not present, the intent is that all sessions at the RP for the End-User identified by the iss and sub Claims be logged out.
+    """
+
+    # TODO Implement proper verification
+    # See https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
+
+    class Config:
+        extra = Extra.forbid
+
+    class Events(OpenidBaseModel):
+        x: dict = Field(
+            alias="http://schemas.openid.net/event/backchannel-logout",
+            default={},
+            const=True,
+        )
+
+    iss: str
+    "REQUIRED. Issuer Identifier"
+
+    sub: Optional[str]
+    "OPTIONAL. Subject Identifier (user id)"
+
+    aud: str
+    "REQUIRED. Audience(s)"
+
+    iat: str
+    "REQUIRED. Issued at time"
+
+    jti: str
+    "REQUIRED. Unique identifier for the token"
+
+    events: Events
+    "REQUIRED. Claim whose value is a JSON object containing the member name http://schemas.openid.net/event/backchannel-logout. This declares that the JWT is a Logout Token. The corresponding member value MUST be a JSON object and SHOULD be the empty JSON object {}. "
+
+    sid: Optional[str]
+    "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."

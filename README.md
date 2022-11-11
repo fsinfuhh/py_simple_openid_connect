@@ -62,3 +62,5 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
 - ✔️ Full [OpenID Connect RP-Initiated Logout 1.0](https://openid.net/specs/openid-connect-rpinitiated-1_0.html)
 
 - ✔️ Full [OpenID Connect Front-Channel Logout 1.0](https://openid.net/specs/openid-connect-frontchannel-1_0.html)
+
+- ✔️ Full [OpenID Connect Back-Channel Logout 1.0](https://openid.net/specs/openid-connect-backchannel-1_0.html)
