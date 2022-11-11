@@ -2,6 +2,7 @@ from typing import Literal
 
 import requests
 
+from simple_openid import utils
 from simple_openid.client_authentication import AccessTokenBearerAuth
 from simple_openid.data import (
     UserinfoErrorResponse,
@@ -28,7 +29,7 @@ def fetch_userinfo(
     else:
         raise ValueError(f"argument http_method has unsupported value {http_method}")
 
-    if response.headers["Content-Type"] != "application/json":
+    if not utils.is_application_json(response.headers["Content-Type"]):
         raise OpenidProtocolError(
             f"userinfo request was responded with invalid Content-Type", response
         )

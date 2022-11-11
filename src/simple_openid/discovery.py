@@ -3,6 +3,7 @@ Mechanisms for discovering information about an OpenID issuer
 """
 import requests
 
+from simple_openid import utils
 from simple_openid.data import ProviderMetadata
 from simple_openid.exceptions import OpenidProtocolError
 
@@ -23,7 +24,7 @@ def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
     issuer = issuer.removesuffix("/")
     response = requests.get(f"{issuer}/.well-known/openid-configuration")
 
-    if response.headers.get("Content-Type") != "application/json":
+    if not utils.is_application_json(response.headers["Content-Type"]):
         raise OpenidProtocolError(
             "The provider did not respond with a json document although it is required to do so",
             response.headers.get("Content-Type"),
