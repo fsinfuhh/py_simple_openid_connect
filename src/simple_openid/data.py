@@ -367,14 +367,17 @@ class TokenRequest(OpenidMessage):
     grant_type: str
     'REQUIRED. Value MUST be set to "authorization_code".'
 
-    code: str
-    "REQUIRED. The authorization code received from the authorization server."
+    code: Optional[str]
+    "REQUIRED, if grant type is 'code', otherwise optional. The authorization code received from the authorization server."
 
-    redirect_uri: str
-    "REQUIRED, must be identical to the value that was included in the :data:`AuthenticationRequest <AuthenticationRequest.redirect_uri>`."
+    redirect_uri: Optional[str]
+    "REQUIRED, if grant_Type is 'code', otherwise not needed. Must be identical to the value that was included in the :data:`AuthenticationRequest <AuthenticationRequest.redirect_uri>`."
 
     client_id: Optional[str]
     "REQUIRED, if the client is not authenticating with the authorization server. Basically, confidential clients don't need to include it but others do."
+
+    refresh_token: Optional[str]
+    "REQUIRED. The refresh token issued to the client."
 
 
 class TokenSuccessResponse(OpenidMessage):

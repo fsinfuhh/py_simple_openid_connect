@@ -2,7 +2,7 @@ from typing import List, Literal, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK
 
-from simple_openid import jwk, userinfo
+from simple_openid import jwk, token_refresh, userinfo
 from simple_openid.client_authentication import (
     ClientAuthenticationMethod,
     ClientSecretBasicAuth,
@@ -11,6 +11,8 @@ from simple_openid.client_authentication import (
 from simple_openid.data import (
     IdToken,
     ProviderMetadata,
+    TokenErrorResponse,
+    TokenSuccessResponse,
     UserinfoErrorResponse,
     UserinfoSuccessResponse,
 )
@@ -151,3 +153,17 @@ class OpenidClient:
             This could e.g. be retrieved as part of the authentication process and returned by the OP in :data:`TokenSuccessResponse.id_token <simple_openid.flows.authorization_code_flow.data.TokenSuccessResponse.id_token>`.
         """
         return IdToken.parse_jwt(raw_token, self.provider_keys)
+
+    def exchange_refresh_token(
+        self, refresh_token: str
+    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+        """
+        Exchange a refresh token for new tokens
+
+        :param refresh_token: The refresh token to use
+        """
+        return token_refresh.exchange_refresh_token(
+            token_endpoint=self.provider_config.token_endpoint,
+            refresh_token=refresh_token,
+            client_authentication=self.client_auth,
+        )

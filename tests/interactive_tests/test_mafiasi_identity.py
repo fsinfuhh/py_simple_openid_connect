@@ -55,6 +55,10 @@ def test_public_client(real_app_server, secrets):
     assert isinstance(response, UserinfoSuccessResponse)
     assert response.sub != ""
 
+    # act (refresh tokens)
+    response = oidc_client.exchange_refresh_token(token_response.refresh_token)
+    assert isinstance(response, TokenSuccessResponse)
+
 
 @pytest.mark.interactive()
 def test_confidential_client(real_app_server, secrets):
@@ -99,3 +103,7 @@ def test_confidential_client(real_app_server, secrets):
     response = oidc_client.fetch_userinfo(token_response.access_token)
     assert isinstance(response, UserinfoSuccessResponse)
     assert response.sub != ""
+
+    # act (refresh tokens)
+    response = oidc_client.exchange_refresh_token(token_response.refresh_token)
+    assert isinstance(response, TokenSuccessResponse)
