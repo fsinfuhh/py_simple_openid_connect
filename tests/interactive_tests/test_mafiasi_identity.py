@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.interactive()
-def test_complete_login(real_app_server):
+def test_complete_login(real_app_server, secrets):
     # arrange
     oidc_client = OpenidClient.from_issuer_url(
         "https://identity.mafiasi.de/auth/realms/mafiasi/",
         real_app_server.login_callback_url,
-        "dev-client",
+        client_id=secrets["mafiasi_identity_public_client_id"],
     )
     token_response: TokenSuccessResponse
 

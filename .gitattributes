@@ -1,0 +1,1 @@
+tests/interactive_tests/secrets.yml filter=git-crypt diff=git-crypt
