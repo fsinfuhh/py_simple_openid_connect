@@ -2,9 +2,9 @@
 Datatypes and models for various OpenID messages
 """
 import logging
-from typing import List, Optional, Union
+from typing import Any, List, Literal, Mapping, Optional, Union
 
-from pydantic import BaseModel, Extra, HttpUrl
+from pydantic import BaseModel, Extra, HttpUrl, root_validator
 
 from simple_openid.base_data import OpenidBaseModel, OpenidMessage
 
@@ -364,8 +364,8 @@ class TokenRequest(OpenidMessage):
     class Config:
         extra = Extra.allow
 
-    grant_type: str
-    'REQUIRED. Value MUST be set to "authorization_code".'
+    grant_type: Union[Literal["authorization_code", "refresh_token"], str]
+    "REQUIRED. Which type of token exchange this request is."
 
     code: Optional[str]
     "REQUIRED, if grant type is 'code', otherwise optional. The authorization code received from the authorization server."
@@ -378,6 +378,22 @@ class TokenRequest(OpenidMessage):
 
     refresh_token: Optional[str]
     "REQUIRED. The refresh token issued to the client."
+
+    @root_validator(skip_on_failure=True)
+    def _validate_required_based_on_grant_type(cls, values: Mapping[str, Any]):
+        if values["grant_type"] == "authorization_code":
+            assert (
+                values["code"] is not None
+            ), "code is required when grant_type is 'authorization_code'"
+            assert (
+                values["redirect_uri"] is not None
+            ), "redirect_uri is required when grant_type is 'authorization_code'"
+        elif values["grant_type"] == "refresh_token":
+            assert (
+                values["refresh_token"] is not None
+            ), "refresh_token is required when grant_type is 'refresh_token'"
+
+        return values
 
 
 class TokenSuccessResponse(OpenidMessage):
