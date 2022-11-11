@@ -67,4 +67,4 @@ class RealAppServer(HTTPServer):
 def real_app_server() -> RealAppServer:
     server = RealAppServer()
     yield server
-    server.done()
+    server.server_close()
