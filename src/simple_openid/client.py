@@ -2,7 +2,7 @@ from typing import List, Literal, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK
 
-from simple_openid import jwk, token_refresh, userinfo
+from simple_openid import jwk, rp_initiated_logout, token_refresh, userinfo
 from simple_openid.client_authentication import (
     ClientAuthenticationMethod,
     ClientSecretBasicAuth,
@@ -11,6 +11,7 @@ from simple_openid.client_authentication import (
 from simple_openid.data import (
     IdToken,
     ProviderMetadata,
+    RpInitiatedLogoutRequest,
     TokenErrorResponse,
     TokenSuccessResponse,
     UserinfoErrorResponse,
@@ -166,4 +167,16 @@ class OpenidClient:
             token_endpoint=self.provider_config.token_endpoint,
             refresh_token=refresh_token,
             client_authentication=self.client_auth,
+        )
+
+    def initiate_logout(self, request: RpInitiatedLogoutRequest = None) -> str:
+        """
+        Initiate user logout as a Relying-Party
+
+        :param request: Additional data pertaining to the logout
+
+        :returns: A url to which the user should be redirected
+        """
+        return rp_initiated_logout.initiate_logout(
+            self.provider_config.end_session_endpoint, request
         )
