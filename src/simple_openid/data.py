@@ -177,19 +177,35 @@ class IdToken(OpenidBaseModel):
 
 
 class UserinfoRequest(OpenidMessage):
+    """
+    A request that can be sent to an OP to request information about a user
+    """
     pass
 
 
 class UserinfoSuccessResponse(OpenidMessage):
+    """
+    A successful response to a userinfo request containing data about the requested user.
+
+    This object might contain additional fields if the access token that was used for the userinfo request allows access
+    to more claims.
+    """
+
     class Config:
         extra = Extra.allow
         allow_mutation = False
 
     sub: str
+    "Subject of this response, basically a unique user id."
 
 
 class UserinfoErrorResponse(OpenidMessage):
+    """
+    An error response that is sent back from an OP after requesting user information
+    """
+
     class Config:
+        extra = Extra.allow
         allow_mutation = False
 
     error: str
