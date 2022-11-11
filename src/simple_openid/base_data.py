@@ -1,5 +1,5 @@
 """
-Base data types which are extended with concrete OpenId data types in :module:`simple_openid.data`
+Base data types which are extended with concrete OpenId data types in :mod:`simple_openid.data`
 """
 import abc
 import logging
