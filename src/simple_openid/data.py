@@ -2,16 +2,17 @@
 Datatypes and models for various OpenID messages
 """
 import logging
+import enum
 from typing import Any, List, Literal, Mapping, Optional, Union
 
-from pydantic import BaseModel, Extra, HttpUrl, root_validator
+from pydantic import Extra, HttpUrl, root_validator
 
 from simple_openid.base_data import OpenidBaseModel, OpenidMessage
 
 logger = logging.getLogger(__name__)
 
 
-class ProviderMetadata(BaseModel):
+class ProviderMetadata(OpenidBaseModel):
     """
     OpenID Providers have metadata describing their configuration
 
@@ -193,14 +194,6 @@ class UserinfoErrorResponse(OpenidMessage):
 
     error: str
     error_description: Optional[str]
-
-
-import enum
-from typing import List, Optional
-
-from pydantic import Extra
-
-from simple_openid.data import OpenidMessage
 
 
 class AuthenticationRequest(OpenidMessage):
