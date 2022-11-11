@@ -9,6 +9,7 @@ from simple_openid.client_authentication import (
     NoneAuth,
 )
 from simple_openid.data import (
+    IdToken,
     ProviderMetadata,
     UserinfoErrorResponse,
     UserinfoSuccessResponse,
@@ -133,3 +134,6 @@ class OpenidClient:
         return userinfo.fetch_userinfo(
             self.provider_config.userinfo_endpoint, access_token
         )
+
+    def decode_id_token(self, raw_token: str) -> IdToken:
+        return IdToken.parse_jwt(raw_token, self.provider_keys)

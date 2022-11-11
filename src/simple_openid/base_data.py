@@ -3,18 +3,33 @@ Base data types which are extended with concrete OpenId data types in :module:`s
 """
 import abc
 import logging
-from typing import Any, Literal, Type, TypeVar
+from typing import Any, List, Literal, Type, TypeVar
 
+from cryptojwt import JWK, JWS
 from furl import Query, furl
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
-Self = TypeVar("Self", bound="OpenidMessage")
+Self = TypeVar("Self", bound="OpenidBaseModel")
 
 
-class OpenidMessage(BaseModel, metaclass=abc.ABCMeta):
+class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
+    """
+    Base model type upon which all openid data types are built.
+
+    It implements decoding functionality that should always be supported.
+    """
+
+    @classmethod
+    def parse_jwt(cls: Type[Self], value: str, signing_keys: List[JWK]) -> Self:
+        verifier = JWS()
+        msg = verifier.verify_compact(value, signing_keys)
+        return cls.parse_obj(msg)
+
+
+class OpenidMessage(OpenidBaseModel, metaclass=abc.ABCMeta):
     """
     A base class for messages sent to and received from an Openid issuer
     """

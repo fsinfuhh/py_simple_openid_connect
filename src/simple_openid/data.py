@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Extra, HttpUrl
 
-from simple_openid.base_data import OpenidMessage
+from simple_openid.base_data import OpenidBaseModel, OpenidMessage
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ class ProviderMetadata(BaseModel):
     "OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service The registration process SHOULD display this URL to the person registering the Client if it is given. "
 
 
-class IdToken(BaseModel):
+class IdToken(OpenidBaseModel):
     """
     The primary extension that OpenID Connect makes to OAuth 2.0 to enable End-Users to be Authenticated is this ID Token data structure.
     The ID Token is a security token that contains Claims about the Authentication of an End-User by an Authorization Server when using a Client, and potentially other requested Claims.
