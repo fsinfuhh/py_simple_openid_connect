@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def test_complete_login(real_app_server, secrets):
     # arrange
     oidc_client = OpenidClient.from_issuer_url(
-        "https://identity.mafiasi.de/auth/realms/mafiasi/",
+        "https://identity.mafiasi.de/auth/realms/simple_openid_test",
         real_app_server.login_callback_url,
         client_id=secrets["mafiasi_identity_public_client_id"],
     )
