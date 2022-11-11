@@ -43,7 +43,7 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
   - ❌ `client_secret_post` client authentication
   - ❌ `client_secret_jwt` client authentication
   - ❌ `private_key_jwt` client authentication
-  - ❌ ID Token handling (it is right now just an opaque string)
+  - ✔ ID Token handling (parsing + validation)
   - ❌ Extensive response validation (signatures, validating responses with external expected conditions)
   - ❌ Using refresh tokens
 
