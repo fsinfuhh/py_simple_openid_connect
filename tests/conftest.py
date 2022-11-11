@@ -1,9 +1,7 @@
 import logging
 import random
 import string
-import sys
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Callable, Dict, List, Mapping, Tuple
+from typing import Dict, List, Tuple
 
 import pytest
 import requests
