@@ -1,0 +1,25 @@
+name: test
+on:
+  - push
+  - workflow_dispatch
+
+jobs:
+  run-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        py_version: [ "3.9", "3.10", "3.11" ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.py_version }}"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.dev.txt
+      - run: |
+          pip install -e .
+          pip install -r requirements.dev.txt
+      - run: pytest
