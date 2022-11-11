@@ -131,9 +131,23 @@ class OpenidClient:
     def fetch_userinfo(
         self, access_token: str
     ) -> UserinfoSuccessResponse | UserinfoErrorResponse:
+        """
+        Fetch user information from the OP by doing a userinfo request.
+
+        Which users information is fetched is determined by the OP directly from the used access token.
+
+        :param access_token: An access token which grants access to user information.
+        :return: The OPs response
+        """
         return userinfo.fetch_userinfo(
             self.provider_config.userinfo_endpoint, access_token
         )
 
     def decode_id_token(self, raw_token: str) -> IdToken:
+        """
+        Decode and verify an encoded and signed id token
+
+        :param raw_token: The encoded and signed id token.
+            This could e.g. be retrieved as part of the authentication process and returned by the OP in :data:`TokenSuccessResponse.id_token <simple_openid.flows.authorization_code_flow.data.TokenSuccessResponse.id_token>`.
+        """
         return IdToken.parse_jwt(raw_token, self.provider_keys)
