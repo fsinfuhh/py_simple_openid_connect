@@ -75,10 +75,12 @@ class OpenidClient:
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
 
         :param url: The url to an Openid issuer
+        :param authentication_redirect_uri: URI that is used during the authentication flow to redirect back to this application.
         :param client_id: The already known client id of your application.
             It must be already registered with the issuer.
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
+        :param scope: Which scopes to request from the OP
         """
 
         config = discover_configuration_from_issuer(url)
@@ -101,10 +103,12 @@ class OpenidClient:
         If you don't have a configuration, use :func:`from_issuer_url` to automatically retrieve it.
 
         :param config: The configuration of the used issuer.
+        :param authentication_redirect_uri: URI that is used during the authentication flow to redirect back to this application.
         :param client_id: The already known client id of your application.
             It must be already registered with the issuer.
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
+        :param scope: Which scopes to request from the OP
         """
         keys = jwk.fetch_jwks(config.jwks_uri)
         return cls(
