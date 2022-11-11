@@ -5,7 +5,7 @@ import enum
 import logging
 from typing import Any, List, Literal, Mapping, Optional, Union
 
-from pydantic import Extra, HttpUrl, root_validator
+from pydantic import Extra, Field, HttpUrl, root_validator
 
 from simple_openid.base_data import OpenidBaseModel, OpenidMessage
 
@@ -132,6 +132,12 @@ class ProviderMetadata(OpenidBaseModel):
 
     end_session_endpoint: Optional[HttpUrl]
     "REQUIRED, if supported by OP. URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP."
+
+    frontchannel_logout_supported: bool = Field(default=False)
+    "OPTIONAL. Boolean value specifying whether the OP supports HTTP-based logout, with true indicating support. If omitted, the default value is false."
+
+    frontchannel_logout_session_supported: bool = Field(default=False)
+    "OPTIONAL. Boolean value specifying whether the OP can pass iss (issuer) and sid (session ID) query parameters to identify the RP session with the OP when the frontchannel_logout_uri is used. If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false."
 
 
 class IdToken(OpenidBaseModel):
@@ -506,3 +512,21 @@ class RpInitiatedLogoutRequest(OpenidMessage):
 
     ui_locales: Optional[List[str]]
     'OPTIONAL. End-User\'s preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. For instance, the value "fr-CA fr en" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider. '
+
+
+class FrontChannelLogoutNotification(OpenidMessage):
+    """
+    A message which the Relying-Party receives when a user logs out.
+
+    This message is encoded as a url which is served by the Relying-Party and accessed by the user agent of the user
+    when they log out at the OP.
+    """
+
+    class Config:
+        allow_mutation = False
+
+    iss: Optional[str]
+    "Issuer Identifier for the OP issuing the front-channel logout request."
+
+    sid: Optional[str]
+    "Identifier for the Session."

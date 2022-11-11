@@ -60,3 +60,5 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
     No explicit support, but it is possible to supply one of the multivalued `response_type` values to an authentication request and then parse multiple responses from the resulting response.
 
 - ✔️ Full [OpenID Connect RP-Initiated Logout 1.0](https://openid.net/specs/openid-connect-rpinitiated-1_0.html)
+
+- ✔️ Full [OpenID Connect Front-Channel Logout 1.0](https://openid.net/specs/openid-connect-frontchannel-1_0.html)
