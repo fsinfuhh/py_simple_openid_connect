@@ -1,8 +1,8 @@
 import logging
 import random
 import string
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from threading import Thread
 from typing import Callable, Dict, List, Mapping, Tuple
 
 import pytest
@@ -174,6 +174,10 @@ class RealAppServer(HTTPServer):
 
     def done(self):
         self._is_done = True
+
+    def handle_error(self, request, client_address) -> None:
+        # re-raise exceptions so that they can fail the test
+        raise sys.exc_info()[1]
 
     class RequestHandler(BaseHTTPRequestHandler):
         def do_GET(self):
