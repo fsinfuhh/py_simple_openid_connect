@@ -203,7 +203,7 @@ def real_app_server() -> RealAppServer:
     server.done()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_responses():
     """
     A context manager that mocks and de-mocks http request responses
@@ -255,4 +255,13 @@ def mock_known_provider_configs(mocked_responses: responses.RequestsMock):
         "https://accounts.google.com/.well-known/openid-configuration",
         content_type="application/json",
         body='{"issuer":"https://accounts.google.com","authorization_endpoint":"https://accounts.google.com/o/oauth2/v2/auth","device_authorization_endpoint":"https://oauth2.googleapis.com/device/code","token_endpoint":"https://oauth2.googleapis.com/token","userinfo_endpoint":"https://openidconnect.googleapis.com/v1/userinfo","revocation_endpoint":"https://oauth2.googleapis.com/revoke","jwks_uri":"https://www.googleapis.com/oauth2/v3/certs","response_types_supported":["code","token","id_token","code token","code id_token","token id_token","code token id_token","none"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256"],"scopes_supported":["openid","email","profile"],"token_endpoint_auth_methods_supported":["client_secret_post","client_secret_basic"],"claims_supported":["aud","email","email_verified","exp","family_name","given_name","iat","iss","locale","name","picture","sub"],"code_challenge_methods_supported":["plain","S256"],"grant_types_supported":["authorization_code","refresh_token","urn:ietf:params:oauth:grant-type:device_code","urn:ietf:params:oauth:grant-type:jwt-bearer"]}',
+    )
+
+
+@pytest.fixture
+def mock_known_provider_jwks(mocked_responses: responses.RequestsMock):
+    mocked_responses.get(
+        url="https://identity.mafiasi.de/auth/realms/mafiasi/protocol/openid-connect/certs",
+        content_type="application/json",
+        body='{"keys":[{"kid":"P9ONvIAIs3TvrQ9Qh_CArFhJXXN3uJrS-kiEcBbt8Ug","kty":"RSA","alg":"RS256","use":"sig","n":"jHVV2sZrujEZQv22fPKScSPyF-JKL6TrWDoztwRGwrxbiTd0nN7bNb9vGDxhqjpLXsg457wExJdwH3SRntYqm0QuykRmNNwaRjIfogI2CRA_F9Bm-QFYcSPTLaUclE1UtqN7Q5qi6mfi9UEzda6A8Tk4rur2UjLJ5BAgsYnkLSSobOimGJz-FK8Pf9SXYRJidkJN2TuLBPTEm7gQGTZ3NiOzcNBze09zUsJPHDDFg4-pXkMMp1rr14YddObXZqz1fHCWYz1obTibIvBKX-HC1KdP7OBevLE_5F9sv7wpK4P-5nrgPsW3CmPXIcqsedvciWun6pij4psxQmh_hq0YXw","e":"AQAB","x5c":["MIICnTCCAYUCBgF1/49sZzANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAdtYWZpYXNpMB4XDTIwMTEyNTEzMTgxMFoXDTMwMTEyNTEzMTk1MFowEjEQMA4GA1UEAwwHbWFmaWFzaTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIx1VdrGa7oxGUL9tnzyknEj8hfiSi+k61g6M7cERsK8W4k3dJze2zW/bxg8Yao6S17IOOe8BMSXcB90kZ7WKptELspEZjTcGkYyH6ICNgkQPxfQZvkBWHEj0y2lHJRNVLaje0Oaoupn4vVBM3WugPE5OK7q9lIyyeQQILGJ5C0kqGzophic/hSvD3/Ul2ESYnZCTdk7iwT0xJu4EBk2dzYjs3DQc3tPc1LCTxwwxYOPqV5DDKda69eGHXTm12as9XxwlmM9aG04myLwSl/hwtSnT+zgXryxP+RfbL+8KSuD/uZ64D7Ftwpj1yHKrHnb3Ilrp+qYo+KbMUJof4atGF8CAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAUGbC0ewNXJ0nkipteixQYb9fiWsHvhSLJv/jdPyzDpscpnJT3JLODlHbt25zsj8QBcyATlXpTolBB+Vg+zh4W3HS370wJvq8IPbk5NdpvJ7ksBWZt9yS99AWUPq7wAtwmWh8mSM52rlz+10u1bCTg2HrTUHFBr2I5sahfhEvZ5X2tl2aQkt+rAU0VoqFysBgsLQOndGmFgZNpkM2mHiPdned24ZaMM4j/3U/ScLsXxa3NHK7fLwyFjBJBqNZIeXplJ8iWKeDtHoFgvZdl5yFT6C1Kir3t4F6uzcIioRgcmX0WJWvB6bew+LM9RGivyCCSOiahPwWQbDsyupL8YojVg=="],"x5t":"wrCciYEqE2pzhEXDUbP52k9UGF0","x5t#S256":"6Ov7Lyhpkbwjd3UNW6076l2LMlbi9HzcGq37j_bK6IU"}]}',
     )

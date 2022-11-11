@@ -1,6 +1,8 @@
-from typing import Literal, Optional, Type, TypeVar
+from typing import List, Literal, Optional, Type, TypeVar
 
-from simple_openid import userinfo
+from cryptojwt import JWK
+
+from simple_openid import jwk, userinfo
 from simple_openid.client_authentication import (
     ClientAuthenticationMethod,
     ClientSecretBasicAuth,
@@ -25,6 +27,7 @@ class OpenidClient:
     """
 
     provider_config: ProviderMetadata
+    provider_keys: List[JWK]
     client_auth: ClientAuthenticationMethod
     scope: str
 
@@ -34,12 +37,14 @@ class OpenidClient:
     def __init__(
         self,
         provider_config: ProviderMetadata,
+        provider_keys: List[JWK],
         authentication_redirect_uri: str,
         client_id: str,
         client_secret: Optional[str] = None,
         scope: str = "openid",
     ):
         self.provider_config = provider_config
+        self.provider_keys = provider_keys
         self.authorization_code_flow = AuthorizationCodeFlowClient(self)
         self.scope = scope
         self.authentication_redirect_uri = authentication_redirect_uri
@@ -101,8 +106,10 @@ class OpenidClient:
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         """
-
-        return cls(config, authentication_redirect_uri, client_id, client_secret, scope)
+        keys = jwk.fetch_jwks(config.jwks_uri)
+        return cls(
+            config, keys, authentication_redirect_uri, client_id, client_secret, scope
+        )
 
     @property
     def client_type(self) -> Literal["public", "confidential"]:
