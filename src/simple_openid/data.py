@@ -1,8 +1,8 @@
 """
 Datatypes and models for various OpenID messages
 """
-import logging
 import enum
+import logging
 from typing import Any, List, Literal, Mapping, Optional, Union
 
 from pydantic import Extra, HttpUrl, root_validator
@@ -180,6 +180,7 @@ class UserinfoRequest(OpenidMessage):
     """
     A request that can be sent to an OP to request information about a user
     """
+
     pass
 
 
