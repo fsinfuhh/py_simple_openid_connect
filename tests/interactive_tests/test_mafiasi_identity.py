@@ -4,9 +4,14 @@ from typing import Mapping, Tuple
 
 import pytest
 from furl import furl
+from pydantic import HttpUrl
 
 from simple_openid.client import OpenidClient
-from simple_openid.data import IdToken, UserinfoSuccessResponse
+from simple_openid.data import (
+    IdToken,
+    RpInitiatedLogoutRequest,
+    UserinfoSuccessResponse,
+)
 from simple_openid.flows.authorization_code_flow import TokenSuccessResponse
 
 logger = logging.getLogger(__name__)
@@ -17,7 +22,7 @@ def test_public_client(real_app_server, secrets):
     # arrange
     oidc_client = OpenidClient.from_issuer_url(
         "https://identity.mafiasi.de/auth/realms/simple_openid_test",
-        real_app_server.login_callback_url,
+        real_app_server.callback_url,
         client_id=secrets["mafiasi_identity_public_client_id"],
     )
     token_response: TokenSuccessResponse
@@ -65,7 +70,7 @@ def test_confidential_client(real_app_server, secrets):
     # arrange
     oidc_client = OpenidClient.from_issuer_url(
         "https://identity.mafiasi.de/auth/realms/simple_openid_test",
-        real_app_server.login_callback_url,
+        real_app_server.callback_url,
         client_id=secrets["mafiasi_identity_confidential_client_id"],
         client_secret=secrets["mafiasi_identity_confidential_client_secret"],
     )

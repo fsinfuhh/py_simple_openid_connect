@@ -17,10 +17,10 @@ def secrets() -> Mapping[str, str]:
 
 class RealAppServer(HTTPServer):
     login_url = "http://127.0.0.1:8000/login"
-    login_callback_url = "http://127.0.0.1:8000/callback"
+    callback_url = "http://127.0.0.1:8000/callback"
 
     _on_login = None
-    _on_login_callback = None
+    _on_callback = None
 
     _is_done = False
 
@@ -32,10 +32,10 @@ class RealAppServer(HTTPServer):
     def serve_until_done(
         self,
         on_login: Callable[[furl], Tuple[int, Mapping[str, str], str]],
-        on_login_callback: Callable[[furl], Tuple[int, Mapping[str, str], str]],
+        on_callback: Callable[[furl], Tuple[int, Mapping[str, str], str]],
     ):
         self._on_login = on_login
-        self._on_login_callback = on_login_callback
+        self._on_callback = on_callback
         while not self._is_done:
             self.handle_request()
 
@@ -52,7 +52,7 @@ class RealAppServer(HTTPServer):
             if url.path == "/login":
                 response = self.server._on_login(url)
             elif url.path == "/callback":
-                response = self.server._on_login_callback(url)
+                response = self.server._on_callback(url)
             else:
                 response = 404, {}, "Not found"
 

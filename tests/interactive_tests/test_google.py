@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def test_login_with_google(real_app_server, secrets):
     oidc_client = OpenidClient.from_issuer_url(
         "https://accounts.google.com",
-        real_app_server.login_callback_url,
+        real_app_server.callback_url,
         client_id=secrets["google_client_id"],
         client_secret=secrets["google_client_secret"],
     )
