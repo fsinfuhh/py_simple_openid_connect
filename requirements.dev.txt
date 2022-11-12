@@ -1,8 +1,9 @@
-sphinx
-sphinx_rtd_theme
+coverage
+flit
+hypothesis
 pytest
 pytest-explicit
-hypothesis
-responses
-coverage
 pyyaml
+responses
+sphinx
+sphinx_rtd_theme
