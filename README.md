@@ -2,6 +2,14 @@
 
 Simple and opinionated OpenID-Connect relying party and resource server implementation
 
+[![Documentation Status](https://readthedocs.org/projects/simple-openid-connect/badge/?version=latest)](https://simple-openid-connect.readthedocs.io/en/latest/?badge=latest)
+
+## Quick Links
+
+- [PyPi Page](https://pypi.org/project/simple_openid_connect/)
+- [Documentation](https://simple-openid-connect.readthedocs.io/en/latest/)
+- [GitHub Repository](https://github.com/fsinfuhh/py_simple_openid_connect)
+
 
 ## Development philosophy
 

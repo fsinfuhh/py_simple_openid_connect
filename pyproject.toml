@@ -17,6 +17,7 @@ dependencies = [
 [project.urls]
 Home = "https://github.com/fsinfuhh/py_simple_openid_connect"
 Source = "https://github.com/fsinfuhh/py_simple_openid_connect"
+Documentations = "https://simple-openid-connect.readthedocs.io/en/latest/"
 
 [build-system]
 requires = ["flit_core >=3.2,<4"]
