@@ -1,5 +1,6 @@
 .idea
 venv
+dist
 docs/_build
 docs/_generated
 **/.pytest_cache
