@@ -5,4 +5,4 @@ API Documentation
     :toctree: _generated
     :recursive:
 
-    simple_openid
+    simple_openid_connect
