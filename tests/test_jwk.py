@@ -1,6 +1,6 @@
 from cryptojwt import JWK
 
-from simple_openid.jwk import fetch_jwks
+from simple_openid_connect.jwk import fetch_jwks
 
 
 def test_load_jwks(mock_known_provider_configs, mock_known_provider_jwks):

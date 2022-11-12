@@ -1,6 +1,6 @@
 [project]
-name = "simple_openid"
-description = "Simple and opinionated OpenID-Connect relying party (client) implementation"
+name = "simple_openid_connect"
+description = "Simple and opinionated OpenID-Connect relying party and resource server implementation"
 authors = [{ name = "Finn-Thorben Sell", email = "dev@finn-thorben.me" }]
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -15,8 +15,8 @@ dependencies = [
 ]
 
 [project.urls]
-Home = "https://github.com/fsinfuhh/simple_openid"
-Source = "https://github.com/fsinfuhh/simple_openid"
+Home = "https://github.com/fsinfuhh/py_simple_openid_connect"
+Source = "https://github.com/fsinfuhh/py_simple_openid_connect"
 
 [build-system]
 requires = ["flit_core >=3.2,<4"]

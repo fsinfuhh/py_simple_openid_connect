@@ -1,6 +1,6 @@
 # Simple OpenID
 
-> Simple and opinionated OpenID-Connect relying party (client) implementation
+Simple and opinionated OpenID-Connect relying party and resource server implementation
 
 
 ## Development philosophy

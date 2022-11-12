@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from simple_openid import rp_initiated_logout
-from simple_openid.data import RpInitiatedLogoutRequest
+from simple_openid_connect import rp_initiated_logout
+from simple_openid_connect.data import RpInitiatedLogoutRequest
 
 
 def test_without_request():

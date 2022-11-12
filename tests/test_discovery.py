@@ -1,7 +1,7 @@
 import pytest
 
-from simple_openid import discovery
-from simple_openid.exceptions import OpenidProtocolError
+from simple_openid_connect import discovery
+from simple_openid_connect.exceptions import OpenidProtocolError
 
 
 def test_mafiasi_identity(mock_known_provider_configs):

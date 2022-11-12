@@ -6,19 +6,19 @@ from typing import List, Literal, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK
 
-from simple_openid import (
+from simple_openid_connect import (
     jwk,
     rp_initiated_logout,
     token_introspection,
     token_refresh,
     userinfo,
 )
-from simple_openid.client_authentication import (
+from simple_openid_connect.client_authentication import (
     ClientAuthenticationMethod,
     ClientSecretBasicAuth,
     NoneAuth,
 )
-from simple_openid.data import (
+from simple_openid_connect.data import (
     IdToken,
     ProviderMetadata,
     RpInitiatedLogoutRequest,
@@ -29,8 +29,8 @@ from simple_openid.data import (
     UserinfoErrorResponse,
     UserinfoSuccessResponse,
 )
-from simple_openid.discovery import discover_configuration_from_issuer
-from simple_openid.flows.authorization_code_flow.client import (
+from simple_openid_connect.discovery import discover_configuration_from_issuer
+from simple_openid_connect.flows.authorization_code_flow.client import (
     AuthorizationCodeFlowClient,
 )
 
@@ -163,7 +163,7 @@ class OpenidClient:
         Decode and verify an encoded and signed id token
 
         :param raw_token: The encoded and signed id token.
-            This could e.g. be retrieved as part of the authentication process and returned by the OP in :data:`TokenSuccessResponse.id_token <simple_openid.flows.authorization_code_flow.data.TokenSuccessResponse.id_token>`.
+            This could e.g. be retrieved as part of the authentication process and returned by the OP in :data:`TokenSuccessResponse.id_token <simple_openid_connect.flows.authorization_code_flow.data.TokenSuccessResponse.id_token>`.
         """
         return IdToken.parse_jwt(raw_token, self.provider_keys)
 

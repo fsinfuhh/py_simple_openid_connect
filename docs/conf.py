@@ -12,7 +12,7 @@ BASE_PATH = Path(__file__).parent.parent
 sys.path.append(str(BASE_PATH / "src"))
 
 
-project = "simple_openid"
+project = "simple_openid_connect"
 copyright = "2022, Finn-Thorben Sell"
 author = "Finn-Thorben Sell"
 release = "0.0.1"

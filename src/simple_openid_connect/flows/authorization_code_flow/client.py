@@ -1,21 +1,21 @@
 from typing import TYPE_CHECKING, Union
 
-from simple_openid.flows import authorization_code_flow as impl
-from simple_openid.flows.authorization_code_flow import (
+from simple_openid_connect.flows import authorization_code_flow as impl
+from simple_openid_connect.flows.authorization_code_flow import (
     AuthenticationSuccessResponse,
     TokenErrorResponse,
     TokenSuccessResponse,
 )
 
 if TYPE_CHECKING:
-    from simple_openid.client import OpenidClient
+    from simple_openid_connect.client import OpenidClient
 
 
 class AuthorizationCodeFlowClient:
     """
     A client that implements *authorization code flow* related functionality.
 
-    It is exposed via :data:`OpenidClient.authorization_code_flow <simple_openid.client.OpenidClient.authorization_code_flow>`.
+    It is exposed via :data:`OpenidClient.authorization_code_flow <simple_openid_connect.client.OpenidClient.authorization_code_flow>`.
     """
 
     def __init__(self, base_client: "OpenidClient"):

@@ -9,8 +9,8 @@ import responses
 from furl import furl
 from requests import PreparedRequest
 
-from simple_openid.data import ProviderMetadata
-from simple_openid.flows.authorization_code_flow import (
+from simple_openid_connect.data import ProviderMetadata
+from simple_openid_connect.flows.authorization_code_flow import (
     AuthenticationRequest,
     AuthenticationSuccessResponse,
     TokenErrorResponse,

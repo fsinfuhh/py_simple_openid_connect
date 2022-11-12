@@ -7,7 +7,7 @@ from typing import Any, List, Literal, Mapping, NewType, Optional, Union
 
 from pydantic import Extra, Field, HttpUrl, root_validator
 
-from simple_openid.base_data import OpenidBaseModel, OpenidMessage
+from simple_openid_connect.base_data import OpenidBaseModel, OpenidMessage
 
 logger = logging.getLogger(__name__)
 

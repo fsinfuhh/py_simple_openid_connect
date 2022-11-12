@@ -5,14 +5,14 @@ from typing import Mapping, Tuple
 import pytest
 from furl import furl
 
-from simple_openid.client import OpenidClient
-from simple_openid.data import (
+from simple_openid_connect.client import OpenidClient
+from simple_openid_connect.data import (
     IdToken,
     TokenIntrospectionErrorResponse,
     TokenIntrospectionSuccessResponse,
     UserinfoSuccessResponse,
 )
-from simple_openid.flows.authorization_code_flow import TokenSuccessResponse
+from simple_openid_connect.flows.authorization_code_flow import TokenSuccessResponse
 
 logger = logging.getLogger(__name__)
 

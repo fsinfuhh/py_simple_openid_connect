@@ -6,14 +6,14 @@ from typing import Literal, Union
 
 import requests
 
-from simple_openid import utils
-from simple_openid.client_authentication import AccessTokenBearerAuth
-from simple_openid.data import (
+from simple_openid_connect import utils
+from simple_openid_connect.client_authentication import AccessTokenBearerAuth
+from simple_openid_connect.data import (
     UserinfoErrorResponse,
     UserinfoRequest,
     UserinfoSuccessResponse,
 )
-from simple_openid.exceptions import OpenidProtocolError
+from simple_openid_connect.exceptions import OpenidProtocolError
 
 
 def fetch_userinfo(

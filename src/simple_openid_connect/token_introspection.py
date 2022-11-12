@@ -6,8 +6,8 @@ from typing import Union
 
 import requests
 
-from simple_openid.client_authentication import ClientAuthenticationMethod
-from simple_openid.data import (
+from simple_openid_connect.client_authentication import ClientAuthenticationMethod
+from simple_openid_connect.data import (
     TokenIntrospectionErrorResponse,
     TokenIntrospectionRequest,
     TokenIntrospectionSuccessResponse,

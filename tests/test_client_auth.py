@@ -4,7 +4,7 @@ import pytest
 import requests
 from responses import RequestsMock
 
-from simple_openid.client_authentication import ClientSecretBasicAuth, NoneAuth
+from simple_openid_connect.client_authentication import ClientSecretBasicAuth, NoneAuth
 
 
 @pytest.fixture

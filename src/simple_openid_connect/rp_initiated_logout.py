@@ -2,7 +2,7 @@
 Implementation of Relying-Party initiated logout
 """
 
-from simple_openid.data import RpInitiatedLogoutRequest
+from simple_openid_connect.data import RpInitiatedLogoutRequest
 
 
 def initiate_logout(

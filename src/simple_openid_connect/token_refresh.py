@@ -7,8 +7,12 @@ from typing import Union
 
 import requests
 
-from simple_openid.client_authentication import ClientAuthenticationMethod
-from simple_openid.data import TokenErrorResponse, TokenRequest, TokenSuccessResponse
+from simple_openid_connect.client_authentication import ClientAuthenticationMethod
+from simple_openid_connect.data import (
+    TokenErrorResponse,
+    TokenRequest,
+    TokenSuccessResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +26,7 @@ def exchange_refresh_token(
     Exchange a refresh token for new tokens
 
     :param token_endpoint: The endpoint of the OP at which tokens can be exchanged.
-        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid.data.ProviderMetadata.token_endpoint>`
+        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid_connect.data.ProviderMetadata.token_endpoint>`
     :param refresh_token: The refresh token to use
     :param client_authentication: A way for the client to authenticate itself
     """

@@ -12,8 +12,8 @@ from typing import Literal, Union
 import requests
 from furl import furl
 
-from simple_openid.client_authentication import ClientAuthenticationMethod
-from simple_openid.data import (
+from simple_openid_connect.client_authentication import ClientAuthenticationMethod
+from simple_openid_connect.data import (
     AuthenticationErrorResponse,
     AuthenticationRequest,
     AuthenticationSuccessResponse,
@@ -21,7 +21,7 @@ from simple_openid.data import (
     TokenRequest,
     TokenSuccessResponse,
 )
-from simple_openid.exceptions import AuthenticationFailedError
+from simple_openid_connect.exceptions import AuthenticationFailedError
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ def handle_authentication_result(
     :param current_url: The current URL which the user is visiting.
         The authentication result should be encoded into this url by the authorization server.
     :param token_endpoint: The endpoint of the OP at which tokens can be exchanged.
-        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid.data.ProviderMetadata.token_endpoint>`
+        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid_connect.data.ProviderMetadata.token_endpoint>`
     :param client_authentication: A way for the client to authenticate itself
     :param redirect_uri: The `redirect_uri` that was specified during the authentication initiation.
         If the special value `auto` is used, it is assumed that `current_url` is the that callback and it is stripped of query parameters and fragments to reproduce the originally supplied one.
@@ -99,7 +99,7 @@ def exchange_code_for_tokens(
     You might want to use :func:`handle_authentication_result` if you don't want to parse an authentication result from the users current url yourself.
 
     :param token_endpoint: The endpoint of the OP at which tokens can be exchanged.
-        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid.data.ProviderMetadata.token_endpoint>`
+        Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid_connect.data.ProviderMetadata.token_endpoint>`
     :param authentication_response: The (successful) response which this app received after the user has come back from
         the OP.
     :param redirect_uri: The callback URI that was specified during the authentication initiation.

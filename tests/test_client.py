@@ -1,4 +1,4 @@
-from simple_openid.client import OpenidClient
+from simple_openid_connect.client import OpenidClient
 
 
 def test_full_authorization_code_flow(

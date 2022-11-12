@@ -1,6 +1,8 @@
-from simple_openid.client_authentication import ClientSecretBasicAuth
-from simple_openid.flows import authorization_code_flow
-from simple_openid.flows.authorization_code_flow import AuthenticationSuccessResponse
+from simple_openid_connect.client_authentication import ClientSecretBasicAuth
+from simple_openid_connect.flows import authorization_code_flow
+from simple_openid_connect.flows.authorization_code_flow import (
+    AuthenticationSuccessResponse,
+)
 
 
 def test_authorization_request(dummy_ua, dummy_openid_provider, dummy_app_server):

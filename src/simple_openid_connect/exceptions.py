@@ -2,7 +2,7 @@
 Exceptions that are raised at various parts of this library.
 """
 
-from simple_openid.data import AuthenticationErrorResponse
+from simple_openid_connect.data import AuthenticationErrorResponse
 
 
 class OpenidProtocolError(Exception):
