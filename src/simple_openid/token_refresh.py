@@ -1,3 +1,7 @@
+"""
+Refresh token exchange implementation.
+"""
+
 import logging
 from typing import Union
 

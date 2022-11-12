@@ -305,7 +305,7 @@ class AuthenticationSuccessResponse(OpenidMessage):
 
 class AuthenticationErrorResponse(OpenidMessage):
     """
-    A response that is sent by the Authorization Server if a previous :class:`.AuthenticationRequest` could not be
+    A response that is sent by the Authorization Server if a previous :class:`AuthenticationRequest` could not be
     understood or handled.
     It contains additional information about the error that occurred.
 
@@ -320,7 +320,7 @@ class AuthenticationErrorResponse(OpenidMessage):
 
     class ErrorType(enum.Enum):
         """
-        Possible values for :data:`error <AuthenticationErrorResponse.error>`
+        Possible values for :data:`error <AuthenticationErrorResponse.error>`.
         """
 
         invalid_request = "invalid_request"
@@ -623,7 +623,7 @@ class TokenIntrospectionRequest(OpenidMessage):
 
 class TokenIntrospectionSuccessResponse(OpenidMessage):
     """
-    A message with which an OP responds to :class:`TokenIntrospectionRequest`s and which contains information about the provided token.
+    A message with which an OP responds to :class:`TokenIntrospectionRequest`\s and which contains information about the provided token.
 
     Specific implementations MAY extend this structure with their own service-specific response names as top-level members of this object.
 
@@ -672,7 +672,7 @@ class TokenIntrospectionSuccessResponse(OpenidMessage):
 
 class TokenIntrospectionErrorResponse(TokenErrorResponse):
     """
-    An error with which an OP responds to :class:`TokenIntrospectionRequest`s and which describes why the request could not be fulfilled.
+    An error with which an OP responds to :class:`TokenIntrospectionRequest`\s and which describes why the request could not be fulfilled.
     """
 
     pass

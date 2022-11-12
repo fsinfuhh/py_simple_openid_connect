@@ -1,3 +1,7 @@
+"""
+JSON-Web-Key handling code
+"""
+
 from typing import List
 
 from cryptojwt import JWK, KeyBundle

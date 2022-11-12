@@ -1,3 +1,7 @@
+"""
+A more contiguous client implementation of the Openid-Connect protocol that offers simpler APIs at the cost of losing some flexibility.
+"""
+
 from typing import List, Literal, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK

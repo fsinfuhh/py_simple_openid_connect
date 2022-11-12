@@ -1,3 +1,7 @@
+"""
+Userinfo implementation
+"""
+
 from typing import Literal, Union
 
 import requests

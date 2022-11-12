@@ -1,3 +1,7 @@
+"""
+Exceptions that are raised at various parts of this library.
+"""
+
 from simple_openid.data import AuthenticationErrorResponse
 
 

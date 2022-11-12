@@ -1,3 +1,7 @@
+"""
+`OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_ implementation.
+"""
+
 from typing import Union
 
 import requests
