@@ -4,12 +4,12 @@ from typing import Mapping, Tuple
 
 import pytest
 from furl import furl
-from pydantic import HttpUrl
 
 from simple_openid.client import OpenidClient
 from simple_openid.data import (
     IdToken,
-    RpInitiatedLogoutRequest,
+    TokenIntrospectionErrorResponse,
+    TokenIntrospectionSuccessResponse,
     UserinfoSuccessResponse,
 )
 from simple_openid.flows.authorization_code_flow import TokenSuccessResponse
@@ -60,6 +60,12 @@ def test_public_client(real_app_server, secrets):
     assert isinstance(response, UserinfoSuccessResponse)
     assert response.sub != ""
 
+    # act (introspect access token). This fails because te public client cannot authenticate itself
+    response = oidc_client.introspect_token(token_response.access_token, "access_token")
+    assert isinstance(response, TokenIntrospectionErrorResponse)
+    assert response.error == "invalid_request"
+    assert response.error_description == "Authentication failed."
+
     # act (refresh tokens)
     response = oidc_client.exchange_refresh_token(token_response.refresh_token)
     assert isinstance(response, TokenSuccessResponse)
@@ -108,6 +114,16 @@ def test_confidential_client(real_app_server, secrets):
     response = oidc_client.fetch_userinfo(token_response.access_token)
     assert isinstance(response, UserinfoSuccessResponse)
     assert response.sub != ""
+
+    # act (introspect access token)
+    response = oidc_client.introspect_token(token_response.access_token, "access_token")
+    assert isinstance(response, TokenIntrospectionSuccessResponse)
+
+    # act (introspect access token)
+    response = oidc_client.introspect_token(
+        token_response.refresh_token, "refresh_token"
+    )
+    assert isinstance(response, TokenIntrospectionSuccessResponse)
 
     # act (refresh tokens)
     response = oidc_client.exchange_refresh_token(token_response.refresh_token)

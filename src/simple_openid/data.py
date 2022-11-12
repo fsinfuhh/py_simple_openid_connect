@@ -3,7 +3,7 @@ Datatypes and models for various OpenID messages
 """
 import enum
 import logging
-from typing import Any, List, Literal, Mapping, Optional, Union
+from typing import Any, List, Literal, Mapping, NewType, Optional, Union
 
 from pydantic import Extra, Field, HttpUrl, root_validator
 
@@ -144,6 +144,9 @@ class ProviderMetadata(OpenidBaseModel):
 
     backchannel_logout_session_supported: bool = Field(default=False)
     "OPTIONAL. Boolean value specifying whether the OP can pass a sid (session ID) Claim in the Logout Token to identify the RP session with the OP. If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false. "
+
+    introspection_endpoint: Optional[HttpUrl]
+    "OPTIONAL. URL that the OpenID Provider provides to resource servers to introspect access tokens in accordance to `RFC7662: OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_."
 
 
 class IdToken(OpenidBaseModel):
@@ -594,3 +597,82 @@ class BackChannelLogoutToken(OpenidMessage):
 
     sid: Optional[str]
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
+
+
+class TokenIntrospectionRequest(OpenidMessage):
+    """
+    The protected resource server calls the introspection endpoint using an HTTP POST request with this request formatted as `application/x-www-form-urlencoded` data.
+
+    The protected resource sends a parameter representing the token along with optional parameters representing additional context that is known by the protected resource to aid the authorization server in its response.
+
+    The introspection endpoint MAY accept other OPTIONAL parameters to provide further context to the query.
+    For instance, an authorization server may desire to know the IP address of the client accessing the protected resource to determine if the correct client is likely to be presenting the token.
+    The definition of this or any other parameters are outside the scope of the specification, to be defined by service documentation.
+    If the authorization server is unable to determine the state of the token without additional information, it SHOULD return an :class:`introspection response <TokenIntrospectionResponse>` indicating the token is not active.
+    """
+
+    class Config:
+        extra = Extra.allow
+
+    token: str
+    "REQUIRED. The string value of the token. The may be a refresh_token or access_token which must be understood by supporting OPs but may also be others."
+
+    token_type_hint: Optional[str]
+    'OPTIONAL. A hint about the type of the token submitted for introspection. The protected resource MAY pass this parameter to help the authorization server optimize the token lookup. If the server is unable to locate the token using the given hint, it MUST extend its search across all of its supported token types. An OP MAY ignore this parameter, particularly if it is able to detect the token type automatically. Values for this field are defined in the "OAuth Token Type Hints" registry defined in OAuth Token Revocation `RFC7009: OAuth 2.0 Token Revocation <https://www.rfc-editor.org/rfc/rfc7009>`_.'
+
+
+class TokenIntrospectionSuccessResponse(OpenidMessage):
+    """
+    A message with which an OP responds to :class:`TokenIntrospectionRequest`s and which contains information about the provided token.
+
+    Specific implementations MAY extend this structure with their own service-specific response names as top-level members of this object.
+
+    The response MAY be cached by the protected resource to improve performance and reduce load on the introspection endpoint, but at the cost of liveness of the information used by the protected resource to make authorization decisions.
+    """
+
+    class Config:
+        extra = Extra.allow
+
+    active: bool
+    'REQUIRED. Boolean indicator of whether or not the presented token is currently active. The specifics of a token\'s "active" state will vary depending on the implementation of the authorization server and the information it keeps about its tokens, but a `true` value return for the "active" property will generally indicate that a given **token has been issued by this authorization server**, **has not been revoked by the resource owner**, and **is within its given time window of validity** (e.g., after its issuance time and before its expiration time).'
+
+    scope: Optional[str]
+    "OPTIONAL. A string containing a space-separated list of scopes associated with this token."
+
+    client_id: Optional[str]
+    "OPTIONAL. Client identifier for the client that requested this token."
+
+    username: Optional[str]
+    "OPTIONAL. Human-readable identifier for the resource owner who authorized this token."
+
+    token_type: Optional[str]
+    "OPTIONAL.  Type of the token as defined in `Section 5.1 of OAuth2.0 [RFC6749] <https://www.rfc-editor.org/rfc/rfc6749#section-5.1>`_."
+
+    exp: Optional[int]
+    "OPTIONAL. Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token will expire."
+
+    iat: Optional[int]
+    "OPTIONAL. Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token was originally issued."
+
+    nbf: Optional[int]
+    "OPTIONAL. Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token is not to be used before."
+
+    sub: Optional[str]
+    "OPTIONAL. Subject of the token. Usually a machine-readable identifier of the resource owner who authorized this token (user id)."
+
+    aud: Optional[str]
+    "OPTIONAL. Service-specific string identifier or list of string identifiers representing the intended audience for this token."
+
+    iss: Optional[str]
+    "OPTIONAL. String representing the issuer (OP) of this token."
+
+    jti: Optional[str]
+    "OPTIONAL. String identifier for the token."
+
+
+class TokenIntrospectionErrorResponse(TokenErrorResponse):
+    """
+    An error with which an OP responds to :class:`TokenIntrospectionRequest`s and which describes why the request could not be fulfilled.
+    """
+
+    pass

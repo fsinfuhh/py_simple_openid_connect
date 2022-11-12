@@ -2,7 +2,13 @@ from typing import List, Literal, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK
 
-from simple_openid import jwk, rp_initiated_logout, token_refresh, userinfo
+from simple_openid import (
+    jwk,
+    rp_initiated_logout,
+    token_introspection,
+    token_refresh,
+    userinfo,
+)
 from simple_openid.client_authentication import (
     ClientAuthenticationMethod,
     ClientSecretBasicAuth,
@@ -13,6 +19,8 @@ from simple_openid.data import (
     ProviderMetadata,
     RpInitiatedLogoutRequest,
     TokenErrorResponse,
+    TokenIntrospectionErrorResponse,
+    TokenIntrospectionSuccessResponse,
     TokenSuccessResponse,
     UserinfoErrorResponse,
     UserinfoSuccessResponse,
@@ -179,4 +187,21 @@ class OpenidClient:
         """
         return rp_initiated_logout.initiate_logout(
             self.provider_config.end_session_endpoint, request
+        )
+
+    def introspect_token(
+        self, token: str, token_type_hint: str = None
+    ) -> Union[TokenIntrospectionSuccessResponse, TokenIntrospectionErrorResponse]:
+        """
+        Introspect the given token at the OP.
+
+        :param token: The token to introspect.
+        :param token_type_hint: Which type of token this is e.g. `refresh_token` or `access_token`.
+        :return: The OPs response
+        """
+        return token_introspection.introspect_token(
+            introspection_endpoint=self.provider_config.introspection_endpoint,
+            token=token,
+            auth=self.client_auth,
+            token_type_hint=token_type_hint,
         )
