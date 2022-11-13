@@ -3,11 +3,13 @@ Datatypes and models for various OpenID messages
 """
 import enum
 import logging
-from typing import Any, List, Literal, Mapping, Optional, Union
+from datetime import datetime
+from typing import Any, Callable, List, Literal, Mapping, Optional, Union
 
 from pydantic import Extra, Field, HttpUrl, root_validator
 
 from simple_openid_connect.base_data import OpenidBaseModel
+from simple_openid_connect.utils import validate_that
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +197,102 @@ class IdToken(OpenidBaseModel):
 
     sid: Optional[str]
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
+
+    def validate_extern(
+        self,
+        issuer: str,
+        client_id: str,
+        nonce: str = None,
+        extra_trusted_audiences: List[str] = [],
+        min_iat: float = 0,
+        validate_acr: Callable[[str], None] = None,
+        min_auth_time: float = 0,
+    ):
+        """
+        Validate this ID-Token with external data for consistency
+
+        :param issuer: The issuer that this token is supposed to originate from.
+            Should usually be :data:`ProviderMetadata.issuer`
+        :param client_id: The client id of this client
+        :param nonce: The nonce that was used during authentication.
+            It is carried over by the OP into ID-Tokens and must now match.
+        :param extra_trusted_audiences: Which token audiences (client ids) to consider trusted beside this client's own client_id.
+            This is usually an empty list but if the token is intended to be used by more than one client, all of these need to be listed in the tokens :data:`IdToken.aud` field, and they all need to be known and trusted by this client.
+        :param min_iat: Minimum value that the tokens :data:`IdToken.iat` claim must be.
+            This value is a posix timestamp and defaults to 0 which allows arbitrarily old `iat` dates.
+        :param validate_acr: A callable that receives this tokens :data:`IdToken.acr` value and must perform it own validation.
+            This is necessary because the value of acr is outside OpenId-Connect specification and usage specific.
+            If not given, acr is assumed to always be valid.
+        :param min_auth_time: The point in time which is considered the minimum at which a user should have authenticated.
+            It basically means that if the user was authenticated very far in the past and reused their session, the time at which the original authentication took place must be greater than this value.
+            This is only validated if the :data:`IdToken.auth_time` is present in the token.
+            This value is a posix timestamp and default to 0 which allows arbitrarily old `auth_time` dates.
+
+        :raises ValidationError: if the validation fails
+        """
+        # this method implements https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+
+        # TODO Call this in relevant places
+        # 2. validate issuer
+        validate_that(self.iss == issuer, "ID-Token was issued from unexpected issuer")
+
+        # 3. validate audience
+        if isinstance(self.aud, str):
+            validate_that(
+                self.aud == client_id,
+                "ID-Token's audience does not contain own client_id",
+            )
+        elif isinstance(self.aud, list):
+            validate_that(
+                client_id in self.aud,
+                "ID-Token's audience does not contain own client_id",
+            )
+            validate_that(
+                all(i in extra_trusted_audiences for i in self.aud),
+                "Not all of the ID-Token's audience are trusted",
+            )
+
+        # 4. validate that an azp claim is present if required
+        if isinstance(self.aud, list) and len(self.aud) > 1:
+            validate_that(
+                self.azp is not None,
+                "ID-Token does not contain azp claim but is required to because it is issued to more than 1 audience",
+            )
+
+        # 5. validate azp claim value
+        if self.azp is not None:
+            validate_that(
+                self.azp == client_id,
+                "The ID-Token was not issued to this client (azp claim mismatch)",
+            )
+
+        # 9. validate expiry
+        validate_that(
+            self.exp > datetime.utcnow().timestamp(), "The ID-Token is expired"
+        )
+
+        # 10. validate iat
+        validate_that(
+            self.iat >= min_iat, "The ID-Token was issued too far in the past"
+        )
+
+        # 11. validate nonce
+        if self.nonce is not None:
+            validate_that(
+                self.nonce == nonce,
+                "The ID-Token's nonce does not match its expected value",
+            )
+
+        # 12. validate acr
+        if self.acr is not None and validate_acr is not None:
+            validate_acr(self.acr)
+
+        # 13. validate auth_time
+        if self.auth_time is not None:
+            validate_that(
+                self.auth_time >= min_auth_time,
+                "The session associated with this ID-Token was authenticated too far in the past",
+            )
 
 
 class UserinfoRequest(OpenidBaseModel):
@@ -431,9 +529,6 @@ class TokenSuccessResponse(OpenidBaseModel):
     """
     After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an ID Token and an Access Token
     """
-
-    # TODO Implement ID Token validation
-    # https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
 
     class Config:
         allow_mutation = False

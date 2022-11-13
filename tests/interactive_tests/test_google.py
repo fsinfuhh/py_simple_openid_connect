@@ -53,6 +53,9 @@ def test_login_with_google(real_app_server, secrets):
     # act (decode id token)
     id_token = oidc_client.decode_id_token(token_response.id_token)
     assert isinstance(id_token, IdToken)
+    id_token.validate_extern(
+        oidc_client.provider_config.issuer, oidc_client.client_auth.client_id
+    )
 
     # act (get userinfo)
     response = oidc_client.fetch_userinfo(token_response.access_token)
