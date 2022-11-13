@@ -4,10 +4,10 @@ from typing import Optional
 from furl import quote as urlquote
 from hypothesis import given
 
-from simple_openid_connect.data import OpenidMessage
+from simple_openid_connect.data import OpenidBaseModel
 
 
-class DummyMessage(OpenidMessage):
+class DummyMessage(OpenidBaseModel):
     required_field: str
     optional_field: Optional[str]
     optional_with_default: Optional[str] = "default value"

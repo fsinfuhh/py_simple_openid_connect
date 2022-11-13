@@ -19,19 +19,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
     """
     Base model type upon which all openid data types are built.
 
-    It implements decoding functionality that should always be supported.
-    """
-
-    @classmethod
-    def parse_jwt(cls: Type[Self], value: str, signing_keys: List[JWK]) -> Self:
-        verifier = JWS()
-        msg = verifier.verify_compact(value, signing_keys)
-        return cls.parse_obj(msg)
-
-
-class OpenidMessage(OpenidBaseModel, metaclass=abc.ABCMeta):
-    """
-    A base class for messages sent to and received from an Openid issuer
+    It implements encoding and decoding functionality that are commonly used in OpenID contexts.
     """
 
     def encode_x_www_form_urlencoded(self) -> str:
@@ -96,3 +84,15 @@ class OpenidMessage(OpenidBaseModel, metaclass=abc.ABCMeta):
                 return cls.parse_url(url, location="query")
         else:
             raise ValueError(f"invalid location value {location}")
+
+    @classmethod
+    def parse_jwt(cls: Type[Self], value: str, signing_keys: List[JWK]) -> Self:
+        """
+        Parse received data that is encoded as a signed Json-Web-Token (JWT).
+
+        :param value: The encoded JWT
+        :param signing_keys: List of keys one of which has been used to sign the JWT
+        """
+        verifier = JWS()
+        msg = verifier.verify_compact(value, signing_keys)
+        return cls.parse_obj(msg)

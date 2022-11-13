@@ -3,11 +3,11 @@ Datatypes and models for various OpenID messages
 """
 import enum
 import logging
-from typing import Any, List, Literal, Mapping, NewType, Optional, Union
+from typing import Any, List, Literal, Mapping, Optional, Union
 
 from pydantic import Extra, Field, HttpUrl, root_validator
 
-from simple_openid_connect.base_data import OpenidBaseModel, OpenidMessage
+from simple_openid_connect.base_data import OpenidBaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +197,7 @@ class IdToken(OpenidBaseModel):
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
 
 
-class UserinfoRequest(OpenidMessage):
+class UserinfoRequest(OpenidBaseModel):
     """
     A request that can be sent to an OP to request information about a user
     """
@@ -205,7 +205,7 @@ class UserinfoRequest(OpenidMessage):
     pass
 
 
-class UserinfoSuccessResponse(OpenidMessage):
+class UserinfoSuccessResponse(OpenidBaseModel):
     """
     A successful response to a userinfo request containing data about the requested user.
 
@@ -221,7 +221,7 @@ class UserinfoSuccessResponse(OpenidMessage):
     "Subject of this response, basically a unique user id."
 
 
-class UserinfoErrorResponse(OpenidMessage):
+class UserinfoErrorResponse(OpenidBaseModel):
     """
     An error response that is sent back from an OP after requesting user information
     """
@@ -234,7 +234,7 @@ class UserinfoErrorResponse(OpenidMessage):
     error_description: Optional[str]
 
 
-class AuthenticationRequest(OpenidMessage):
+class AuthenticationRequest(OpenidBaseModel):
     """
     An Authentication Request requests that the End-User be authenticated by the Authorization Server.
     """
@@ -285,7 +285,7 @@ class AuthenticationRequest(OpenidMessage):
     "OPTIONAL. Requested Authentication Context Class Reference values Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference The Authentication Context Class satisfied by the authentication performed is returned as the acr Claim Value, as specified in Section 2 The acr Claim is requested as a Voluntary Claim by this parameter."
 
 
-class AuthenticationSuccessResponse(OpenidMessage):
+class AuthenticationSuccessResponse(OpenidBaseModel):
     """
     A response that is sent by the Authorization Server if a previous :class:`.AuthenticationRequest` could successfully
     be parsed and handled.
@@ -303,7 +303,7 @@ class AuthenticationSuccessResponse(OpenidMessage):
     "REQUIRED if the `state` parameter was present in the client authorization request The exact value received from the client."
 
 
-class AuthenticationErrorResponse(OpenidMessage):
+class AuthenticationErrorResponse(OpenidBaseModel):
     """
     A response that is sent by the Authorization Server if a previous :class:`AuthenticationRequest` could not be
     understood or handled.
@@ -384,7 +384,7 @@ class AuthenticationErrorResponse(OpenidMessage):
     "REQUIRED if a `state` parameter was present in the client authorization request. The exact value received from the client."
 
 
-class TokenRequest(OpenidMessage):
+class TokenRequest(OpenidBaseModel):
     """
     A Client makes a Token Request by presenting its Authorization Grant (in the form of an Authorization Code) to the Token Endpoint.
     If the Client is a Confidential Client, then it MUST authenticate to the Token Endpoint using the authentication method registered for its client_id.
@@ -427,7 +427,7 @@ class TokenRequest(OpenidMessage):
         return values
 
 
-class TokenSuccessResponse(OpenidMessage):
+class TokenSuccessResponse(OpenidBaseModel):
     """
     After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an ID Token and an Access Token
     """
@@ -457,7 +457,7 @@ class TokenSuccessResponse(OpenidMessage):
     "ID Token value associated with the authenticated session."
 
 
-class TokenErrorResponse(OpenidMessage):
+class TokenErrorResponse(OpenidBaseModel):
     """
     A response that is sent by the Authorization Server if a previous :class:`.TokenRequest` could not be
     understood or handled.
@@ -502,7 +502,7 @@ class TokenErrorResponse(OpenidMessage):
     "OPTIONAL.  A URI identifying a human-readable web page with information about the error, used to provide the client developer with additional information about the error."
 
 
-class RpInitiatedLogoutRequest(OpenidMessage):
+class RpInitiatedLogoutRequest(OpenidBaseModel):
     """
     Request which a Relying-Party sends to the OP to initiate a user logout
     """
@@ -526,7 +526,7 @@ class RpInitiatedLogoutRequest(OpenidMessage):
     'OPTIONAL. End-User\'s preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. For instance, the value "fr-CA fr en" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider. '
 
 
-class FrontChannelLogoutNotification(OpenidMessage):
+class FrontChannelLogoutNotification(OpenidBaseModel):
     """
     A notification which the Relying-Party receives when a user logs out.
 
@@ -544,7 +544,7 @@ class FrontChannelLogoutNotification(OpenidMessage):
     "Identifier for the Session."
 
 
-class BackChannelLogoutNotification(OpenidMessage):
+class BackChannelLogoutNotification(OpenidBaseModel):
     """
     A notification which the Relying-Party receives from the OP when a user logs out.
 
@@ -555,7 +555,7 @@ class BackChannelLogoutNotification(OpenidMessage):
     "A signed JWT containing a :class:`BackChannelLogoutToken`"
 
 
-class BackChannelLogoutToken(OpenidMessage):
+class BackChannelLogoutToken(OpenidBaseModel):
     """
     OPs send a JWT similar to an ID Token to RPs called a Logout Token to request that they log out.
     This token is sent as part of a :class:`BackChannelLogoutNotification`.
@@ -599,7 +599,7 @@ class BackChannelLogoutToken(OpenidMessage):
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
 
 
-class TokenIntrospectionRequest(OpenidMessage):
+class TokenIntrospectionRequest(OpenidBaseModel):
     """
     The protected resource server calls the introspection endpoint using an HTTP POST request with this request formatted as `application/x-www-form-urlencoded` data.
 
@@ -621,7 +621,7 @@ class TokenIntrospectionRequest(OpenidMessage):
     'OPTIONAL. A hint about the type of the token submitted for introspection. The protected resource MAY pass this parameter to help the authorization server optimize the token lookup. If the server is unable to locate the token using the given hint, it MUST extend its search across all of its supported token types. An OP MAY ignore this parameter, particularly if it is able to detect the token type automatically. Values for this field are defined in the "OAuth Token Type Hints" registry defined in OAuth Token Revocation `RFC7009: OAuth 2.0 Token Revocation <https://www.rfc-editor.org/rfc/rfc7009>`_.'
 
 
-class TokenIntrospectionSuccessResponse(OpenidMessage):
+class TokenIntrospectionSuccessResponse(OpenidBaseModel):
     """
     A message with which an OP responds to :class:`TokenIntrospectionRequest`\s and which contains information about the provided token.
 
