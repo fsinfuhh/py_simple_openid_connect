@@ -232,7 +232,6 @@ class IdToken(OpenidBaseModel):
         """
         # this method implements https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
 
-        # TODO Call this in relevant places
         # 2. validate issuer
         validate_that(self.iss == issuer, "ID-Token was issued from unexpected issuer")
 
@@ -681,7 +680,7 @@ class BackChannelLogoutToken(OpenidBaseModel):
     aud: str
     "REQUIRED. Audience(s)"
 
-    iat: str
+    iat: int
     "REQUIRED. Issued at time"
 
     jti: str
@@ -692,6 +691,84 @@ class BackChannelLogoutToken(OpenidBaseModel):
 
     sid: Optional[str]
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
+
+    def validate_extern(
+        self,
+        issuer: str,
+        client_id: str,
+        extra_trusted_audiences: List[str] = [],
+        min_iat: float = 0,
+        validate_unique_jti: Callable[[str], None] = None,
+        validate_iss_has_sessions: Callable[[str], None] = None,
+        validate_sub_has_sessions: Callable[[str], None] = None,
+        validate_sid_exists: Callable[[str], None] = None,
+    ):
+        """
+        Validate this ID-Token with external data for consistency
+
+        :param issuer: The issuer that this token is supposed to originate from.
+            Should usually be :data:`ProviderMetadata.issuer`
+        :param client_id: The client id of this client
+        :param extra_trusted_audiences: Which token audiences (client ids) to consider trusted beside this client's own client_id.
+            This is usually an empty list but if the token is intended to be used by more than one client, all of these need to be listed in the tokens :data:`IdToken.aud` field, and they all need to be known and trusted by this client.
+        :param min_iat: Minimum value that the tokens :data:`IdToken.iat` claim must be.
+            This value is a posix timestamp and defaults to 0 which allows arbitrarily old `iat` dates.
+        :param validate_unique_jti: A callable which verifies that the given :data:`BackChannelLogoutToken.jti` value has not been previsouly used.
+            If this parameter is not given, validation is skipped.
+        :param validate_iss_has_sessions: A callable which verifies that the logout tokens :data:`iss <BackChannelLogoutToken.iss>` (issuer) has open sessions on this app.
+            If this parameter is not given, validation is skipped.
+        :param validate_sub_has_sessions: A callable which verifies that the logout tokens :data:`sub <BackChannelLogoutToken.sub>` (subject) has one or more open session on this app.
+            If this parameter is not given or the token contains no `sub` claim, validation is skipped.
+        :param validate_sid_exists:  A callable which verifies that the logout tokens :data:`sid <BackChannelLogoutToken.sid>` (session id) is a currently open session on this app.
+            If this parameter is not given or the token contains no `sid` claim, validation is skipped.
+        """
+        # this method implements https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
+
+        # 4. validate iss
+        validate_that(self.iss == issuer, "ID-Token was issued from unexpected issuer")
+
+        # 4. validate audience
+        if isinstance(self.aud, str):
+            validate_that(
+                self.aud == client_id,
+                "ID-Token's audience does not contain own client_id",
+            )
+        elif isinstance(self.aud, list):
+            validate_that(
+                client_id in self.aud,
+                "ID-Token's audience does not contain own client_id",
+            )
+            validate_that(
+                all(i in extra_trusted_audiences for i in self.aud),
+                "Not all of the ID-Token's audience are trusted",
+            )
+
+        # 4. validate iat
+        validate_that(
+            self.iat >= min_iat, "The ID-Token was issued too far in the past"
+        )
+
+        # 5. validate that one of sub or sid (or both) is present
+        validate_that(
+            not (self.sub is None and self.sid is None),
+            "Neither sub nor sid claim is present in Backchannel-Logout-Token",
+        )
+
+        # 8. optionally validate jti
+        if validate_unique_jti is not None:
+            validate_unique_jti(self.jti)
+
+        # 9.optionally validate iss
+        if validate_iss_has_sessions is not None:
+            validate_iss_has_sessions(self.iss)
+
+        # 10. optionally validate sub
+        if validate_sub_has_sessions is not None and self.sub is not None:
+            validate_sub_has_sessions(self.sub)
+
+        # 11. optionally validate sid
+        if validate_sid_exists is not None and self.sid is not None:
+            validate_sid_exists(self.sid)
 
 
 class TokenIntrospectionRequest(OpenidBaseModel):

@@ -42,6 +42,8 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
   - ✔️ `client_secret_basic` client authentication
   - ✔️ `none` client authentication
   - ✔️ Query String serialization and parsing
+  - ✔️ ID Token handling (parsing + validation)
+  - ✔️ Using refresh tokens
   - ❌ Implicit Flow
   - ❌ Hybrid Flow
   - ❌ Handling third party initiated login
@@ -51,9 +53,6 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
   - ❌ `client_secret_post` client authentication
   - ❌ `client_secret_jwt` client authentication
   - ❌ `private_key_jwt` client authentication
-  - ✔ ID Token handling (parsing + validation)
-  - ❌ Extensive response validation (signatures, validating responses with external expected conditions)
-  - ✔ Using refresh tokens
 
 - (✔️) Partial [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html).
   *Provider Configuration Discovery* is implemented, *Provider Issuer Discovery* is not.
