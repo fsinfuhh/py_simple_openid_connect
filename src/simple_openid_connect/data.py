@@ -90,7 +90,9 @@ class ProviderMetadata(OpenidBaseModel):
     request_object_encryption_enc_values_supported: Optional[List[str]]
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects These algorithms are used both when the Request Object is passed by value and when it is passed by reference."
 
-    token_endpoint_auth_methods_supported: Optional[List[str]] = ["client_secret_basic"]
+    token_endpoint_auth_methods_supported: List[str] = Field(
+        default=["client_secret_basic"]
+    )
     "OPTIONAL. JSON array containing a list of Client Authentication methods supported by this Token Endpoint The options are client_secret_post, client_secret_basic, client_secret_jwt, and private_key_jwt, as described in Section 9 of OpenID Connect Core 1.0 Other authentication methods MAY be defined by extensions. If omitted, the default is client_secret_basic -- the HTTP Basic Authentication Scheme specified in Section 2.3.1 of OAuth 2.0 [RFC6749]."
 
     token_endpoint_auth_signing_alg_values_supported: Optional[List[str]]
@@ -202,10 +204,10 @@ class IdToken(OpenidBaseModel):
         self,
         issuer: str,
         client_id: str,
-        nonce: str = None,
+        nonce: Union[str, None] = None,
         extra_trusted_audiences: List[str] = [],
         min_iat: float = 0,
-        validate_acr: Callable[[str], None] = None,
+        validate_acr: Union[Callable[[str], None], None] = None,
         min_auth_time: float = 0,
     ):
         """
@@ -698,10 +700,10 @@ class BackChannelLogoutToken(OpenidBaseModel):
         client_id: str,
         extra_trusted_audiences: List[str] = [],
         min_iat: float = 0,
-        validate_unique_jti: Callable[[str], None] = None,
-        validate_iss_has_sessions: Callable[[str], None] = None,
-        validate_sub_has_sessions: Callable[[str], None] = None,
-        validate_sid_exists: Callable[[str], None] = None,
+        validate_unique_jti: Union[Callable[[str], None], None] = None,
+        validate_iss_has_sessions: Union[Callable[[str], None], None] = None,
+        validate_sub_has_sessions: Union[Callable[[str], None], None] = None,
+        validate_sid_exists: Union[Callable[[str], None], None] = None,
     ):
         """
         Validate this ID-Token with external data for consistency

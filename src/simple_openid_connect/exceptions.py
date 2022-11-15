@@ -16,6 +16,14 @@ class OpenidProtocolError(Exception):
         super().__init__(msg, *data)
 
 
+class UnsupportedByProviderError(OpenidProtocolError):
+    """
+    This error indicates that a desired feature is not supported by the OpenID Provider
+    """
+
+    pass
+
+
 class AuthenticationFailedError(Exception):
     """
     A previous authentication attempt has failed

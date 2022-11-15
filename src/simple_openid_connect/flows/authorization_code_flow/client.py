@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Union
 
+from simple_openid_connect.exceptions import UnsupportedByProviderError
 from simple_openid_connect.flows import authorization_code_flow as impl
 from simple_openid_connect.flows.authorization_code_flow import (
     AuthenticationSuccessResponse,
@@ -45,9 +46,15 @@ class AuthorizationCodeFlowClient:
             The authentication result should be encoded into this url by the authorization server.
 
         :raises AuthenticationFailedError: If the current url indicates an authentication failure that prevents an access token from being retrieved.
+        :raise UnsupportedByProviderError: If the provider only supports implicit flow and has no token endpoint.
 
         :returns: The result of the token exchange
         """
+        if self._base_client.provider_config.token_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self._base_client.provider_config.issuer} only supports the implicit flow and does not have a token endpoint"
+            )
+
         return impl.handle_authentication_result(
             current_url=current_url,
             token_endpoint=self._base_client.provider_config.token_endpoint,
@@ -64,9 +71,15 @@ class AuthorizationCodeFlowClient:
         You might want to use :func:`handle_authentication_result` if you don't want to parse an authentication result from the users current url yourself.
 
         :param authentication_response: The (successful) response which this app received after the user has come back from the OP.
+        :raise UnsupportedByProviderError: If the provider only supports implicit flow and has no token endpoint.
 
         :returns: The result of the token exchange
         """
+        if self._base_client.provider_config.token_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self._base_client.provider_config.issuer} only supports the implicit flow and does not have a token endpoint"
+            )
+
         return impl.exchange_code_for_tokens(
             token_endpoint=self._base_client.provider_config.token_endpoint,
             authentication_response=authentication_response,

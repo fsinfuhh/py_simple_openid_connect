@@ -4,5 +4,6 @@ dist
 docs/_build
 docs/_generated
 **/.pytest_cache
+**/.mypy_cache
 **/.hypothesis
 **/__pycache__

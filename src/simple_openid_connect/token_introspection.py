@@ -18,7 +18,7 @@ def introspect_token(
     introspection_endpoint: str,
     token: str,
     auth: ClientAuthenticationMethod,
-    token_type_hint: str = None,
+    token_type_hint: Union[str, None] = None,
 ) -> Union[TokenIntrospectionSuccessResponse, TokenIntrospectionErrorResponse]:
     """
     Introspect the given token at the OP.

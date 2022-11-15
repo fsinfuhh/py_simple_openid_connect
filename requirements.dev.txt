@@ -1,9 +1,11 @@
 coverage
 flit
 hypothesis
+mypy
 pytest
 pytest-explicit
 pyyaml
 responses
 sphinx
 sphinx_rtd_theme
+types-requests

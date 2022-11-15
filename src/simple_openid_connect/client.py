@@ -30,6 +30,7 @@ from simple_openid_connect.data import (
     UserinfoSuccessResponse,
 )
 from simple_openid_connect.discovery import discover_configuration_from_issuer
+from simple_openid_connect.exceptions import UnsupportedByProviderError
 from simple_openid_connect.flows.authorization_code_flow.client import (
     AuthorizationCodeFlowClient,
 )
@@ -84,7 +85,7 @@ class OpenidClient:
         url: str,
         authentication_redirect_uri: str,
         client_id: str,
-        client_secret: str = None,
+        client_secret: Union[str, None] = None,
         scope: str = "openid",
     ) -> Self:
         """
@@ -110,7 +111,7 @@ class OpenidClient:
         config: ProviderMetadata,
         authentication_redirect_uri: str,
         client_id: str,
-        client_secret: str = None,
+        client_secret: Union[str, None] = None,
         scope: str = "openid",
     ) -> Self:
         """
@@ -152,8 +153,16 @@ class OpenidClient:
         Which users information is fetched is determined by the OP directly from the used access token.
 
         :param access_token: An access token which grants access to user information.
-        :return: The OPs response
+
+        :raises UnsupportedByProviderError: If the provider does not support userinfo requests or the userinfo endpoint is not known.
+
+        :returns: The OPs response
         """
+        if self.provider_config.userinfo_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self.provider_config.issuer} does not support userinfo requests or does not advertise its userinfo endpoint"
+            )
+
         return userinfo.fetch_userinfo(
             self.provider_config.userinfo_endpoint, access_token
         )
@@ -174,35 +183,59 @@ class OpenidClient:
         Exchange a refresh token for new tokens
 
         :param refresh_token: The refresh token to use
+
+        :raise UnsupportedByProviderError: If the provider only supports implicit flow and has no token endpoint.
         """
+        if self.provider_config.token_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self.provider_config.issuer} only supports the implicit flow and does not have a token endpoint"
+            )
+
         return token_refresh.exchange_refresh_token(
             token_endpoint=self.provider_config.token_endpoint,
             refresh_token=refresh_token,
             client_authentication=self.client_auth,
         )
 
-    def initiate_logout(self, request: RpInitiatedLogoutRequest = None) -> str:
+    def initiate_logout(
+        self, request: Union[RpInitiatedLogoutRequest, None] = None
+    ) -> str:
         """
         Initiate user logout as a Relying-Party
 
         :param request: Additional data pertaining to the logout
 
+        :raises UnsupportedByProviderError: If the provider does not support Relying-Party-Initiated logout.
+
         :returns: A url to which the user should be redirected
         """
+        if self.provider_config.end_session_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self.provider_config.issuer} does not support RP-initiated logout"
+            )
+
         return rp_initiated_logout.initiate_logout(
             self.provider_config.end_session_endpoint, request
         )
 
     def introspect_token(
-        self, token: str, token_type_hint: str = None
+        self, token: str, token_type_hint: Union[str, None] = None
     ) -> Union[TokenIntrospectionSuccessResponse, TokenIntrospectionErrorResponse]:
         """
         Introspect the given token at the OP.
 
         :param token: The token to introspect.
         :param token_type_hint: Which type of token this is e.g. `refresh_token` or `access_token`.
-        :return: The OPs response
+
+        :raises UnsupportedByProviderError: If the provider does not support token introspection.
+
+        :returns: The OPs response
         """
+        if self.provider_config.introspection_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self.provider_config.issuer} does not support token introspection"
+            )
+
         return token_introspection.introspect_token(
             introspection_endpoint=self.provider_config.introspection_endpoint,
             token=token,

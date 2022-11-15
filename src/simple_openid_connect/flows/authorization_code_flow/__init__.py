@@ -65,20 +65,23 @@ def handle_authentication_result(
 
     :returns: The result of the token exchange
     """
-    current_url = furl(current_url)
-    if "error" in current_url.query.params.keys():
-        auth_response_msg = AuthenticationErrorResponse.parse_url(str(current_url))
-        raise AuthenticationFailedError(auth_response_msg)
+    current_furl = furl(current_url)
+    if "error" in current_furl.query.params.keys():
+        raise AuthenticationFailedError(
+            AuthenticationErrorResponse.parse_url(str(current_furl))
+        )
 
     if redirect_uri == "auto":
-        redirect_uri = str(copy.deepcopy(current_url).remove(fragment=True, query=True))
+        redirect_uri = str(
+            copy.deepcopy(current_furl).remove(fragment=True, query=True)
+        )
         logger.debug(
             f"a redirect_uri value of 'auto' was specified. Reproducing redirect_uri (%s) from current_url (%s)",
             redirect_uri,
-            current_url,
+            current_furl,
         )
 
-    auth_response_msg = AuthenticationSuccessResponse.parse_url(str(current_url))
+    auth_response_msg = AuthenticationSuccessResponse.parse_url(str(current_furl))
     return exchange_code_for_tokens(
         token_endpoint=token_endpoint,
         authentication_response=auth_response_msg,
@@ -124,8 +127,6 @@ def exchange_code_for_tokens(
     )
 
     if response.status_code == 200:
-        response_msg = TokenSuccessResponse.parse_raw(response.content)
-        return response_msg
+        return TokenSuccessResponse.parse_raw(response.content)
     else:
-        response_msg = TokenErrorResponse.parse_raw(response.content)
-        return response_msg
+        return TokenErrorResponse.parse_raw(response.content)

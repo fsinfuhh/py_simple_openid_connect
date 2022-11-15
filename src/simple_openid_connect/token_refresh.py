@@ -46,8 +46,6 @@ def exchange_refresh_token(
     )
 
     if response.status_code == 200:
-        response_msg = TokenSuccessResponse.parse_raw(response.content)
-        return response_msg
+        return TokenSuccessResponse.parse_raw(response.content)
     else:
-        response_msg = TokenErrorResponse.parse_raw(response.content)
-        return response_msg
+        return TokenErrorResponse.parse_raw(response.content)
