@@ -19,9 +19,13 @@ repos:
       - id: isort
         args:
           - "--profile=black"
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v0.991"
+  - repo: local
     hooks:
       - id: mypy
-        exclude: ^tests/.*$
-        additional_dependencies: [ types-requests ]
+        name: mypy
+        description: Check type errors
+        entry: mypy
+        args: [ "--pretty" ]
+        language: python
+        types_or: [python, pyi]
+        pass_filenames: false
