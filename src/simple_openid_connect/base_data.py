@@ -32,7 +32,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         """
         query = Query()
         query.set(self.dict(exclude_defaults=True))
-        return query.encode()
+        return query.encode()  # type: ignore # because furl has no typedefs, but we know what this returns
 
     def encode_url(self, url: str) -> str:
         """
@@ -43,7 +43,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         it should never need to generate responses.
         """
         url_parsed = furl(url, query_params=self.dict(exclude_defaults=True))
-        return url_parsed.tostr()
+        return url_parsed.tostr()  # type: ignore # because furl has no typedefs, but we know what this returns
 
     @classmethod
     def parse_x_www_form_urlencoded(cls: Type[Self], s: str) -> Self:

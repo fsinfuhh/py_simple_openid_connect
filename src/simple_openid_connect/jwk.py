@@ -13,4 +13,4 @@ def fetch_jwks(jwks_uri: str) -> List[JWK]:
     This uri is part of the provider configuration and used to validate responses and tokens sent by the provider.
     """
     bundle = KeyBundle(source=jwks_uri)
-    return bundle.keys()
+    return bundle.keys()  # type: ignore # because cryptojwk has no typedefs, but we know what this returns

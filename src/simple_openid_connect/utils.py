@@ -15,7 +15,7 @@ def is_application_json(content_type: str) -> bool:
     return main_type == "application/json"
 
 
-def validate_that(condition: bool, msg: str):
+def validate_that(condition: bool, msg: str) -> None:
     """
     Validate that the given condition is true, raising a ValidationError with the given message if it is not.
 

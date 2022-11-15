@@ -1,7 +1,7 @@
 """
 Exceptions that are raised at various parts of this library.
 """
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from simple_openid_connect.data import AuthenticationErrorResponse
@@ -12,7 +12,7 @@ class OpenidProtocolError(Exception):
     A generic error that is raised when the OpenID protocol was irrecoverably violated
     """
 
-    def __init__(self, msg: str, *data) -> None:
+    def __init__(self, msg: str, *data: Any) -> None:
         super().__init__(msg, *data)
 
 

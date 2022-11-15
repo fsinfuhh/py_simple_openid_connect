@@ -209,7 +209,7 @@ class IdToken(OpenidBaseModel):
         min_iat: float = 0,
         validate_acr: Union[Callable[[str], None], None] = None,
         min_auth_time: float = 0,
-    ):
+    ) -> None:
         """
         Validate this ID-Token with external data for consistency
 
@@ -510,7 +510,9 @@ class TokenRequest(OpenidBaseModel):
     "REQUIRED. The refresh token issued to the client."
 
     @root_validator(skip_on_failure=True)
-    def _validate_required_based_on_grant_type(cls, values: Mapping[str, Any]):
+    def _validate_required_based_on_grant_type(
+        cls, values: Mapping[str, Any]
+    ) -> Mapping[str, Any]:
         if values["grant_type"] == "authorization_code":
             assert (
                 values["code"] is not None
@@ -667,7 +669,7 @@ class BackChannelLogoutToken(OpenidBaseModel):
         extra = Extra.forbid
 
     class Events(OpenidBaseModel):
-        x: dict = Field(
+        x: Mapping[str, Any] = Field(
             alias="http://schemas.openid.net/event/backchannel-logout",
             default={},
             const=True,
@@ -704,7 +706,7 @@ class BackChannelLogoutToken(OpenidBaseModel):
         validate_iss_has_sessions: Union[Callable[[str], None], None] = None,
         validate_sub_has_sessions: Union[Callable[[str], None], None] = None,
         validate_sid_exists: Union[Callable[[str], None], None] = None,
-    ):
+    ) -> None:
         """
         Validate this ID-Token with external data for consistency
 
@@ -723,6 +725,8 @@ class BackChannelLogoutToken(OpenidBaseModel):
             If this parameter is not given or the token contains no `sub` claim, validation is skipped.
         :param validate_sid_exists:  A callable which verifies that the logout tokens :data:`sid <BackChannelLogoutToken.sid>` (session id) is a currently open session on this app.
             If this parameter is not given or the token contains no `sid` claim, validation is skipped.
+
+        :raises ValidationError: if the validation fails
         """
         # this method implements https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
 

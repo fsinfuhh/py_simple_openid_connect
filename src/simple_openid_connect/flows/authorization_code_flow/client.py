@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Union
 
-from simple_openid_connect.exceptions import UnsupportedByProviderError
-from simple_openid_connect.flows import authorization_code_flow as impl
-from simple_openid_connect.flows.authorization_code_flow import (
+from simple_openid_connect.data import (
     AuthenticationSuccessResponse,
     TokenErrorResponse,
     TokenSuccessResponse,
 )
+from simple_openid_connect.exceptions import UnsupportedByProviderError
+from simple_openid_connect.flows import authorization_code_flow as impl
 
 if TYPE_CHECKING:
     from simple_openid_connect.client import OpenidClient

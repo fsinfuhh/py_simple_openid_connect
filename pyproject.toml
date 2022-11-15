@@ -32,6 +32,7 @@ exclude = [
 [tool.mypy]
 mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
 files = ["src/simple_openid_connect"]
+strict = true
 
 [[tool.mypy.overrides]]
 module = ["cryptojwt", "furl"]
