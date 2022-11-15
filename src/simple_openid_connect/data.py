@@ -3,6 +3,7 @@ Datatypes and models for various OpenID messages
 """
 import enum
 import logging
+import time
 from datetime import datetime
 from typing import Any, Callable, List, Literal, Mapping, Optional, Union
 
@@ -268,9 +269,7 @@ class IdToken(OpenidBaseModel):
             )
 
         # 9. validate expiry
-        validate_that(
-            self.exp > datetime.utcnow().timestamp(), "The ID-Token is expired"
-        )
+        validate_that(self.exp > time.time(), "The ID-Token is expired")
 
         # 10. validate iat
         validate_that(
