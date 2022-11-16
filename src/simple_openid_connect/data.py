@@ -547,6 +547,9 @@ class TokenSuccessResponse(OpenidBaseModel):
     refresh_token: Optional[str]
     "OPTIONAL. The refresh token, which can be used to obtain new access tokens using the same authorization grant as described in `Section 6 of RFC6749 <https://www.rfc-editor.org/rfc/rfc6749#section-6>`_."
 
+    refresh_expires_in: Optional[int]
+    "OPTIONAL. The lifetime in seconds of the refresh token."
+
     scope: Optional[str]
     "OPTIONAL, if identical to the scope requested by the client; otherwise, REQUIRED. The scope of the access token."
 
