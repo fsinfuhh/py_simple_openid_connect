@@ -2,9 +2,10 @@
 A more contiguous client implementation of the Openid-Connect protocol that offers simpler APIs at the cost of losing some flexibility.
 """
 
-from typing import List, Literal, Optional, Type, TypeVar, Union
+from typing import Any, Dict, List, Literal, Mapping, Optional, Type, TypeVar, Union
 
 from cryptojwt import JWK
+from cryptojwt.jwk.jwk import key_from_jwk_dict
 
 from simple_openid_connect import (
     jwk,
@@ -242,3 +243,16 @@ class OpenidClient:
             auth=self.client_auth,
             token_type_hint=token_type_hint,
         )
+
+    def __getstate__(self) -> Mapping[str, Any]:
+        # this implements support for pickling this class
+        # it is basically the default pickle behavior but explicitly serializes keys because they are FFI backed and not normally picklable
+        result = self.__dict__
+        result["provider_keys"] = [k.serialize() for k in self.provider_keys]
+        return result
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        # this implements support for unpickling this class
+        # it is basically the default pickle behavior but explicitly deserializes keys
+        state["provider_keys"] = [key_from_jwk_dict(k) for k in state["provider_keys"]]
+        self.__dict__ = state

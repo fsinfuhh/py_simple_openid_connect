@@ -9,7 +9,6 @@ class InitLoginView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         client = OpenidAppConfig.get_instance().get_client(request)
         redirect = client.authorization_code_flow.start_authentication()
-        print(redirect)
         return HttpResponseRedirect(redirect)
 
 

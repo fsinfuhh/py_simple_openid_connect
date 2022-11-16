@@ -1,14 +1,18 @@
+import logging
 from types import EllipsisType
-from typing import Optional, TypeVar, Union
+from typing import Optional, Union
 
 from django.apps import AppConfig, apps
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.shortcuts import resolve_url
 from pydantic import BaseModel
 
 from simple_openid_connect.client import OpenidClient
+
+logger = logging.getLogger(__name__)
 
 
 class SettingsModel(BaseModel):
@@ -64,6 +68,7 @@ class OpenidAppConfig(AppConfig):
 
         :raises ImproperlyConfigured: when the *own_base_uri* is given and the `OPENID_BASE_URI` is also None
         """
+        # determine base_uri of this app
         if own_base_uri is ...:
             setting = self.safe_settings.OPENID_BASE_URI
             if setting is not None:
@@ -75,11 +80,17 @@ class OpenidAppConfig(AppConfig):
         elif isinstance(own_base_uri, HttpRequest):
             own_base_uri = f"{own_base_uri.scheme}://{own_base_uri.get_host()}"
 
-        redirect_uri = resolve_url(self.safe_settings.OPENID_REDIRECT_URI)
-        return OpenidClient.from_issuer_url(
-            url=self.safe_settings.OPENID_ISSUER,
-            authentication_redirect_uri=f"{own_base_uri}{redirect_uri}",
-            client_id=self.safe_settings.OPENID_CLIENT_ID,
-            client_secret=self.safe_settings.OPENID_CLIENT_SECRET,
-            scope=self.safe_settings.OPENID_SCOPE,
-        )
+        # use a cached client instance if one exists or create a new one if not
+        client = cache.get("openid_client")  # type: OpenidClient
+        if client is None:
+            redirect_uri = resolve_url(self.safe_settings.OPENID_REDIRECT_URI)
+            client = OpenidClient.from_issuer_url(
+                url=self.safe_settings.OPENID_ISSUER,
+                authentication_redirect_uri=f"{own_base_uri}{redirect_uri}",
+                client_id=self.safe_settings.OPENID_CLIENT_ID,
+                client_secret=self.safe_settings.OPENID_CLIENT_SECRET,
+                scope=self.safe_settings.OPENID_SCOPE,
+            )
+            cache.set("openid_client", client)
+
+        return client
