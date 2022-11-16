@@ -2,19 +2,20 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.views import View
 
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
-from simple_openid_connect_django.apps import BaseAppConfig
+from simple_openid_connect_django.apps import OpenidAppConfig
 
 
 class InitLoginView(View):
-    def get(self, _request: HttpRequest) -> HttpResponse:
-        client = BaseAppConfig.get_instance().openid_client
+    def get(self, request: HttpRequest) -> HttpResponse:
+        client = OpenidAppConfig.get_instance().get_client(request)
         redirect = client.authorization_code_flow.start_authentication()
+        print(redirect)
         return HttpResponseRedirect(redirect)
 
 
 class LoginCallbackView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
-        client = BaseAppConfig.get_instance().openid_client
+        client = OpenidAppConfig.get_instance().get_client(request)
 
         token_response = client.authorization_code_flow.handle_authentication_result(
             request.get_raw_uri()
@@ -36,7 +37,7 @@ class LoginCallbackView(View):
 
 class LogoutView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
-        client = BaseAppConfig.get_instance().openid_client
+        client = OpenidAppConfig.get_instance().get_client(request)
         return HttpResponseRedirect(client.initiate_logout())
 
 

@@ -85,3 +85,6 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+OPENID_ISSUER = "https://identity.mafiasi.de/auth/realms/simple_openid_test"
+OPENID_CLIENT_ID = "test-public"
