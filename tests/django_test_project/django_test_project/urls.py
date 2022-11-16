@@ -19,4 +19,5 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/openid/", include("simple_openid_connect_django.urls")),
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
