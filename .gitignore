@@ -3,6 +3,7 @@ venv
 dist
 docs/_build
 docs/_generated
+**/db.sqlite3
 **/.pytest_cache
 **/.mypy_cache
 **/.hypothesis
