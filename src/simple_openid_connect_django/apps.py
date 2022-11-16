@@ -24,8 +24,12 @@ class SettingsModel(BaseModel):
     OPENID_SCOPE: str = "openid"
     OPENID_REDIRECT_URI: str = "simple_openid_connect_django:login-callback"
     OPENID_BASE_URI: Optional[str]
-    OPENID_CREATE_USER_FUNC = "simple_openid_connect_django.create_user_from_token"
-    OPENID_UPDATE_USER_FUNC = "simple_openid_connect_django.update_user_from_token"
+    OPENID_CREATE_USER_FUNC = (
+        "simple_openid_connect_django.user_mapping.create_user_from_token"
+    )
+    OPENID_UPDATE_USER_FUNC = (
+        "simple_openid_connect_django.user_mapping.update_user_from_token"
+    )
 
     class Config:
         orm_mode = True
