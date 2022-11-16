@@ -1,6 +1,6 @@
 coverage
 django-debug-toolbar
-django-types
+django-stubs[compatible-mypy]
 flit
 hypothesis
 mypy

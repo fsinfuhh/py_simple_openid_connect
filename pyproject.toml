@@ -39,6 +39,7 @@ exclude = [
 ]
 
 [tool.mypy]
+plugins = ["mypy_django_plugin.main"]
 mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
 files = ["src/simple_openid_connect", "src/simple_openid_connect_django"]
 strict = true
@@ -46,6 +47,9 @@ strict = true
 [[tool.mypy.overrides]]
 module = ["cryptojwt.*", "furl"]
 ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "simple_openid_connect_django.settings"
 
 [tool.pytest.ini_options]
 markers = [

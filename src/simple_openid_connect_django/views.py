@@ -1,8 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views import View
 
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
 from simple_openid_connect_django.apps import OpenidAppConfig
+from simple_openid_connect_django.models import OpenidUser
 
 
 class InitLoginView(View):
@@ -25,6 +27,9 @@ class LoginCallbackView(View):
         id_token.validate_extern(
             client.provider_config.issuer, client.client_auth.client_id
         )
+
+        user = OpenidUser.objects.get_or_create_from_id_token(id_token)
+        user.update_session(token_response)
 
         return JsonResponse(
             {

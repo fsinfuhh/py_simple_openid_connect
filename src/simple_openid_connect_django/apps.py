@@ -1,6 +1,6 @@
 import logging
 from types import EllipsisType
-from typing import Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from django.apps import AppConfig, apps
 from django.conf import settings
@@ -8,9 +8,11 @@ from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.shortcuts import resolve_url
+from django.utils.module_loading import import_string
 from pydantic import BaseModel
 
 from simple_openid_connect.client import OpenidClient
+from simple_openid_connect.data import IdToken
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +24,8 @@ class SettingsModel(BaseModel):
     OPENID_SCOPE: str = "openid"
     OPENID_REDIRECT_URI: str = "simple_openid_connect_django:login-callback"
     OPENID_BASE_URI: Optional[str]
+    OPENID_CREATE_USER_FUNC = "simple_openid_connect_django.create_user_from_token"
+    OPENID_UPDATE_USER_FUNC = "simple_openid_connect_django.update_user_from_token"
 
     class Config:
         orm_mode = True
@@ -36,6 +40,8 @@ class OpenidAppConfig(AppConfig):
         # assert that are settings are as required
         try:
             _ = self.safe_settings
+            _ = self.create_user_func
+            _ = self.update_user_func
         except Exception as e:
             raise ImproperlyConfigured(
                 f"django settings are invalid for openid usage: {e}"
@@ -53,6 +59,14 @@ class OpenidAppConfig(AppConfig):
     @property
     def safe_settings(self) -> SettingsModel:
         return SettingsModel.from_orm(settings)
+
+    @property
+    def create_user_func(self) -> Callable[[IdToken], Any]:
+        return import_string(self.safe_settings.OPENID_CREATE_USER_FUNC)  # type: ignore
+
+    @property
+    def update_user_func(self) -> Callable[[Any, IdToken], None]:
+        return import_string(self.safe_settings.OPENID_UPDATE_USER_FUNC)  # type: ignore
 
     def get_client(
         self, own_base_uri: Union[HttpRequest, str, EllipsisType] = ...
