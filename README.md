@@ -44,10 +44,10 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
   - ✔️ Query String serialization and parsing
   - ✔️ ID Token handling (parsing + validation)
   - ✔️ Using refresh tokens
+  - ✔️ Retrieving userinfo
   - ❌ Implicit Flow
   - ❌ Hybrid Flow
   - ❌ Handling third party initiated login
-  - ❌ Retrieving userinfo
   - ❌ Passing requests as JWTs (neither by value nor by reference)
   - ❌ Self-Issued OpenID Provider
   - ❌ `client_secret_post` client authentication
