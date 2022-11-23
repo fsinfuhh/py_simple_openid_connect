@@ -3,7 +3,7 @@ django-debug-toolbar
 django-stubs[compatible-mypy]
 flit
 hypothesis
-mypy
+mypy>=0.991
 pytest
 pytest-explicit
 pyyaml
