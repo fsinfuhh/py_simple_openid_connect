@@ -2,6 +2,7 @@ import re
 from urllib.parse import quote as urlquote
 
 from simple_openid_connect.client import OpenidClient
+from simple_openid_connect.data import UserinfoSuccessResponse
 
 
 def test_full_authorization_code_flow(
@@ -74,3 +75,23 @@ def test_client_type(mock_known_provider_configs):
     # assert
     assert public_client.client_type == "public"
     assert confidential_client.client_type == "confidential"
+
+
+def test_fetch_userinfo(
+    mock_known_provider_configs, dummy_openid_provider, dummy_app_server, dummy_ua
+):
+    # arrange
+    client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid-connect",
+        authentication_redirect_uri=dummy_app_server.callback_url,
+        client_id=dummy_openid_provider.test_client_id,
+        client_secret=dummy_openid_provider.test_client_secret,
+    )
+
+    # act
+    response = client.fetch_userinfo(dummy_openid_provider.cheat_token)
+
+    # assert
+    assert isinstance(response, UserinfoSuccessResponse)
+    assert response.sub == "abc123"
+    assert response.username == "test-user"

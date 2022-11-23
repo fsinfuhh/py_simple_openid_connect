@@ -9,13 +9,16 @@ import responses
 from furl import furl
 from requests import PreparedRequest
 
-from simple_openid_connect.data import ProviderMetadata
-from simple_openid_connect.flows.authorization_code_flow import (
+from simple_openid_connect.data import (
     AuthenticationRequest,
     AuthenticationSuccessResponse,
+    ProviderMetadata,
     TokenErrorResponse,
     TokenRequest,
     TokenSuccessResponse,
+    UserinfoErrorResponse,
+    UserinfoRequest,
+    UserinfoSuccessResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,6 +33,7 @@ class DummyOpenidProvider:
     endpoints = {
         "authorization": f"{iss}/client_auth",
         "token": f"{iss}/token",
+        "userinfo": f"{iss}/userinfo",
     }
 
     test_client_id = "test-client"
@@ -37,13 +41,17 @@ class DummyOpenidProvider:
     test_client_redirect_uri = "https://app.example.com/auth/callback"
 
     cheat_code = "master access code which can always be exchanged for tokens"
+    cheat_token = "master access token which can always be used for everything"
 
     _valid_auth_codes: List[str]
+    _valid_access_tokens: List[str]
 
     def __init__(self, requests_mock: responses.RequestsMock):
         self._valid_auth_codes = []
+        self._valid_access_tokens = []
         self.setup_authorization_endpoint(requests_mock)
         self.setup_token_endpoint(requests_mock)
+        self.setup_userinfo_endpoint(requests_mock)
 
     def setup_authorization_endpoint(self, requests_mock: responses.RequestsMock):
         def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
@@ -69,12 +77,14 @@ class DummyOpenidProvider:
     def setup_token_endpoint(self, requests_mock: responses.RequestsMock):
         def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
             request_msg = TokenRequest.parse_x_www_form_urlencoded(request.body)
+            access_token = rand_str()
+            self._valid_access_tokens.append(access_token)
             if request_msg.code == self.cheat_code:
                 return (
                     200,
                     {},
                     TokenSuccessResponse(
-                        access_token=rand_str(),
+                        access_token=access_token,
                         token_type="Bearer",
                         id_token=rand_str(),
                     ).json(),
@@ -85,7 +95,7 @@ class DummyOpenidProvider:
                     200,
                     {},
                     TokenSuccessResponse(
-                        access_token=rand_str(),
+                        access_token=access_token,
                         token_type="Bearer",
                         id_token=rand_str(),
                     ).json(),
@@ -103,6 +113,35 @@ class DummyOpenidProvider:
         requests_mock.add_callback(
             method=responses.POST,
             url=self.endpoints["token"],
+            callback=callback,
+            content_type="application/json",
+        )
+
+    def setup_userinfo_endpoint(self, requests_mock: responses.RequestsMock):
+        def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
+            _request_msg = UserinfoRequest.parse_x_www_form_urlencoded(request.body)
+            if request.headers["Authorization"] == f"Bearer {self.cheat_token}" or any(
+                request.headers["Authorization"] == f"Bearer {token}"
+                for token in self._valid_access_tokens
+            ):
+                return (
+                    200,
+                    {},
+                    UserinfoSuccessResponse(sub="abc123", username="test-user").json(),
+                )
+            else:
+                return (
+                    400,
+                    {},
+                    UserinfoErrorResponse(
+                        error="invalid_token",
+                        error_description="the access token was not valid",
+                    ).json(),
+                )
+
+        requests_mock.add_callback(
+            method=responses.GET,
+            url=self.endpoints["userinfo"],
             callback=callback,
             content_type="application/json",
         )
@@ -186,6 +225,7 @@ def mock_known_provider_configs(mocked_responses: responses.RequestsMock):
             authorization_endpoint="https://provider.example.com/openid-connect/client_auth",
             token_endpoint="https://provider.example.com/openid-connect/token",
             jwks_uri="https://provider.example.com/openid-connect/jwks",
+            userinfo_endpoint="https://provider.example.com/openid-connect/userinfo",
             subject_types_supported=["public"],
             id_token_signing_alg_values_supported=["RS256"],
         ).dict(exclude_defaults=True),
