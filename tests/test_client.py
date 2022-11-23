@@ -1,3 +1,4 @@
+import pickle
 import re
 
 from simple_openid_connect.client import OpenidClient
@@ -142,3 +143,17 @@ def test_token_introspection(mock_known_provider_configs, dummy_openid_provider)
     # assert
     assert isinstance(response, TokenIntrospectionSuccessResponse)
     assert response.active
+
+
+def test_pickling(mock_known_provider_configs, dummy_openid_provider):
+    # arrange
+    client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid-connect",
+        authentication_redirect_uri="",
+        client_id=dummy_openid_provider.test_client_id,
+        client_secret=dummy_openid_provider.test_client_secret,
+    )
+
+    # act (assert not throwing)
+    enc = pickle.dumps(client)
+    _ = pickle.loads(enc)
