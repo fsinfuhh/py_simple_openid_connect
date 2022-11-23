@@ -1,5 +1,8 @@
+from http import HTTPStatus
+
 from django.contrib.auth import login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.template.response import TemplateResponse
 from django.views import View
 
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
@@ -22,7 +25,15 @@ class LoginCallbackView(View):
         token_response = client.authorization_code_flow.handle_authentication_result(
             request.get_raw_uri()
         )
-        assert isinstance(token_response, TokenSuccessResponse)
+        if not isinstance(token_response, TokenSuccessResponse):
+            return TemplateResponse(
+                request,
+                "simple_openid_connect_django/login_failed.html",
+                {
+                    "token_response": token_response,
+                },
+                status=HTTPStatus.UNAUTHORIZED,
+            )
 
         id_token = IdToken.parse_jwt(token_response.id_token, client.provider_keys)
         id_token.validate_extern(
@@ -33,11 +44,14 @@ class LoginCallbackView(View):
         user.update_session(token_response)
         login(request, user.user)
 
-        return JsonResponse(
+        return TemplateResponse(
+            request,
+            "simple_openid_connect_django/login_success.html",
             {
-                "token_response": token_response.dict(),
-                "id_token": id_token.dict(),
-            }
+                "token_response": token_response,
+                "id_token": id_token,
+            },
+            status=HTTPStatus.OK,
         )
 
 

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenID Login Failed</title>
+</head>
+<body>
+<h1>Login with OpenID failed</h1>
+<b>Error</b>: <i>{{ token_response.error }}</i> - <i>{{ token_response.error_description }}</i>
+{% if token_response.error_uri %}
+    <br>
+    <a href="{{ token_response.error_uri }}">Error URI</a>
+{% endif %}
+</body>
+</html>
