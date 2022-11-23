@@ -42,7 +42,8 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         responses can be returned via a fragment and since this library is only intended for usage as a relying party,
         it should never need to generate responses.
         """
-        url_parsed = furl(url, query_params=self.dict(exclude_defaults=True))
+        url_parsed = furl(url)
+        url_parsed.args.update(self.dict(exclude_defaults=True))
         return url_parsed.tostr()  # type: ignore # because furl has no typedefs, but we know what this returns
 
     @classmethod
