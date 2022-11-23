@@ -16,8 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from . import views
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/openid/", include("simple_openid_connect_django.urls")),
+    path("", views.debug_view),
     path("__debug__/", include("debug_toolbar.urls")),
 ]

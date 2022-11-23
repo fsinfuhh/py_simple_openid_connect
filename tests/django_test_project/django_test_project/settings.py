@@ -92,3 +92,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 OPENID_ISSUER = "https://identity.mafiasi.de/auth/realms/simple_openid_test"
 OPENID_CLIENT_ID = "test-public"
+
+LOGIN_URL = "simple_openid_connect_django:login"
