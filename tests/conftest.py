@@ -1,4 +1,3 @@
-import json
 import logging
 import random
 import string
@@ -16,6 +15,9 @@ from simple_openid_connect.data import (
     ProviderMetadata,
     RpInitiatedLogoutRequest,
     TokenErrorResponse,
+    TokenIntrospectionErrorResponse,
+    TokenIntrospectionRequest,
+    TokenIntrospectionSuccessResponse,
     TokenRequest,
     TokenSuccessResponse,
     UserinfoErrorResponse,
@@ -37,6 +39,7 @@ class DummyOpenidProvider:
         "token": f"{iss}/token",
         "userinfo": f"{iss}/userinfo",
         "end-session": f"{iss}/end-session",
+        "token-introspection": f"{iss}/token-introspection",
     }
 
     test_client_id = "test-client"
@@ -56,6 +59,7 @@ class DummyOpenidProvider:
         self.setup_token_endpoint(requests_mock)
         self.setup_userinfo_endpoint(requests_mock)
         self.setup_end_session_endpoint(requests_mock)
+        self.setup_token_introspection_endpoint(requests_mock)
 
     def setup_authorization_endpoint(self, requests_mock: responses.RequestsMock):
         def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
@@ -166,6 +170,30 @@ class DummyOpenidProvider:
             callback=callback,
         )
 
+    def setup_token_introspection_endpoint(self, requests_mock: responses.RequestsMock):
+        def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
+            _request_msg = TokenIntrospectionRequest.parse_x_www_form_urlencoded(
+                request.body
+            )
+            return (
+                200,
+                {},
+                TokenIntrospectionSuccessResponse(
+                    active=True,
+                    scope="openid",
+                    client_id=self.test_client_id,
+                    username="test-user",
+                    sub="abc123",
+                ).json(),
+            )
+
+        requests_mock.add_callback(
+            method=responses.POST,
+            url=self.endpoints["token-introspection"],
+            callback=callback,
+            content_type="applictaion/json",
+        )
+
 
 @pytest.fixture
 def dummy_openid_provider(
@@ -247,6 +275,7 @@ def mock_known_provider_configs(mocked_responses: responses.RequestsMock):
             jwks_uri="https://provider.example.com/openid-connect/jwks",
             userinfo_endpoint="https://provider.example.com/openid-connect/userinfo",
             end_session_endpoint="https://provider.example.com/openid-connect/end-session",
+            introspection_endpoint="https://provider.example.com/openid-connect/token-introspection",
             subject_types_supported=["public"],
             id_token_signing_alg_values_supported=["RS256"],
         ).dict(exclude_defaults=True),

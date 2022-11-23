@@ -1,8 +1,11 @@
 import re
-from urllib.parse import quote as urlquote
 
 from simple_openid_connect.client import OpenidClient
-from simple_openid_connect.data import RpInitiatedLogoutRequest, UserinfoSuccessResponse
+from simple_openid_connect.data import (
+    RpInitiatedLogoutRequest,
+    TokenIntrospectionSuccessResponse,
+    UserinfoSuccessResponse,
+)
 
 
 def test_full_authorization_code_flow(
@@ -122,3 +125,20 @@ def test_rp_initiated_logout(
         == "https://provider.example.com/openid-connect/end-session?post_logout_redirect_uri=https%3A%2F%2Fapp.example.com%2Fauth%2Fcallback"
     )
     assert nav_response.url == dummy_app_server.callback_url
+
+
+def test_token_introspection(mock_known_provider_configs, dummy_openid_provider):
+    # arrange
+    client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid-connect",
+        authentication_redirect_uri="",
+        client_id=dummy_openid_provider.test_client_id,
+        client_secret=dummy_openid_provider.test_client_secret,
+    )
+
+    # act
+    response = client.introspect_token(dummy_openid_provider.cheat_token)
+
+    # assert
+    assert isinstance(response, TokenIntrospectionSuccessResponse)
+    assert response.active
