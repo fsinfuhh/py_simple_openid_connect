@@ -1,7 +1,10 @@
 from http import HTTPStatus
+from typing import Mapping
 
+from django.conf import settings
 from django.contrib.auth import login, logout
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import resolve_url
 from django.template.response import TemplateResponse
 from django.views import View
 
@@ -10,11 +13,21 @@ from simple_openid_connect_django.apps import OpenidAppConfig
 from simple_openid_connect_django.models import OpenidUser
 
 
+def get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
+    if "next" in request.GET.keys():
+        return {
+            "next": request.GET["next"],
+        }
+    return {}
+
+
 class InitLoginView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
-        redirect = client.authorization_code_flow.start_authentication()
+        redirect = client.authorization_code_flow.start_authentication(
+            additional_redirect_args=get_redirect_args(request),
+        )
         return HttpResponseRedirect(redirect)
 
 
@@ -23,7 +36,8 @@ class LoginCallbackView(View):
         client = OpenidAppConfig.get_instance().get_client(request)
 
         token_response = client.authorization_code_flow.handle_authentication_result(
-            request.get_raw_uri()
+            current_url=request.get_raw_uri(),
+            additional_redirect_args=get_redirect_args(request),
         )
         if not isinstance(token_response, TokenSuccessResponse):
             return TemplateResponse(
@@ -44,15 +58,13 @@ class LoginCallbackView(View):
         user.update_session(token_response)
         login(request, user.user)
 
-        return TemplateResponse(
-            request,
-            "simple_openid_connect_django/login_success.html",
-            {
-                "token_response": token_response,
-                "id_token": id_token,
-            },
-            status=HTTPStatus.OK,
-        )
+        # redirect to the next get parameter if present, otherwise to the configured default
+        if "next" in request.GET.keys():
+            return HttpResponseRedirect(redirect_to=request.GET["next"])
+        else:
+            return HttpResponseRedirect(
+                redirect_to=resolve_url(settings.LOGIN_REDIRECT_URL)
+            )
 
 
 class LogoutView(View):
