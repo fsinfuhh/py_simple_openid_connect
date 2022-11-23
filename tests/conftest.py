@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import string
@@ -13,6 +14,7 @@ from simple_openid_connect.data import (
     AuthenticationRequest,
     AuthenticationSuccessResponse,
     ProviderMetadata,
+    RpInitiatedLogoutRequest,
     TokenErrorResponse,
     TokenRequest,
     TokenSuccessResponse,
@@ -34,6 +36,7 @@ class DummyOpenidProvider:
         "authorization": f"{iss}/client_auth",
         "token": f"{iss}/token",
         "userinfo": f"{iss}/userinfo",
+        "end-session": f"{iss}/end-session",
     }
 
     test_client_id = "test-client"
@@ -52,6 +55,7 @@ class DummyOpenidProvider:
         self.setup_authorization_endpoint(requests_mock)
         self.setup_token_endpoint(requests_mock)
         self.setup_userinfo_endpoint(requests_mock)
+        self.setup_end_session_endpoint(requests_mock)
 
     def setup_authorization_endpoint(self, requests_mock: responses.RequestsMock):
         def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
@@ -146,6 +150,22 @@ class DummyOpenidProvider:
             content_type="application/json",
         )
 
+    def setup_end_session_endpoint(self, requests_mock: responses.RequestsMock):
+        def callback(request: PreparedRequest) -> Tuple[int, Dict[str, str], str]:
+            request_msg = RpInitiatedLogoutRequest.parse_x_www_form_urlencoded(
+                request.url.split("?")[1]
+            )
+            if request_msg.post_logout_redirect_uri is not None:
+                return (302, {"Location": request_msg.post_logout_redirect_uri}, "")
+
+            return 200, {}, "Logged out"
+
+        requests_mock.add_callback(
+            method=responses.GET,
+            url=self.endpoints["end-session"],
+            callback=callback,
+        )
+
 
 @pytest.fixture
 def dummy_openid_provider(
@@ -226,6 +246,7 @@ def mock_known_provider_configs(mocked_responses: responses.RequestsMock):
             token_endpoint="https://provider.example.com/openid-connect/token",
             jwks_uri="https://provider.example.com/openid-connect/jwks",
             userinfo_endpoint="https://provider.example.com/openid-connect/userinfo",
+            end_session_endpoint="https://provider.example.com/openid-connect/end-session",
             subject_types_supported=["public"],
             id_token_signing_alg_values_supported=["RS256"],
         ).dict(exclude_defaults=True),

@@ -2,7 +2,7 @@ import re
 from urllib.parse import quote as urlquote
 
 from simple_openid_connect.client import OpenidClient
-from simple_openid_connect.data import UserinfoSuccessResponse
+from simple_openid_connect.data import RpInitiatedLogoutRequest, UserinfoSuccessResponse
 
 
 def test_full_authorization_code_flow(
@@ -95,3 +95,30 @@ def test_fetch_userinfo(
     assert isinstance(response, UserinfoSuccessResponse)
     assert response.sub == "abc123"
     assert response.username == "test-user"
+
+
+def test_rp_initiated_logout(
+    mock_known_provider_configs, dummy_openid_provider, dummy_app_server, dummy_ua
+):
+    # arrange
+    client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid-connect",
+        authentication_redirect_uri=dummy_app_server.callback_url,
+        client_id=dummy_openid_provider.test_client_id,
+        client_secret=dummy_openid_provider.test_client_secret,
+    )
+
+    # act
+    plain_url = client.initiate_logout()
+    advanced_url = client.initiate_logout(
+        RpInitiatedLogoutRequest(post_logout_redirect_uri=dummy_app_server.callback_url)
+    )
+    nav_response = dummy_ua.naviagte_to(advanced_url)
+
+    # assert
+    assert plain_url == "https://provider.example.com/openid-connect/end-session"
+    assert (
+        advanced_url
+        == "https://provider.example.com/openid-connect/end-session?post_logout_redirect_uri=https%3A%2F%2Fapp.example.com%2Fauth%2Fcallback"
+    )
+    assert nav_response.url == dummy_app_server.callback_url
