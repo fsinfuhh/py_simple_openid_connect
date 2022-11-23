@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import login, logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views import View
 
@@ -9,6 +9,7 @@ from simple_openid_connect_django.models import OpenidUser
 
 class InitLoginView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
+        logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
         redirect = client.authorization_code_flow.start_authentication()
         return HttpResponseRedirect(redirect)
@@ -30,6 +31,7 @@ class LoginCallbackView(View):
 
         user = OpenidUser.objects.get_or_create_from_id_token(id_token)
         user.update_session(token_response)
+        login(request, user.user)
 
         return JsonResponse(
             {
