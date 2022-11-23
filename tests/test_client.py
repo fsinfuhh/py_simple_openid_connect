@@ -55,3 +55,22 @@ def test_additional_redirect_args(
         call.request.body and re.search(r"redirect_uri=.*foo%3Dbar", call.request.body)
         for call in mocked_responses.calls
     )
+
+
+def test_client_type(mock_known_provider_configs):
+    # arrange
+    public_client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid-connect",
+        authentication_redirect_uri="",
+        client_id="test",
+    )
+    confidential_client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid-connect",
+        authentication_redirect_uri="",
+        client_id="test",
+        client_secret="test",
+    )
+
+    # assert
+    assert public_client.client_type == "public"
+    assert confidential_client.client_type == "confidential"
