@@ -1,0 +1,11 @@
+{
+  "name": "dummy_openid_provider",
+  "private": true,
+  "scripts": {
+    "start": "node main.mjs"
+  },
+  "dependencies": {
+    "oidc-provider": "^7.14.1",
+    "js-yaml": "^4.1.0"
+  }
+}

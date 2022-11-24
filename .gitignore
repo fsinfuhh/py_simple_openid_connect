@@ -8,3 +8,4 @@ docs/_generated
 **/.mypy_cache
 **/.hypothesis
 **/__pycache__
+**/node_modules

@@ -1,0 +1,5 @@
+port: 3000
+client_id: test-client
+client_secret: foobar123
+redirect_uris:
+  - http://localhost:8000/auth/openid/login-callback/?next=%2F

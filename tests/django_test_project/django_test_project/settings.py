@@ -90,7 +90,9 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-OPENID_ISSUER = "https://identity.mafiasi.de/auth/realms/simple_openid_test"
-OPENID_CLIENT_ID = "test-public"
+OPENID_ISSUER = "http://localhost:3000"
+OPENID_CLIENT_ID = "test-client"
+OPENID_CLIENT_SECRET = "foobar123"
+OPENID_SCOPE = "openid profile email"
 
 LOGIN_URL = "simple_openid_connect_django:login"
