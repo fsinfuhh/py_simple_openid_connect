@@ -52,13 +52,16 @@ ignore_missing_imports = true
 django_settings_module = "simple_openid_connect_django.settings"
 
 [tool.pytest.ini_options]
+pythonpath = "src tests/django_test_project"
 markers = [
     # run these tests by passing --run-interactive to pytest
     "interactive: Tests that require user interaction and are only run explicitly",
 ]
-testpaths = "tests"
+testpaths = "tests tests/django_test_project/django_test_project/tests"
 explicit-only = [
     "interactive",
 ]
 log_cli = true
 log_cli_level = "info"
+django_find_project = false
+DJANGO_SETTINGS_MODULE = "django_test_project.settings"

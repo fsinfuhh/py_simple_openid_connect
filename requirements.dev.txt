@@ -5,6 +5,7 @@ flit
 hypothesis
 mypy>=0.991
 pytest
+pytest-django
 pytest-explicit
 pyyaml
 responses

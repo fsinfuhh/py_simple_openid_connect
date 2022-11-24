@@ -1,8 +1,8 @@
-import { Provider } from "oidc-provider"
+import {Provider} from "oidc-provider"
 import yaml from "js-yaml"
 import fs from "fs"
 import path from "path"
-import { fileURLToPath } from "url"
+import {fileURLToPath} from "url"
 
 const baseDir = path.dirname(fileURLToPath(import.meta.url))
 const yamlConfig = yaml.load(fs.readFileSync(path.join(baseDir, "config.yml")))
@@ -20,16 +20,18 @@ const configuration = {
     pkce: {
         required: () => false,
     },
-    findAccount: async (ctx, id) => {
+    findAccount: async (ctx, username) => {
         return {
-            accountId: id,
-            async claims(use, scope) { return {
-                sub: id,
-                email: "test@example.com",
-                preferred_username: "test",
-            } }
+            accountId: username,
+            async claims(use, scope) {
+                return {
+                    sub: username,
+                    email: `test-${username}@example.com`,
+                    preferred_username: `${username}`,
+                }
+            }
         }
-    }
+    },
 }
 
 const oidc = new Provider(`http://localhost:${yamlConfig.port}`, configuration)

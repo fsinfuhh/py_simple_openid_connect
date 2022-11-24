@@ -5,7 +5,7 @@
     "start": "node main.mjs"
   },
   "dependencies": {
-    "oidc-provider": "^7.14.1",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "oidc-provider": "^7.14.1"
   }
 }
