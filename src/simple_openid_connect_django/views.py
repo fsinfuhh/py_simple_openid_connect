@@ -36,7 +36,7 @@ class LoginCallbackView(View):
         client = OpenidAppConfig.get_instance().get_client(request)
 
         token_response = client.authorization_code_flow.handle_authentication_result(
-            current_url=request.get_raw_uri(),
+            current_url=request.get_full_path(),
             additional_redirect_args=get_redirect_args(request),
         )
         if not isinstance(token_response, TokenSuccessResponse):
