@@ -87,16 +87,15 @@ class OpenidAppConfig(AppConfig):
         :raises ImproperlyConfigured: when the *own_base_uri* is given and the `OPENID_BASE_URI` is also None
         """
         # determine base_uri of this app
-        if own_base_uri is ...:
-            setting = self.safe_settings.OPENID_BASE_URI
-            if setting is not None:
-                own_base_uri = setting
-            else:
+        if self.safe_settings.OPENID_BASE_URI is not None:
+            own_base_uri = self.safe_settings.OPENID_BASE_URI
+        else:
+            if own_base_uri is ...:
                 raise ImproperlyConfigured(
                     "either a value for own_base_uri must be given or the django setting OPENID_BASE_URI must be filled"
                 )
-        elif isinstance(own_base_uri, HttpRequest):
-            own_base_uri = f"{own_base_uri.scheme}://{own_base_uri.get_host()}"
+            elif isinstance(own_base_uri, HttpRequest):
+                own_base_uri = f"{own_base_uri.scheme}://{own_base_uri.get_host()}"
 
         # use a cached client instance if one exists or create a new one if not
         client = cache.get("openid_client")  # type: OpenidClient
