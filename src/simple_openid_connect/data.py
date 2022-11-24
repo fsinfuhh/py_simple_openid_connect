@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from typing import Any, Callable, List, Literal, Mapping, Optional, Union
 
-from pydantic import Extra, Field, HttpUrl, root_validator
+from pydantic import AnyHttpUrl, Extra, Field, root_validator
 
 from simple_openid_connect.base_data import OpenidBaseModel
 from simple_openid_connect.utils import validate_that
@@ -28,22 +28,22 @@ class ProviderMetadata(OpenidBaseModel):
         extra = Extra.allow
         allow_mutation = False
 
-    issuer: HttpUrl
+    issuer: AnyHttpUrl
     "REQUIRED. URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier This MUST be identical to the iss Claim value in ID Tokens issued from this Issuer."
 
-    authorization_endpoint: HttpUrl
+    authorization_endpoint: AnyHttpUrl
     "REQUIRED. URL of the OP's OAuth 2.0 Authorization Endpoint."
 
-    token_endpoint: Optional[HttpUrl]
+    token_endpoint: Optional[AnyHttpUrl]
     "URL of the OP's OAuth 2.0 Token Endpoint. This is REQUIRED unless only the Implicit Flow is used."
 
-    userinfo_endpoint: Optional[HttpUrl]
+    userinfo_endpoint: Optional[AnyHttpUrl]
     "RECOMMENDED. URL of the OP's UserInfo Endpoint. This URL MUST use the https scheme and MAY contain port, path, and query parameter components."
 
-    jwks_uri: HttpUrl
+    jwks_uri: AnyHttpUrl
     "REQUIRED. URL of the OP's JSON Web Key Set document This contains the signing key(s) the RP uses to validate signatures from the OP The JWK Set MAY also contain the Server's encryption key(s), which are used by RPs to encrypt requests to the Server When both signing and encryption keys are made available, a use (Key Use) parameter value is REQUIRED for all keys in the referenced JWK Set to indicate each key's intended usage Although some algorithms allow the same key to be used for both signatures and encryption, doing so is NOT RECOMMENDED, as it is less secure The JWK x5c parameter MAY be used to provide X.509 representations of keys provided When used, the bare key values MUST still be present and MUST match those in the certificate. "
 
-    registration_endpoint: Optional[HttpUrl]
+    registration_endpoint: Optional[AnyHttpUrl]
     "RECOMMENDED. URL of the OP's Dynamic Client Registration Endpoint"
 
     scopes_supported: Optional[List[str]]
@@ -108,7 +108,7 @@ class ProviderMetadata(OpenidBaseModel):
     claims_supported: Optional[List[str]]
     "RECOMMENDED. JSON array containing a list of the Claim Names of the Claims that the OpenID Provider MAY be able to supply values for Note that for privacy or other reasons, this might not be an exhaustive list."
 
-    service_documentation: Optional[HttpUrl]
+    service_documentation: Optional[AnyHttpUrl]
     "OPTIONAL. URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider In particular, if the OpenID Provider does not support Dynamic Client Registration, then information on how to register Clients needs to be provided in this documentation."
 
     claims_locales_supported: Optional[List[str]]
@@ -129,13 +129,13 @@ class ProviderMetadata(OpenidBaseModel):
     require_request_uri_registration: Optional[bool] = False
     "OPTIONAL. Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter Pre-registration is REQUIRED when the value is true. If omitted, the default value is false."
 
-    op_policy_uri: Optional[HttpUrl]
+    op_policy_uri: Optional[AnyHttpUrl]
     "OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP The registration process SHOULD display this URL to the person registering the Client if it is given."
 
-    op_tos_uri: Optional[HttpUrl]
+    op_tos_uri: Optional[AnyHttpUrl]
     "OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service The registration process SHOULD display this URL to the person registering the Client if it is given. "
 
-    end_session_endpoint: Optional[HttpUrl]
+    end_session_endpoint: Optional[AnyHttpUrl]
     "REQUIRED, if supported by OP. URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP."
 
     frontchannel_logout_supported: bool = Field(default=False)
@@ -150,7 +150,7 @@ class ProviderMetadata(OpenidBaseModel):
     backchannel_logout_session_supported: bool = Field(default=False)
     "OPTIONAL. Boolean value specifying whether the OP can pass a sid (session ID) Claim in the Logout Token to identify the RP session with the OP. If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false. "
 
-    introspection_endpoint: Optional[HttpUrl]
+    introspection_endpoint: Optional[AnyHttpUrl]
     "OPTIONAL. URL that the OpenID Provider provides to resource servers to introspect access tokens in accordance to `RFC7662: OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_."
 
 
@@ -168,7 +168,7 @@ class IdToken(OpenidBaseModel):
         extra = Extra.allow
         allow_mutation = False
 
-    iss: HttpUrl
+    iss: AnyHttpUrl
     "REQUIRED. Issuer Identifier for the Issuer of the response The iss value is a case sensitive URL using the https scheme that contains scheme, host, and optionally, port number and path components and no query or fragment components."
 
     sub: str
