@@ -55,8 +55,7 @@ def access_token_required(
                 logger.critical("could not introspect token for validity: %s", result)
                 return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
-            # FIXME: This fails if the token is inactive because then it might have no scope
-            if result.scope is None:
+            if result.active and result.scope is None:
                 logger.critical(
                     "could not determine access because token introspection did not return token scopes"
                 )
