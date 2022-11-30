@@ -18,6 +18,26 @@ logger = logging.getLogger(__name__)
 View_Return = TypeVar("View_Return", bound=HttpResponse)
 
 
+def _invalid_token_response(request: HttpRequest) -> HttpResponse:
+    if "Accept" in request.headers.keys() and is_application_json(
+        request.headers["Accept"]
+    ):
+        return JsonResponse(
+            status=HTTPStatus.UNAUTHORIZED,
+            headers={"WWW-Authenticate": "Bearer"},
+            data={
+                "error": "invalid_token",
+                "error_description": "the used access token is not valid or does not grant enough access",
+            },
+        )
+    else:
+        return HttpResponse(
+            status=HTTPStatus.UNAUTHORIZED,
+            content="the used access token is not valid or does not grant enough access",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 def access_token_required(
     *, required_scopes: str = "openid"
 ) -> Callable[..., Union[HttpResponse, View_Return]]:
@@ -55,34 +75,21 @@ def access_token_required(
                 logger.critical("could not introspect token for validity: %s", result)
                 return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
-            if result.active and result.scope is None:
+            # return an error if the token is expired
+            if not result.active:
+                return _invalid_token_response(request)
+
+            # validate token scope for required access
+            if result.scope is None:
                 logger.critical(
                     "could not determine access because token introspection did not return token scopes"
                 )
                 return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-
-            # directly return a http response if the token is not valid
-            if not result.active or any(
+            elif any(
                 scope not in result.scope.split(" ")
                 for scope in required_scopes.split(" ")
             ):
-                if "Accept" in request.headers.keys() and is_application_json(
-                    request.headers["Accept"]
-                ):
-                    return JsonResponse(
-                        status=HTTPStatus.UNAUTHORIZED,
-                        headers={"WWW-Authenticate": "Bearer"},
-                        data={
-                            "error": "invalid_token",
-                            "error_description": "the used access token is not valid or does not grant enough access",
-                        },
-                    )
-                else:
-                    return HttpResponse(
-                        status=HTTPStatus.UNAUTHORIZED,
-                        content="the used access token is not valid or does not grant enough access",
-                        headers={"WWW-Authenticate": "Bearer"},
-                    )
+                return _invalid_token_response(request)
 
             # execute the decorated view function
             return view_func(request, *args, **kwargs)
