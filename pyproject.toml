@@ -31,7 +31,7 @@ build-backend = "flit_core.buildapi"
 [tool.flit.sdist]
 exclude = [
     ".git-crypt",
-    "tests/interactive_tests/secrets.yml",
+    "tests/secrets.yml",
     "src/manage.py",
     "src/simple_openid_connect_django/settings.py",
     "src/simple_openid_connect_django/wsgi.py",
