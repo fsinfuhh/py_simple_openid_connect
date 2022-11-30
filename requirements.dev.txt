@@ -1,13 +1,14 @@
 coverage
 django-debug-toolbar
 django-stubs[compatible-mypy]
+djangorestframework-types
 flit
 hypothesis
 mypy>=0.991
 pytest
 pytest-django
-pytest-explicit
 pytest-env
+pytest-explicit
 pyyaml
 responses
 sphinx

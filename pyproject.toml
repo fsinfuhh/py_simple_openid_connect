@@ -16,7 +16,10 @@ dependencies = [
 
 [project.optional-dependencies]
 django = [
-    "django~=3.0"
+    "django~=3.0",
+]
+djangorestframework = [
+    "djangorestframework~=3.14",
 ]
 
 [project.urls]
