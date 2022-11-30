@@ -1,11 +1,13 @@
 import logging
 import random
 import string
-from typing import Dict, List, Tuple
+from pathlib import Path
+from typing import Dict, List, Mapping, Tuple
 
 import pytest
 import requests
 import responses
+import yaml
 from furl import furl
 from requests import PreparedRequest
 from requests.adapters import HTTPAdapter
@@ -347,3 +349,10 @@ def mock_known_provider_jwks(mocked_responses: responses.RequestsMock):
         content_type="application/json",
         body='{"keys":[{"kid":"JAehgk0O0uzTEht7KGCPVB_urwfsBGe22phHVDZezeo","kty":"RSA","alg":"RS256","use":"sig","n":"n1t4R6mVlBZggtmEM5HohZYg5QjLtjlRVyAMMM93H4WRPpP2Xqj3RrGwP-LZr6lQhk6w8nvPNGnFujWtXb_dBrhZDBh2z0mCNvfjJMp5Ki5sLT9nCbuZ4NkIhfx7qTzQ--GomQ6uKOSuoE12A_r9UopwuCf_1zrx0MIqN_kMeYU2px5yJW-5qbwPL9hcWcfY_Pdz5SFcQ3kDi6GlXA0PN74Ivhs9baVIv60cwB0TytQXGn__GYFZ-K5qAjIymyIy8cPRy9N27Gs29cWF-C56n1pAxwkcPY1SAQgcrspIhntQbZBeGboUx2pnQ_v8LEqVt9ahh52eAbV36YoQqu1DbQ","e":"AQAB","x5c":["MIICszCCAZsCBgGEZpqrijANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDDBJzaW1wbGVfb3BlbmlkX3Rlc3QwHhcNMjIxMTExMTIxMDIzWhcNMzIxMTExMTIxMjAzWjAdMRswGQYDVQQDDBJzaW1wbGVfb3BlbmlkX3Rlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCfW3hHqZWUFmCC2YQzkeiFliDlCMu2OVFXIAwwz3cfhZE+k/ZeqPdGsbA/4tmvqVCGTrDye880acW6Na1dv90GuFkMGHbPSYI29+MkynkqLmwtP2cJu5ng2QiF/HupPND74aiZDq4o5K6gTXYD+v1SinC4J//XOvHQwio3+Qx5hTanHnIlb7mpvA8v2FxZx9j893PlIVxDeQOLoaVcDQ83vgi+Gz1tpUi/rRzAHRPK1Bcaf/8ZgVn4rmoCMjKbIjLxw9HL03bsazb1xYX4LnqfWkDHCRw9jVIBCByuykiGe1BtkF4ZuhTHamdD+/wsSpW31qGHnZ4BtXfpihCq7UNtAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAD3aKq2xiLNPlUcmxwtR1FihkEM+NM7VV+m+74Lf9m/lhNzuM00JZAW67gIz2kO5K4XaU84PCRzt3sELma/xVoBs3iW8AhtldTax17g0NZzpMEExzYi0vyihq8xihbx+8XrVwxQ3JBkb/y3b+otDX3xRxBKSCDuxuigL1bX7UzgJ3oe4wD6m8yN7nrMdqSMbspd8lkceKNPziclXnbKPIUwrnxdWMmB41zYcT3y+zHxqk6EDkf3NU+C3gCoRCQoBKcK4X2dwZdUbv0ginU9kROjNXc2+gP53CYDT4fqOEX/jBuljbYb9ziaQ9/5kJZ9SsazgWNjpf4VvhAsH64i7+dE="],"x5t":"PxLqu4M4uNWaUhbfkvI0tGrkhtQ","x5t#S256":"OWVSYSSNFaLyfxV0Lg6XyVDnB2t6sHwtNbzVB2fNCVc"}]}',
     )
+
+
+@pytest.fixture
+def secrets() -> Mapping[str, str]:
+    path = Path(__file__).parent / "secrets.yml"
+    with open(path, "r", encoding="UTF-8") as f:
+        return yaml.safe_load(f)

@@ -1,18 +1,9 @@
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from pathlib import Path
 from typing import Callable, Mapping, Tuple
 
 import pytest
-import yaml
 from furl import furl
-
-
-@pytest.fixture
-def secrets() -> Mapping[str, str]:
-    path = Path(__file__).parent / "secrets.yml"
-    with open(path, "r", encoding="UTF-8") as f:
-        return yaml.safe_load(f)
 
 
 class RealAppServer(HTTPServer):

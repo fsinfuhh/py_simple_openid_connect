@@ -23,5 +23,10 @@ urlpatterns = [
     path("auth/openid/", include("simple_openid_connect_django.urls")),
     path("default-after-login/", views.default_after_login, name="default-after-login"),
     path("test-protected-view/", views.test_protected_view, name="test-protected-view"),
+    path(
+        "access-token-protected-view/",
+        views.test_access_token_view,
+        name="access-token-protected-view",
+    ),
     path("__debug__/", include("debug_toolbar.urls")),
 ]
