@@ -6,12 +6,12 @@ from simple_openid_connect.exceptions import OpenidProtocolError
 
 def test_mafiasi_identity(mock_known_provider_configs):
     discovery.discover_configuration_from_issuer(
-        "https://identity.mafiasi.de/auth/realms/simple_openid_test/"
+        "https://identity.mafiasi.de/auth/realms/simple_openid_test"
     )
 
 
 def test_google(mock_known_provider_configs):
-    discovery.discover_configuration_from_issuer("https://accounts.google.com/")
+    discovery.discover_configuration_from_issuer("https://accounts.google.com")
 
 
 def test_errors(mock_known_provider_configs):
