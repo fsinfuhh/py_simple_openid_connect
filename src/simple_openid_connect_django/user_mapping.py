@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Mapping, Type, TypeVar
+from typing import Any, Mapping, Type
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser

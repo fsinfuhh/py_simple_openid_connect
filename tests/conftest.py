@@ -8,6 +8,7 @@ import requests
 import responses
 from furl import furl
 from requests import PreparedRequest
+from requests.adapters import HTTPAdapter
 
 from simple_openid_connect.data import (
     AuthenticationRequest,
@@ -15,7 +16,6 @@ from simple_openid_connect.data import (
     ProviderMetadata,
     RpInitiatedLogoutRequest,
     TokenErrorResponse,
-    TokenIntrospectionErrorResponse,
     TokenIntrospectionRequest,
     TokenIntrospectionSuccessResponse,
     TokenRequest,
@@ -202,16 +202,56 @@ def dummy_openid_provider(
     yield DummyOpenidProvider(mocked_responses)
 
 
-class DummyUserAgent:
+class DummyUserAgent(requests.Session):
     def naviagte_to(self, url: str) -> requests.Response:
         """
         Mimic navigating to the given URL
         """
-        return requests.get(url, allow_redirects=True)
+        return self.get(url, allow_redirects=True)
+
+    def login_to_dummy_provider(
+        self, url: str, username: str = "test", password: str = "foobar123"
+    ) -> str:
+        """
+        Login to the dummy provider by posting the given credentials.
+        The credentials are not intended to be real credentials because the provider usually accepts all credentials.
+
+        This is intended to be used against the dummy provider that is defined in this repositories `tests/dummy_provider`.
+
+        :param url: The url which currently presents the login form.
+            The user agent is usually redirected here and asked to log in.
+        :param username: The username to use during login.
+        :param password: The password to use during login.
+
+        :returns: The absolute path on the app server which should now be called to complete the login
+        """
+        # perform login
+        response = self.post(
+            url,
+            data={
+                "prompt": "login",
+                "login": username,
+                "password": password,
+            },
+        )
+
+        # give consent
+        response = self.post(
+            response.url,
+            allow_redirects=False,
+            data={
+                "prompt": "consent",
+            },
+        )
+        while response.headers["Location"].startswith("http://localhost:300"):
+            response = self.get(response.headers["Location"], allow_redirects=False)
+
+        assert response.is_redirect, "Consent response did not return a redirect"
+        return "/" + response.headers["Location"].split("/", 3)[3]
 
 
 @pytest.fixture
-def dummy_ua() -> DummyUserAgent:
+def dummy_ua(monkeypatch) -> DummyUserAgent:
     yield DummyUserAgent()
 
 

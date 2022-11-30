@@ -90,6 +90,9 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+LOGIN_REDIRECT_URL = "default-after-login"
+
+OPENID_BASE_URI = "http://localhost:8000"
 OPENID_ISSUER = "http://localhost:3000"
 OPENID_CLIENT_ID = "test-client"
 OPENID_CLIENT_SECRET = "foobar123"
