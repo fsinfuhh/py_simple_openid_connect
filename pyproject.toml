@@ -52,6 +52,9 @@ ignore_missing_imports = true
 django_settings_module = "simple_openid_connect_django.settings"
 
 [tool.pytest.ini_options]
+env = [
+    "DJANGO_LIVE_TEST_SERVER_ADDRESS=localhost:8001"
+]
 pythonpath = "src tests/django_test_project"
 markers = [
     # run these tests by passing --run-interactive to pytest
