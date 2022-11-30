@@ -14,6 +14,6 @@ def test_protected_view(request: HttpRequest) -> HttpResponse:
     return HttpResponse(content=f"hello user {request.user.openid.sub}")
 
 
-@access_token_required
+@access_token_required()
 def test_access_token_view(_request: HttpRequest) -> HttpResponse:
     return HttpResponse(content="access granted")
