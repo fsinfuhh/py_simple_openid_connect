@@ -39,6 +39,33 @@ class OpenidUserManager(models.Manager["OpenidUser"]):
             )
             return openid_user
 
+    def get_or_create_for_sub(
+        self, sub: str, username: Optional[str] = None
+    ) -> "OpenidUser":
+        """
+        Dynamically get the existing user from the provided subject or create a new user if none already exists.
+
+        This also ensures that a django auth model user exists (with the given username if present).
+        This method is intended to be used when minimal user information is known but *things* should still be linked to
+        a user i.e. when this app serves as a resource server and receives its user information through access token
+        introspection.
+        """
+        user_t = get_user_model()
+        queryset = self.filter(sub=sub)
+        if queryset.exists():
+            # update existing object
+            openid_user = queryset.get()
+            if username is not None and hasattr(user_t, "USERNAME_FIELD"):
+                setattr(openid_user.user, user_t.USERNAME_FIELD, username)
+            return openid_user
+        else:
+            # create new objects
+            if username is not None and hasattr(user_t, "USERNAME_FIELD"):
+                user = user_t.objects.create(user_t.USERNAME_FIELD, username)
+            else:
+                user = user_t.objects.create()
+            return self.create(user=user, sub=sub)
+
 
 class OpenidUser(models.Model):
     """
