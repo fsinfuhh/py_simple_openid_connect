@@ -33,6 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          cache-dependency-path: |
+            tests/dummy_provider/yarn.lock
       - uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.py_version }}"
@@ -40,7 +46,13 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements.dev.txt
-      - run: |
+      - name: install dependencies
+        run: |
+          yarn install --frozen-lockfile --cwd=tests/dummy_provider
           pip install -e .
           pip install -r requirements.dev.txt
-      - run: pytest
+      - name: execute tests
+        run: |
+          yarn run --cwd=tests/dummy_provider start &
+          pytest
+          kill %1
