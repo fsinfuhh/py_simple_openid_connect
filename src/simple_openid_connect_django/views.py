@@ -1,3 +1,7 @@
+"""
+View functions which handle openid authentication and their related callbacks
+"""
+
 from http import HTTPStatus
 from typing import Mapping
 
@@ -13,7 +17,10 @@ from simple_openid_connect_django.apps import OpenidAppConfig
 from simple_openid_connect_django.models import OpenidUser
 
 
-def get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
+def _get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
+    """
+    Calculate arguments which are appended to the redirect_uri
+    """
     if "next" in request.GET.keys():
         return {
             "next": request.GET["next"],
@@ -22,22 +29,38 @@ def get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
 
 
 class InitLoginView(View):
+    """
+    The view which handles initiating a login.
+
+    It essentially redirects the user agent to the Openid provider.
+    """
+
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
         redirect = client.authorization_code_flow.start_authentication(
-            additional_redirect_args=get_redirect_args(request),
+            additional_redirect_args=_get_redirect_args(request),
         )
         return HttpResponseRedirect(redirect)
 
 
 class LoginCallbackView(View):
+    """
+    The view which handles login callbacks.
+
+    It handles an authentication response from the Openid provider that is encoded in the current url by either logging
+    the user in or rendering the error.
+
+    Error rendering can be customized by overwriting the template *simple_openid_connect_django/login_failed.html* which
+    receives the context `token_response` of type :class:`TokenErrorResponse <simple_openid_connect.data.TokenErrorResponse>`.
+    """
+
     def get(self, request: HttpRequest) -> HttpResponse:
         client = OpenidAppConfig.get_instance().get_client(request)
 
         token_response = client.authorization_code_flow.handle_authentication_result(
             current_url=request.get_full_path(),
-            additional_redirect_args=get_redirect_args(request),
+            additional_redirect_args=_get_redirect_args(request),
         )
         if not isinstance(token_response, TokenSuccessResponse):
             return TemplateResponse(
@@ -68,10 +91,10 @@ class LoginCallbackView(View):
 
 
 class LogoutView(View):
+    """
+    The view which handles logging a user out.
+    """
+
     def get(self, request: HttpRequest) -> HttpResponse:
         client = OpenidAppConfig.get_instance().get_client(request)
         return HttpResponseRedirect(client.initiate_logout())
-
-
-class LogoutNotificationView(View):
-    pass

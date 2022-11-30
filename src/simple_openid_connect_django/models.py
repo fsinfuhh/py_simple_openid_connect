@@ -1,7 +1,10 @@
+"""
+simple_openid_connect_django database models
+"""
+
 from datetime import datetime, timedelta
 from typing import Optional
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -11,7 +14,15 @@ from simple_openid_connect_django.apps import OpenidAppConfig
 
 
 class OpenidUserManager(models.Manager["OpenidUser"]):
+    """
+    Custom user manager for the :class:`OpenidUser` model.
+    """
+
     def get_or_create_from_id_token(self, id_token: IdToken) -> "OpenidUser":
+        """
+        Dynamically get the existing user from the provided token or create a new user if none already exists.
+        """
+
         queryset = self.filter(sub=id_token.sub)
         if queryset.exists():
             # update existing objects
@@ -30,6 +41,12 @@ class OpenidUserManager(models.Manager["OpenidUser"]):
 
 
 class OpenidUser(models.Model):
+    """
+    A model which holds user related openid data.
+
+    It is related to the user model instances via the `openid` relation.
+    """
+
     objects = OpenidUserManager()
 
     sub = models.CharField(
@@ -53,6 +70,13 @@ class OpenidUser(models.Model):
         self._id_token = value.json()
 
     def update_session(self, token_response: TokenSuccessResponse) -> None:
+        """
+        Update session information based on the given openid token response.
+
+        If the token contains a session id, that session is updated with newer information and if not, a new session
+        object is created.
+        """
+
         def calc_expiry(t: Optional[int]) -> Optional[datetime]:
             if t is not None:
                 return timezone.now() + timedelta(seconds=t)
@@ -85,6 +109,10 @@ class OpenidUser(models.Model):
 
 
 class OpenidSession(models.Model):
+    """
+    A model to hold openid session information.
+    """
+
     user = models.ForeignKey(
         to=OpenidUser, on_delete=models.CASCADE, db_index=True, related_name="sessions"
     )

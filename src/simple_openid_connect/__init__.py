@@ -1,5 +1,5 @@
 """
-Simple and opinionated OpenID-Connect relying party (client) implementation
+Simple and opinionated OpenID-Connect relying party (client) and resource server implementation.
 
 
 Protocol Overview

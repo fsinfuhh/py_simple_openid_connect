@@ -1,3 +1,7 @@
+"""
+Django AppConfig for this app
+"""
+
 import logging
 from typing import Any, Callable, Optional, Union
 
@@ -17,6 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class SettingsModel(BaseModel):
+    """
+    A pydantic model used to validate django settings
+    """
+
     OPENID_ISSUER: str
     OPENID_CLIENT_ID: str
     OPENID_CLIENT_SECRET: Optional[str]
@@ -38,6 +46,11 @@ class OpenidAppConfig(AppConfig):
     name = "simple_openid_connect_django"
 
     def ready(self) -> None:
+        """
+        Called when django starts.
+
+        Performs settings validation and raises ImproperlyConfigured if necessary.
+        """
         super().ready()
 
         # assert that are settings are as required
@@ -61,14 +74,23 @@ class OpenidAppConfig(AppConfig):
 
     @property
     def safe_settings(self) -> SettingsModel:
+        """
+        type-validated version of django settings
+        """
         return SettingsModel.from_orm(settings)
 
     @property
     def create_user_func(self) -> Callable[[IdToken], Any]:
+        """
+        The function which is configured via django settings and which creates new users based on id tokens.
+        """
         return import_string(self.safe_settings.OPENID_CREATE_USER_FUNC)  # type: ignore
 
     @property
     def update_user_func(self) -> Callable[[Any, IdToken], None]:
+        """
+        The function which is configured via django settings and which updates user objects based on id tokens.
+        """
         return import_string(self.safe_settings.OPENID_UPDATE_USER_FUNC)  # type: ignore
 
     def get_client(

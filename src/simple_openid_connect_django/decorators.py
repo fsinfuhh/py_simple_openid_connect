@@ -1,3 +1,7 @@
+"""
+View-function decorators
+"""
+
 import logging
 from functools import wraps
 from http import HTTPStatus
@@ -18,8 +22,8 @@ def access_token_required(
     *, required_scopes: str = "openid"
 ) -> Callable[..., Union[HttpResponse, View_Return]]:
     """
-    Decorator for views that checks that the request is authenticated using a valid access token, returning an
-    appropriate http response if necessary.
+    Decorator for views that checks that the request is authenticated using a valid access token, early-returning an
+    appropriate http error response if necessary.
 
     :param required_scopes: Scopes to which the access token needs to have access
 
