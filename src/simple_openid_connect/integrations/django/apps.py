@@ -46,6 +46,8 @@ class OpenidAppConfig(AppConfig):
     name = "simple_openid_connect.integrations.django"
     label = "simple_openid_connect_django"
 
+    default_auto_field = "django.db.models.BigAutoField"
+
     def ready(self) -> None:
         """
         Called when django starts.
