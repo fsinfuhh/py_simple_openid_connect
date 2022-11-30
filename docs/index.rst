@@ -1,22 +1,22 @@
-.. simple_openid documentation master file, created by
-   sphinx-quickstart on Fri Nov  4 21:05:03 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Welcome to simple_openid_connect's documentation!
+=================================================
 
-Welcome to simple_openid's documentation!
-=========================================
+`simple_openid_connect` is a **simple** and **opinionated** OpenID-Connect relying party and resource server implementation.
+This means it can be used by an app to authenticate users as well as validate access tokens passed to it.
+
+Quick Links
+-----------
+
+- `PyPi package <https://pypi.org/project/simple_openid_connect/>`_
+- `Documentation <https://simple-openid-connect.readthedocs.io/en/latest/>`_
+- `GitHub Repository <https://github.com/fsinfuhh/py_simple_openid_connect>`_
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   installation
+   usage
+   django-integration
+   resource-server-usage
    api
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

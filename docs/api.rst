@@ -9,3 +9,10 @@ This part of the documentation contains detailed information about various modul
 
     simple_openid_connect
     simple_openid_connect_django
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
