@@ -8,7 +8,6 @@ This part of the documentation contains detailed information about various modul
     :recursive:
 
     simple_openid_connect
-    simple_openid_connect_django
 
 Indices and tables
 ------------------

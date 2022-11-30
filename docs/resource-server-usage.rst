@@ -23,7 +23,7 @@ A simple way to introspect a token is using an :class:`OpenidClient <simple_open
 Using the ``access_token_required`` decorator
 =============================================
 
-If you are using Django, you can decorate your view functions with the :func:`access_token_required <simple_openid_connect_django.decorators.access_token_required>` to enforce that
+If you are using Django, you can decorate your view functions with the :func:`access_token_required <simple_openid_connect.integrations.django.decorators.access_token_required>` to enforce that
 only requests with a valid access token can access the view::
 
     @access_token_required(required_scopes="openid my_resource:read")

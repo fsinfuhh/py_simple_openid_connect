@@ -16,7 +16,7 @@ def is_provider_running() -> bool:
 def test_directly_calling_login_endpoint(dummy_ua, live_server):
     # initiate login
     init_response = dummy_ua.naviagte_to(
-        live_server + resolve_url("simple_openid_connect_django:login")
+        live_server + resolve_url("simple_openid_connect:login")
     )
     assert init_response.ok
 

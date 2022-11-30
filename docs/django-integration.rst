@@ -10,12 +10,12 @@ Setup
 Add to ``INSTALLED_APPS``
 +++++++++++++++++++++++++
 
-At first django settings need to be adapted to include ``simple_openid_connect_django`` as an app::
+At first django settings need to be adapted to include ``simple_openid_connect.integrations.django`` as an app::
 
     # settings.py
     INSTALLED_APPS = [
         ...,
-        "simple_openid_connect_django",
+        "simple_openid_connect.integrations.django",
     ]
 
 Add url routes
@@ -27,7 +27,7 @@ To do so, include this libraries urls into yours::
     # urls.py
     urlpatterns = [
         ...,
-        path("auth/openid/", include("simple_openid_connect_django.urls")),
+        path("auth/openid/", include("simple_openid_connect.integrations.django.urls")),
     ]
 
 Required settings
@@ -72,7 +72,7 @@ Customizing User Mapping
 
 User objects are automatically created from id tokens and also updated when the user re-authenticates.
 The default behavior is to look for some well known id token attributes and map them to well known django attributes.
-See :mod:`simple_openid_connect_django.user_mapping` for the implementation.
+See :mod:`user_mapping <simple_openid_connect.integrations.django.user_mapping>` for the implementation.
 
 This can be customized by defining ``OPENID_CREATE_USER_FUNC`` or ``OPENID_UPDATE_USER_FUNC`` in your django settings.
 These should be a dotted module path with the function being the last name in the path.
@@ -81,8 +81,8 @@ These should be a dotted module path with the function being the last name in th
 Accessing ``OpenidClient``
 --------------------------
 
-If you ever need to do your own Openid interactions, a configured :class:`OpenidClient <simple_openid_connect.client.OpenidClient>` is available at this libraries :class:`AppConfig <simple_openid_connect_django.apps.OpenidAppConfig>` instance.
+If you ever need to do your own Openid interactions, a configured :class:`OpenidClient <simple_openid_connect.client.OpenidClient>` is available at this libraries :class:`AppConfig <simple_openid_connect.integrations.django.apps.OpenidAppConfig>` instance.
 You can access it like this::
 
-    from simple_openid_connect_django.apps import OpenidAppConfig
+    from simple_openid_connect.integrations.django.apps import OpenidAppConfig
     client = OpenidAppConfig.get_instance().get_client(request)

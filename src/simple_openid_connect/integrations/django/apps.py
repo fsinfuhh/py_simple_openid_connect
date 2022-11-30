@@ -29,13 +29,13 @@ class SettingsModel(BaseModel):
     OPENID_CLIENT_ID: str
     OPENID_CLIENT_SECRET: Optional[str]
     OPENID_SCOPE: str = "openid"
-    OPENID_REDIRECT_URI: str = "simple_openid_connect_django:login-callback"
+    OPENID_REDIRECT_URI: str = "simple_openid_connect:login-callback"
     OPENID_BASE_URI: Optional[str]
     OPENID_CREATE_USER_FUNC = (
-        "simple_openid_connect_django.user_mapping.create_user_from_token"
+        "simple_openid_connect.integrations.django.user_mapping.create_user_from_token"
     )
     OPENID_UPDATE_USER_FUNC = (
-        "simple_openid_connect_django.user_mapping.update_user_from_token"
+        "simple_openid_connect.integrations.django.user_mapping.update_user_from_token"
     )
 
     class Config:
@@ -43,7 +43,8 @@ class SettingsModel(BaseModel):
 
 
 class OpenidAppConfig(AppConfig):
-    name = "simple_openid_connect_django"
+    name = "simple_openid_connect.integrations.django"
+    label = "simple_openid_connect_django"
 
     def ready(self) -> None:
         """
@@ -68,7 +69,7 @@ class OpenidAppConfig(AppConfig):
         """
         Retrieve the currently used instance from django's app registry
         """
-        instance = apps.get_app_config(cls.name)
+        instance = apps.get_app_config(cls.label)
         assert isinstance(instance, OpenidAppConfig)
         return instance
 

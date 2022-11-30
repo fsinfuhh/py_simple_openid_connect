@@ -1,18 +1,19 @@
-"""simple_openid_connect_django URL Configuration
+"""
+simple_openid_connect URL Configuration
 
 These urls should be included into your project wherever you like via::
 
     urlpatterns = [
         ...
-        path("auth/openid/", include("simple_openid_connect_django.urls")),
+        path("auth/openid/", include("simple_openid_connect.integrations.django.urls")),
     ]
 
 """
 from django.urls import path
 
-from simple_openid_connect_django import views
+from . import views
 
-app_name = "simple_openid_connect_django"
+app_name = "simple_openid_connect"
 urlpatterns = [
     path("login/", views.InitLoginView.as_view(), name="login"),
     path("login-callback/", views.LoginCallbackView.as_view(), name="login-callback"),

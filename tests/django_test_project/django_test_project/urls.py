@@ -20,7 +20,7 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("auth/openid/", include("simple_openid_connect_django.urls")),
+    path("auth/openid/", include("simple_openid_connect.integrations.django.urls")),
     path("default-after-login/", views.default_after_login, name="default-after-login"),
     path("test-protected-view/", views.test_protected_view, name="test-protected-view"),
     path(

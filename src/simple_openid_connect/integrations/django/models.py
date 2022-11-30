@@ -1,5 +1,5 @@
 """
-simple_openid_connect_django database models
+simple_openid_connect database models
 """
 
 from datetime import datetime, timedelta
@@ -10,7 +10,7 @@ from django.db import models
 from django.utils import timezone
 
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
-from simple_openid_connect_django.apps import OpenidAppConfig
+from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 
 
 class OpenidUserManager(models.Manager["OpenidUser"]):

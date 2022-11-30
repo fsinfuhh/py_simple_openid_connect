@@ -10,8 +10,8 @@ from typing import Any, Callable, TypeVar, Union
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
 from simple_openid_connect.data import TokenIntrospectionErrorResponse
+from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 from simple_openid_connect.utils import is_application_json
-from simple_openid_connect_django.apps import OpenidAppConfig
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,8 @@ def access_token_required(
             if isinstance(result, TokenIntrospectionErrorResponse):
                 logger.critical("could not introspect token for validity: %s", result)
                 return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+            # FIXME: This fails if the token is inactive because then it might have no scope
             if result.scope is None:
                 logger.critical(
                     "could not determine access because token introspection did not return token scopes"

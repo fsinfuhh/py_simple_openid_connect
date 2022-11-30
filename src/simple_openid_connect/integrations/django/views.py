@@ -13,8 +13,8 @@ from django.template.response import TemplateResponse
 from django.views import View
 
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
-from simple_openid_connect_django.apps import OpenidAppConfig
-from simple_openid_connect_django.models import OpenidUser
+from simple_openid_connect.integrations.django.apps import OpenidAppConfig
+from simple_openid_connect.integrations.django.models import OpenidUser
 
 
 def _get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
@@ -51,7 +51,7 @@ class LoginCallbackView(View):
     It handles an authentication response from the Openid provider that is encoded in the current url by either logging
     the user in or rendering the error.
 
-    Error rendering can be customized by overwriting the template *simple_openid_connect_django/login_failed.html* which
+    Error rendering can be customized by overwriting the template *simple_openid_connect/login_failed.html* which
     receives the context `token_response` of type :class:`TokenErrorResponse <simple_openid_connect.data.TokenErrorResponse>`.
     """
 
@@ -65,7 +65,7 @@ class LoginCallbackView(View):
         if not isinstance(token_response, TokenSuccessResponse):
             return TemplateResponse(
                 request,
-                "simple_openid_connect_django/login_failed.html",
+                "simple_openid_connect/login_failed.html",
                 {
                     "token_response": token_response,
                 },

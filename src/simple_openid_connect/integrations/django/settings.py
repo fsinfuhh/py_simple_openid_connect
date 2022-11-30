@@ -1,5 +1,5 @@
 """
-Django settings for simple_openid_connect_django project so that migrations can properly be generated
+Django settings for simple_openid_connect project so that migrations can properly be generated
 """
 
 from pathlib import Path
@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-(jjh@e%wy_9hmu%%nf8!#67cwl&i(mcggyi@!+6_30trxnsq)r"
+SECRET_KEY = "django-insecure-foobar123"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -24,13 +24,12 @@ ALLOWED_HOSTS: List[str] = []
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "simple_openid_connect_django",
+    "simple_openid_connect.integrations.django",
 ]
 
 MIDDLEWARE = [
@@ -43,9 +42,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "simple_openid_connect_django.urls"
+ROOT_URLCONF = "simple_openid_connect.integrations.django.urls"
 
-WSGI_APPLICATION = "simple_openid_connect_django.wsgi.application"
+WSGI_APPLICATION = "simple_openid_connect.integrations.django.wsgi.application"
 
 
 # Database

@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "debug_toolbar",
-    "simple_openid_connect_django",
+    "simple_openid_connect.integrations.django",
 ]
 
 MIDDLEWARE = [
@@ -98,4 +98,4 @@ OPENID_CLIENT_ID = "test-client"
 OPENID_CLIENT_SECRET = "foobar123"
 OPENID_SCOPE = "openid profile email"
 
-LOGIN_URL = "simple_openid_connect_django:login"
+LOGIN_URL = "simple_openid_connect:login"

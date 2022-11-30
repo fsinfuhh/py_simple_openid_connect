@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 
-from simple_openid_connect_django.decorators import access_token_required
+from simple_openid_connect.integrations.django.decorators import access_token_required
 
 
 @login_required
