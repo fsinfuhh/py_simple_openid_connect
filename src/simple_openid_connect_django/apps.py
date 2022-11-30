@@ -1,5 +1,4 @@
 import logging
-from types import EllipsisType
 from typing import Any, Callable, Optional, Union
 
 from django.apps import AppConfig, apps
@@ -73,7 +72,7 @@ class OpenidAppConfig(AppConfig):
         return import_string(self.safe_settings.OPENID_UPDATE_USER_FUNC)  # type: ignore
 
     def get_client(
-        self, own_base_uri: Union[HttpRequest, str, EllipsisType] = ...
+        self, own_base_uri: Union[HttpRequest, str, None] = None
     ) -> OpenidClient:
         """
         Get an `OpenidClient` instance that is appropriate for usage in django.
@@ -82,15 +81,16 @@ class OpenidAppConfig(AppConfig):
 
         :param own_base_uri: The base url of this application which will be used to construct a redirect_uri back to it.
             Can also be the current request in which case `{scheme}://{host}` of it will be used as the base url.
-            If this parameter is not given, a fallback to the `OPENID_BASE_URI` setting is done.
+            If this parameter is not given, only the `OPENID_BASE_URI` setting is used.
+            In any case, if the `OPENID_BASE_URI` setting is set, it will be used instead.
 
-        :raises ImproperlyConfigured: when the *own_base_uri* is given and the `OPENID_BASE_URI` is also None
+        :raises ImproperlyConfigured: when no *own_base_uri* is given and the `OPENID_BASE_URI` is also None
         """
         # determine base_uri of this app
         if self.safe_settings.OPENID_BASE_URI is not None:
             own_base_uri = self.safe_settings.OPENID_BASE_URI
         else:
-            if own_base_uri is ...:
+            if own_base_uri is None:
                 raise ImproperlyConfigured(
                     "either a value for own_base_uri must be given or the django setting OPENID_BASE_URI must be filled"
                 )
