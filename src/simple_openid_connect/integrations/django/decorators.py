@@ -5,8 +5,9 @@ View-function decorators
 import logging
 from functools import wraps
 from http import HTTPStatus
-from typing import Any, Callable, TypeVar, Union
+from typing import Any, Callable, Optional, TypeVar, Union
 
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
 from simple_openid_connect.data import TokenIntrospectionErrorResponse
@@ -40,16 +41,21 @@ def _invalid_token_response(request: HttpRequest) -> HttpResponse:
 
 
 def access_token_required(
-    *, required_scopes: str = "openid"
+    *, required_scopes: Optional[str] = None
 ) -> Callable[..., Union[HttpResponse, View_Return]]:
     """
     Decorator for views that checks that the request is authenticated using a valid access token, early-returning an
     appropriate http error response if necessary.
 
-    :param required_scopes: Scopes to which the access token needs to have access
+    :param required_scopes: Scopes to which the access token needs to have access.
+        If not given, use the `settings.OPENID_SCOPE` value which defaults to "openid".
 
     :raises UnsupportedByProviderError: If the provider does not support token introspection.
     """
+    if required_scopes is None:
+        _required_scopes = OpenidAppConfig.get_instance().safe_settings.OPENID_SCOPE
+    else:
+        _required_scopes = required_scopes
 
     def actual_decorator(
         view_func: Callable[..., View_Return]
@@ -90,7 +96,7 @@ def access_token_required(
                 return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
             elif any(
                 scope not in introspect_response.scope.split(" ")
-                for scope in required_scopes.split(" ")
+                for scope in _required_scopes.split(" ")
             ):
                 return _invalid_token_response(request)
 
