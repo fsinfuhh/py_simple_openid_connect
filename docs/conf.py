@@ -31,6 +31,11 @@ extensions = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "django": (
+        "https://docs.djangoproject.com/en/stable/",
+        "https://docs.djangoproject.com/en/stable/_objects/",
+    ),
+    "drf-spectacular": ("https://drf-spectacular.readthedocs.io/en/latest/", None),
 }
 intersphinx_disabled_domains = ["std"]
 
