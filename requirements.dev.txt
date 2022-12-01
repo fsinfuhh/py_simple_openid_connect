@@ -2,6 +2,7 @@ coverage
 django-debug-toolbar
 django-stubs[compatible-mypy]
 djangorestframework-types
+drf-spectacular
 flit
 hypothesis
 mypy>=0.991
