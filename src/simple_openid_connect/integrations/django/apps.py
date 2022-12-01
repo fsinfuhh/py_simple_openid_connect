@@ -29,7 +29,7 @@ class SettingsModel(BaseModel):
     OPENID_CLIENT_ID: str
     OPENID_CLIENT_SECRET: Optional[str]
     OPENID_SCOPE: str = "openid"
-    OPENID_REDIRECT_URI: str = "simple_openid_connect:login-callback"
+    OPENID_REDIRECT_URI: Optional[str] = "simple_openid_connect:login-callback"
     OPENID_BASE_URI: Optional[str]
     OPENID_CREATE_USER_FUNC = (
         "simple_openid_connect.integrations.django.user_mapping.create_user_from_token"
@@ -111,24 +111,35 @@ class OpenidAppConfig(AppConfig):
 
         :raises ImproperlyConfigured: when no *own_base_uri* is given and the `OPENID_BASE_URI` is also None
         """
-        # determine base_uri of this app
-        if self.safe_settings.OPENID_BASE_URI is not None:
-            own_base_uri = self.safe_settings.OPENID_BASE_URI
-        else:
-            if own_base_uri is None:
-                raise ImproperlyConfigured(
-                    "either a value for own_base_uri must be given or the django setting OPENID_BASE_URI must be filled"
-                )
-            elif isinstance(own_base_uri, HttpRequest):
-                own_base_uri = f"{own_base_uri.scheme}://{own_base_uri.get_host()}"
-
         # use a cached client instance if one exists or create a new one if not
         client = cache.get("openid_client")  # type: OpenidClient
         if client is None:
-            redirect_uri = resolve_url(self.safe_settings.OPENID_REDIRECT_URI)
+
+            # determine base_uri of this app
+            if self.safe_settings.OPENID_REDIRECT_URI is not None:
+                if self.safe_settings.OPENID_BASE_URI is not None:
+                    own_base_uri = self.safe_settings.OPENID_BASE_URI
+                else:
+                    if own_base_uri is None:
+                        raise ImproperlyConfigured(
+                            "either a value for own_base_uri must be given or the django setting OPENID_BASE_URI must be filled"
+                        )
+                    elif isinstance(own_base_uri, HttpRequest):
+                        own_base_uri = (
+                            f"{own_base_uri.scheme}://{own_base_uri.get_host()}"
+                        )
+
+                relative_redirect_uri = resolve_url(
+                    self.safe_settings.OPENID_REDIRECT_URI
+                )
+                redirect_uri = f"{own_base_uri}{relative_redirect_uri}"
+            else:
+                redirect_uri = None
+
+            # create a new client instance and cache it
             client = OpenidClient.from_issuer_url(
                 url=self.safe_settings.OPENID_ISSUER,
-                authentication_redirect_uri=f"{own_base_uri}{redirect_uri}",
+                authentication_redirect_uri=redirect_uri,
                 client_id=self.safe_settings.OPENID_CLIENT_ID,
                 client_secret=self.safe_settings.OPENID_CLIENT_SECRET,
                 scope=self.safe_settings.OPENID_SCOPE,
