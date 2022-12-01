@@ -16,6 +16,15 @@ class OpenidProtocolError(Exception):
         super().__init__(msg, *data)
 
 
+class ImpossibleOperationError(OpenidProtocolError):
+    """
+    This error indicates that an intended operation could not be performed because it is not possible under the current
+    configuration
+    """
+
+    pass
+
+
 class UnsupportedByProviderError(OpenidProtocolError):
     """
     This error indicates that a desired feature is not supported by the OpenID Provider

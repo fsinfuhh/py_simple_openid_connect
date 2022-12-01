@@ -56,7 +56,7 @@ class OpenidClient:
         self,
         provider_config: ProviderMetadata,
         provider_keys: List[JWK],
-        authentication_redirect_uri: str,
+        authentication_redirect_uri: Optional[str],
         client_id: str,
         client_secret: Optional[str] = None,
         scope: str = "openid",
@@ -84,7 +84,7 @@ class OpenidClient:
     def from_issuer_url(
         cls: Type[Self],
         url: str,
-        authentication_redirect_uri: str,
+        authentication_redirect_uri: Optional[str],
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
@@ -110,7 +110,7 @@ class OpenidClient:
     def from_issuer_config(
         cls: Type[Self],
         config: ProviderMetadata,
-        authentication_redirect_uri: str,
+        authentication_redirect_uri: Optional[str],
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
