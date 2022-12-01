@@ -13,7 +13,7 @@ from simple_openid_connect.integrations.djangorestframework.authentication impor
 logger = logging.getLogger(__name__)
 
 
-class HasTokenScopePermission(BasePermission):  # type: ignore # ignores a metaclass conflict that doesn't really exist
+class HasTokenScope(BasePermission):  # type: ignore # ignores a metaclass conflict that doesn't really exist
     @staticmethod
     def _get_required_scopes(view: Any) -> str:
         if hasattr(view, "required_scopes"):
