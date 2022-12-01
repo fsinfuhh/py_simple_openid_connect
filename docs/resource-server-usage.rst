@@ -9,6 +9,14 @@ This process is called token introspection and the provider may add more informa
 (e.g. which scopes the token has access to).
 
 
+Django Setup
+============
+
+There is almost no additional setup required when this library is used for resource servers.
+Settings like ``OPENID_ISSUER`` or client credentials are reused.
+The only exception is that the ``OPENID_REDIRECT_URI`` setting should be explicitly set to ``None`` if your project is
+exclusively acting as a resource server.
+
 
 Using a client
 ==============
