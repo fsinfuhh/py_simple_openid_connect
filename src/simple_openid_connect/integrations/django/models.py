@@ -57,11 +57,12 @@ class OpenidUserManager(models.Manager["OpenidUser"]):
             openid_user = queryset.get()
             if username is not None and hasattr(user_t, "USERNAME_FIELD"):
                 setattr(openid_user.user, user_t.USERNAME_FIELD, username)
+                openid_user.user.save()
             return openid_user
         else:
             # create new objects
             if username is not None and hasattr(user_t, "USERNAME_FIELD"):
-                user = user_t.objects.create(user_t.USERNAME_FIELD, username)
+                user = user_t.objects.create(**{user_t.USERNAME_FIELD: username})
             else:
                 user = user_t.objects.create()
             return self.create(user=user, sub=sub)
