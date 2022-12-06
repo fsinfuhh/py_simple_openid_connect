@@ -32,6 +32,7 @@ jobs:
       matrix:
         py_version: [ "3.9", "3.10", "3.11" ]
         django_version: ["3.2", "4.0", "4.1"]
+        drf_version: ["3.13", "3.14"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -44,8 +45,6 @@ jobs:
             requirements.dev.txt
       - name: Install dependencies
         run: |
-          pip install -e .
-          pip install -r requirements.dev.txt
-          pip install django==${{ matrix.django_version }}
+          pip install .[django,djangorestframework] -r requirements.dev.txt django==${{ matrix.django_version }} djangorestframework==${{ matrix.drf_version }}
       - name: Run tests
         run: pytest
