@@ -15,6 +15,7 @@ from django.http import (
 )
 from django.shortcuts import resolve_url
 from django.template.response import TemplateResponse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_control
 
@@ -118,7 +119,7 @@ class FrontChannelLogoutNotificationView(View):
     A view which handles Openid front-channel logout notifications by logging out the current session
     """
 
-    @cache_control(no_store=True)
+    @method_decorator(cache_control(no_store=True))
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
         return HttpResponse(status=200)
