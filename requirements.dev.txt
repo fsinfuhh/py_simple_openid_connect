@@ -4,6 +4,7 @@ django-stubs[compatible-mypy]
 djangorestframework-types
 drf-spectacular
 flit
+furo
 hypothesis
 mypy>=0.991
 pytest
@@ -12,5 +13,4 @@ pytest-explicit
 pyyaml
 responses
 sphinx
-sphinx_rtd_theme
 types-requests
