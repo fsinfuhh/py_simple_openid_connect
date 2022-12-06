@@ -45,22 +45,13 @@ class AccessTokenAuthentication(BaseAuthentication):
 
     def __init__(
         self,
-        required_scopes: Optional[str] = None,
         allow_anonymous: Optional[bool] = True,
     ):
         """
-        :param required_scopes: Scopes to which the access token needs to have access.
-            If not given, use the `settings.OPENID_SCOPE` value which defaults to "openid"
         :param allow_anonymous: Whether access is allowed when the token is valid but no user can be identified.
             This is the case if the Openid providers token introspection endpoint does not return a user id.
         """
         self.allow_anonymous = allow_anonymous
-        if required_scopes is None:
-            self.required_scopes = (
-                OpenidAppConfig.get_instance().safe_settings.OPENID_SCOPE
-            )
-        else:
-            self.required_scopes = required_scopes
 
     def authenticate(
         self, request: HttpRequest
@@ -117,7 +108,6 @@ class AccessTokenNoAnonAuthentication(AccessTokenAuthentication):
 
     def __init__(
         self,
-        required_scopes: Optional[str] = None,
         allow_anonymous: Optional[bool] = False,
     ):
-        super().__init__(required_scopes, allow_anonymous)
+        super().__init__(allow_anonymous)
