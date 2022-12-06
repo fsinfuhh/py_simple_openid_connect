@@ -26,7 +26,8 @@ jobs:
           key: pre-commit|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - run: pre-commit run --show-diff-on-failure --color=always --all-files
 
-  pytest:
+  test:
+    name: test py=${{ matrix.py_version }} django=${{ matrix.django_version }} drf=${{ matrix.drf_version }}
     strategy:
       fail-fast: false
       matrix:
