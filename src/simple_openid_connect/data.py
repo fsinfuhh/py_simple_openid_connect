@@ -4,7 +4,6 @@ Datatypes and models for various OpenID messages
 import enum
 import logging
 import time
-from datetime import datetime
 from typing import Any, Callable, List, Literal, Mapping, Optional, Union
 
 from pydantic import AnyHttpUrl, Extra, Field, root_validator
@@ -664,12 +663,6 @@ class BackChannelLogoutToken(OpenidBaseModel):
     If a sid Claim is not present, the intent is that all sessions at the RP for the End-User identified by the iss and sub Claims be logged out.
     """
 
-    # TODO Implement proper verification
-    # See https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
-
-    class Config:
-        extra = Extra.forbid
-
     class Events(OpenidBaseModel):
         x: Mapping[str, Any] = Field(
             alias="http://schemas.openid.net/event/backchannel-logout",
@@ -733,27 +726,29 @@ class BackChannelLogoutToken(OpenidBaseModel):
         # this method implements https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
 
         # 4. validate iss
-        validate_that(self.iss == issuer, "ID-Token was issued from unexpected issuer")
+        validate_that(
+            self.iss == issuer, "Logout-Token was issued from unexpected issuer"
+        )
 
         # 4. validate audience
         if isinstance(self.aud, str):
             validate_that(
                 self.aud == client_id,
-                "ID-Token's audience does not contain own client_id",
+                "Logout-Token's audience does not contain own client_id",
             )
         elif isinstance(self.aud, list):
             validate_that(
                 client_id in self.aud,
-                "ID-Token's audience does not contain own client_id",
+                "Logout-Token's audience does not contain own client_id",
             )
             validate_that(
                 all(i in extra_trusted_audiences for i in self.aud),
-                "Not all of the ID-Token's audience are trusted",
+                "Not all of the Logout-Token's audience are trusted",
             )
 
         # 4. validate iat
         validate_that(
-            self.iat >= min_iat, "The ID-Token was issued too far in the past"
+            self.iat >= min_iat, "The Logout-Token was issued too far in the past"
         )
 
         # 5. validate that one of sub or sid (or both) is present
