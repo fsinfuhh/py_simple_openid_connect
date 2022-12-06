@@ -18,5 +18,5 @@ Quick Links
    installation
    usage
    django-integration
-   resource-server-usage
+   drf-integration
    api
