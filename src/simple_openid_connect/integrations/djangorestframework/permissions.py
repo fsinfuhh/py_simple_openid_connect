@@ -1,3 +1,10 @@
+"""
+DRF permission classes
+
+See the `DRF documentation on Setting the permission policy <https://www.django-rest-framework.org/api-guide/permissions/#setting-the-permission-policy>`_ on how to use the classes contained here.
+"""
+
+
 import logging
 from typing import Any
 

@@ -1,3 +1,9 @@
+"""
+DRF Authentication classes
+
+See the `DRF documentation on Setting the authentication scheme <https://www.django-rest-framework.org/api-guide/authentication/#setting-the-authentication-scheme>`_ about how to use the classes contained here.
+"""
+
 import logging
 from typing import Any, Optional, Tuple, Union
 

@@ -1,3 +1,7 @@
+"""
+Automatic OpenAPI schema generation for drf_spectacular.
+"""
+
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
