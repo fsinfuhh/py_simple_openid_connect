@@ -96,5 +96,6 @@ class LogoutView(View):
     """
 
     def get(self, request: HttpRequest) -> HttpResponse:
+        logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
         return HttpResponseRedirect(client.initiate_logout())

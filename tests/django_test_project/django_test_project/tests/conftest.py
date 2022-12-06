@@ -1,20 +1,17 @@
-import json
-import sys
-from base64 import b64encode
-from typing import Any, Mapping, Union
+from typing import Any
 
 import pytest
 import requests
-from cryptojwt import JWS, KeyBundle
+from django.contrib.auth.models import User
 from django.http import (
     HttpResponse,
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import resolve_url
 from django.test.client import Client as DjangoClient
 from furl import furl
-from responses import matchers
+
+from simple_openid_connect.integrations.django import models
 
 
 @pytest.fixture
@@ -73,3 +70,10 @@ class DynClient(DjangoClient):
 def dyn_client(client) -> DynClient:
     """A client that automatically distinguishes between internal django calls and calls to external domains"""
     return DynClient()
+
+
+@pytest.fixture
+def test_user(db) -> User:
+    user = User.objects.create_user("user1")
+    openid_user = models.OpenidUser.objects.create(sub="1", user=user, _id_token="")
+    return user
