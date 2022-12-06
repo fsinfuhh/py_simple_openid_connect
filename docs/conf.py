@@ -8,6 +8,8 @@
 import sys
 from pathlib import Path
 
+import simple_openid_connect
+
 BASE_PATH = Path(__file__).parent.parent
 sys.path.append(str(BASE_PATH / "src"))
 
@@ -15,7 +17,7 @@ sys.path.append(str(BASE_PATH / "src"))
 project = "simple_openid_connect"
 copyright = "2022, Finn-Thorben Sell"
 author = "Finn-Thorben Sell"
-release = "0.0.1"
+release = "v" + simple_openid_connect.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
