@@ -18,4 +18,9 @@ urlpatterns = [
     path("login/", views.InitLoginView.as_view(), name="login"),
     path("login-callback/", views.LoginCallbackView.as_view(), name="login-callback"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
+    path(
+        "logout/frontchannel-notify/",
+        views.FrontChannelLogoutNotificationView.as_view(),
+        name="logout-frontchannel-notify",
+    ),
 ]

@@ -1,20 +1,32 @@
 """
 View functions which handle openid authentication and their related callbacks
 """
-
+import logging
 from http import HTTPStatus
 from typing import Mapping
 
 from django.conf import settings
 from django.contrib.auth import login, logout
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+)
 from django.shortcuts import resolve_url
 from django.template.response import TemplateResponse
 from django.views import View
+from django.views.decorators.cache import cache_control
 
-from simple_openid_connect.data import IdToken, TokenSuccessResponse
+from simple_openid_connect.data import (
+    FrontChannelLogoutNotification,
+    IdToken,
+    TokenSuccessResponse,
+)
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 from simple_openid_connect.integrations.django.models import OpenidUser
+
+logger = logging.getLogger(__name__)
 
 
 def _get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
@@ -99,3 +111,14 @@ class LogoutView(View):
         logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
         return HttpResponseRedirect(client.initiate_logout())
+
+
+class FrontChannelLogoutNotificationView(View):
+    """
+    A view which handles Openid front-channel logout notifications by logging out the current session
+    """
+
+    @cache_control(no_store=True)
+    def get(self, request: HttpRequest) -> HttpResponse:
+        logout(request)
+        return HttpResponse(status=200)
