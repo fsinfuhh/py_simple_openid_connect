@@ -31,6 +31,7 @@ jobs:
       fail-fast: false
       matrix:
         py_version: [ "3.9", "3.10", "3.11" ]
+        django_version: ["3.2", "4.0", "4.1"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -45,5 +46,6 @@ jobs:
         run: |
           pip install -e .
           pip install -r requirements.dev.txt
+          pip install django==${{ matrix.django_version }}
       - name: Run tests
         run: pytest
