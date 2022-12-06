@@ -7,7 +7,7 @@ Simple and opinionated OpenID-Connect relying party and resource server implemen
 ## Quick Links
 
 - [PyPi Page](https://pypi.org/project/simple_openid_connect/)
-- [Documentation](https://simple-openid-connect.readthedocs.io/en/latest/)
+- [Documentation](https://simple-openid-connect.readthedocs.io/en/stable/)
 - [GitHub Repository](https://github.com/fsinfuhh/py_simple_openid_connect)
 
 
@@ -29,6 +29,15 @@ Simple and opinionated OpenID-Connect relying party and resource server implemen
 
   Tell the user about function requirements clearly but don't try any fancy internal persistence or caching mechanisms that will only fail in different usage scenarios.
   Instead, abstract the underlying OpenID protocol into usable, clear functions but nothing more.
+
+
+## Framework Integrations
+
+| Name                                                            | Integration Docs                                                                                   | Supported Versions     |
+|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------|------------------------|
+| [Django](https://www.djangoproject.com/)                        | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v3.2`, `v4.0`, `v4.1` |
+| [Django-Rest-Framework](https://www.django-rest-framework.org/) | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/drf-integration.html)    | `v3.13`, `v3.14`       |
+
 
 
 ## Supported OpenID Specs
