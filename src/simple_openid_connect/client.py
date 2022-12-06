@@ -175,7 +175,7 @@ class OpenidClient:
         :param raw_token: The encoded and signed id token.
             This could e.g. be retrieved as part of the authentication process and returned by the OP in :data:`TokenSuccessResponse.id_token <simple_openid_connect.flows.authorization_code_flow.data.TokenSuccessResponse.id_token>`.
         """
-        return IdToken.parse_jwt(raw_token, self.provider_keys)
+        return IdToken.parse_jws(raw_token, self.provider_keys)
 
     def exchange_refresh_token(
         self, refresh_token: str

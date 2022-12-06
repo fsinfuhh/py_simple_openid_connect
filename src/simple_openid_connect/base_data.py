@@ -3,9 +3,9 @@ Base data types which are extended with concrete OpenId data types in :mod:`simp
 """
 import abc
 import logging
-from typing import Any, List, Literal, Type, TypeVar
+from typing import List, Literal, Type, TypeVar
 
-from cryptojwt import JWK, JWS
+from cryptojwt import JWK, JWS, JWT, KeyBundle, KeyJar
 from furl import Query, furl
 from pydantic import BaseModel
 
@@ -87,13 +87,24 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
             raise ValueError(f"invalid location value {location}")
 
     @classmethod
-    def parse_jwt(cls: Type[Self], value: str, signing_keys: List[JWK]) -> Self:
+    def parse_jws(cls: Type[Self], value: str, signing_keys: List[JWK]) -> Self:
         """
-        Parse received data that is encoded as a signed Json-Web-Token (JWT).
+        Parse received data that is encoded as a signed Json-Web-Signature (JWS).
 
         :param value: The encoded JWT
         :param signing_keys: List of keys one of which has been used to sign the JWT
         """
         verifier = JWS()
         msg = verifier.verify_compact(value, signing_keys)
+        return cls.parse_obj(msg)
+
+    @classmethod
+    def parse_jwt(
+        cls: Type[Self], token: str, signing_keys: List[JWK], issuer: str
+    ) -> Self:
+        key_bundle = KeyBundle(keys=signing_keys)
+        key_jar = KeyJar()
+        key_jar.add_kb(issuer, key_bundle)
+        verifier = JWT(key_jar)
+        msg = verifier.unpack(token)
         return cls.parse_obj(msg)
