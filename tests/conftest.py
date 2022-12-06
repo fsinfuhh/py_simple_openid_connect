@@ -3,33 +3,17 @@ import random
 import string
 from base64 import b64encode
 from pathlib import Path
-from typing import Dict, List, Mapping, Tuple
+from typing import Mapping
 
 import pytest
 import requests
 import responses
 import yaml
-from cryptojwt import KeyBundle
+from cryptojwt import JWT, KeyBundle, KeyJar
 from cryptojwt.jwk.rsa import new_rsa_key
-from furl import furl
-from requests import PreparedRequest
-from requests.adapters import HTTPAdapter
 from responses import matchers
 
-from simple_openid_connect.data import (
-    AuthenticationRequest,
-    AuthenticationSuccessResponse,
-    ProviderMetadata,
-    RpInitiatedLogoutRequest,
-    TokenErrorResponse,
-    TokenIntrospectionRequest,
-    TokenIntrospectionSuccessResponse,
-    TokenRequest,
-    TokenSuccessResponse,
-    UserinfoErrorResponse,
-    UserinfoRequest,
-    UserinfoSuccessResponse,
-)
+from simple_openid_connect.data import ProviderMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +29,14 @@ def jwks() -> KeyBundle:
     bundle = KeyBundle()
     bundle.set([key])
     return bundle
+
+
+@pytest.fixture(scope="session")
+def jwt(jwks) -> JWT:
+    """JWT builder based on the generated JWKs"""
+    jar = KeyJar()
+    jar.add_kb("https://provider.example.com", jwks)
+    return JWT(jar, "https://provider.example.com", 3600)
 
 
 class DummyUserAgent(requests.Session):
@@ -98,6 +90,7 @@ def known_provider_configs(response_mock):
 
 @pytest.fixture
 def dummy_provider_config(jwks, response_mock):
+    """Mocked responses for the dummy *https://provider.example.com provider*"""
     response_mock.get(
         url="https://provider.example.com/.well-known/openid-configuration",
         json=ProviderMetadata(
