@@ -8,7 +8,6 @@ hypothesis
 mypy>=0.991
 pytest
 pytest-django
-pytest-env
 pytest-explicit
 pyyaml
 responses

@@ -8,8 +8,8 @@ from simple_openid_connect.client_authentication import ClientSecretBasicAuth, N
 
 
 @pytest.fixture
-def mock_empty_response(mocked_responses: RequestsMock):
-    mocked_responses.get(url="https://example.com")
+def mock_empty_response(response_mock):
+    response_mock.get(url="https://example.com")
 
 
 def test_none_auth(mock_empty_response):

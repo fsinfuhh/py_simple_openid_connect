@@ -5,63 +5,48 @@ from simple_openid_connect.flows.authorization_code_flow import (
 )
 
 
-def test_authorization_request(dummy_ua, dummy_openid_provider, dummy_app_server):
+def test_authorization_request(user_agent, dummy_auth_response):
     # act
     url = authorization_code_flow.start_authentication(
-        dummy_openid_provider.endpoints["authorization"],
+        "https://provider.example.com/auth",
         "openid",
-        dummy_openid_provider.test_client_id,
-        dummy_app_server.callback_url,
+        "client-id",
+        "https://app.example.com/login-callback",
     )
-    response = dummy_ua.naviagte_to(url)
-
-    # assert
+    response = user_agent.naviagte_to(url)
     response_msg = authorization_code_flow.AuthenticationSuccessResponse.parse_url(
         response.url
     )
-    assert response_msg.code is not None
-    assert response_msg.code != ""
-
-
-def test_handle_authentication_result(
-    dummy_ua, dummy_openid_provider, dummy_app_server
-):
-    # arrange
-    url = authorization_code_flow.start_authentication(
-        dummy_openid_provider.endpoints["authorization"],
-        "openid",
-        dummy_openid_provider.test_client_id,
-        dummy_app_server.callback_url,
-    )
-    response = dummy_ua.naviagte_to(url)
-
-    # act
-    response = authorization_code_flow.handle_authentication_result(
-        response.url,
-        dummy_openid_provider.endpoints["token"],
-        ClientSecretBasicAuth(
-            dummy_openid_provider.test_client_id,
-            dummy_openid_provider.test_client_secret,
-        ),
-    )
 
     # assert
-    assert response.access_token
-    assert response.id_token
+    assert response_msg.code == "code.foobar123"
 
 
-def test_token_exchange(dummy_ua, dummy_openid_provider, dummy_app_server):
+def test_token_exchange(user_agent, dummy_token_response):
     # act
     response = authorization_code_flow.exchange_code_for_tokens(
-        dummy_openid_provider.endpoints["token"],
-        AuthenticationSuccessResponse(code=dummy_openid_provider.cheat_code),
-        dummy_app_server.callback_url,
+        "https://provider.example.com/token",
+        AuthenticationSuccessResponse(code="code.foobar123"),
+        "https://app.example.com/login-callback",
         ClientSecretBasicAuth(
-            dummy_openid_provider.test_client_id,
-            dummy_openid_provider.test_client_secret,
+            "client-id",
+            "client-secret",
         ),
     )
 
     # assert
     assert response.access_token
     assert response.id_token
+
+
+def test_handle_authentication_result(user_agent, dummy_token_response):
+    # act
+    response = authorization_code_flow.handle_authentication_result(
+        "https://app.example.com/login-callback?code=code.foobar123",
+        "https://provider.example.com/token",
+        ClientSecretBasicAuth("client-id", "client-secret"),
+    )
+
+    # assert
+    assert response.access_token == "access_token.foobar123"
+    assert response.id_token == "id_token.user1"

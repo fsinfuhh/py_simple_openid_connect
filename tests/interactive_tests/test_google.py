@@ -6,11 +6,7 @@ import pytest
 from furl import furl
 
 from simple_openid_connect.client import OpenidClient
-from simple_openid_connect.data import (
-    IdToken,
-    TokenIntrospectionSuccessResponse,
-    UserinfoSuccessResponse,
-)
+from simple_openid_connect.data import IdToken, UserinfoSuccessResponse
 from simple_openid_connect.flows.authorization_code_flow import TokenSuccessResponse
 
 logger = logging.getLogger(__name__)
