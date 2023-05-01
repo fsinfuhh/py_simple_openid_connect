@@ -92,7 +92,7 @@ class LoginCallbackView(View):
 
         user = OpenidUser.objects.get_or_create_from_id_token(id_token)
         user.update_session(token_response)
-        login(request, user.user)
+        login(request, user.user, backend=settings.AUTHENTICATION_BACKENDS[0])
 
         # redirect to the next get parameter if present, otherwise to the configured default
         if "next" in request.GET.keys():
