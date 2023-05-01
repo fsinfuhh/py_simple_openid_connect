@@ -114,7 +114,6 @@ class OpenidAppConfig(AppConfig):
         # use a cached client instance if one exists or create a new one if not
         client = cache.get("openid_client")  # type: OpenidClient
         if client is None:
-
             # determine base_uri of this app
             if self.safe_settings.OPENID_REDIRECT_URI is not None:
                 if self.safe_settings.OPENID_BASE_URI is not None:

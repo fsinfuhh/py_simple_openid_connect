@@ -189,7 +189,7 @@ class IdToken(OpenidBaseModel):
     "String value used to associate a Client session with an ID Token, and to mitigate replay attacks The value is passed through unmodified from the Authentication Request to the ID Token If present in the ID Token, Clients MUST verify that the nonce Claim Value is equal to the value of the nonce parameter sent in the Authentication Request If present in the Authentication Request, Authorization Servers MUST include a nonce Claim in the ID Token with the Claim Value being the nonce value sent in the Authentication Request Authorization Servers SHOULD perform no other processing on nonce values used The nonce value is a case sensitive string. "
 
     acr: Optional[str]
-    "OPTIONAL. Authentication Context Class Reference String specifying an Authentication Context Class Reference value that identifies the Authentication Context Class that the authentication performed satisfied. " 'The value "0" indicates the End-User authentication did not meet the requirements of ISO/IEC 29115 [ISO29115] level 1. ' 'Authentication using a long-lived browser cookie, for instance, is one example where the use of "level 0" is appropriate. ' "Authentications with level 0 SHOULD NOT be used to authorize access to any resource of any monetary value (This corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] nist_auth_level 0.)  An absolute URI or an RFC 6711 [RFC6711] registered name SHOULD be used as the acr value; registered names MUST NOT be used with a different meaning than that which is registered Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The acr value is a case sensitive string."
+    "OPTIONAL. Authentication Context Class Reference String specifying an Authentication Context Class Reference value that identifies the Authentication Context Class that the authentication performed satisfied. The value '0' indicates the End-User authentication did not meet the requirements of ISO/IEC 29115 [ISO29115] level 1. Authentication using a long-lived browser cookie, for instance, is one example where the use of 'level 0' is appropriate. Authentications with level 0 SHOULD NOT be used to authorize access to any resource of any monetary value (This corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] nist_auth_level 0.)  An absolute URI or an RFC 6711 [RFC6711] registered name SHOULD be used as the acr value; registered names MUST NOT be used with a different meaning than that which is registered Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The acr value is a case sensitive string."
 
     amr: Optional[List[str]]
     "OPTIONAL. Authentication Methods References JSON array of strings that are identifiers for authentication methods used in the authentication For instance, values might indicate that both password and OTP authentication methods were used The definition of particular values to be used in the amr Claim is beyond the scope of this specification Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The amr value is an array of case sensitive strings."
@@ -351,34 +351,34 @@ class AuthenticationRequest(OpenidBaseModel):
     redirect_uri: str
     "REQUIRED. Redirection URI to which the response will be sent This URI MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider When using this flow, the Redirection URI SHOULD use the https scheme; however, it MAY use the http scheme, provided that the Client Type is confidential, as defined in Section 2.1 of OAuth 2.0, and provided the OP allows the use of http Redirection URIs in this case The Redirection URI MAY use an alternate scheme, such as one that is intended to identify a callback into a native application."
 
-    state: Optional[str]
+    state: Optional[str] = None
     "RECOMMENDED. Opaque value used to maintain state between the request and the callback Typically, Cross-Site Request Forgery (CSRF, XSRF) mitigation is done by cryptographically binding the value of this parameter with a browser cookie."
 
-    response_mode: Optional[str]
+    response_mode: Optional[str] = None
     "OPTIONAL. Informs the Authorization Server of the mechanism to be used for returning parameters from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the Response Mode that would be requested is the default mode specified for the Response Type."
 
-    nonce: Optional[str]
+    nonce: Optional[str] = None
     "OPTIONAL. String value used to associate a Client session with an ID Token, and to mitigate replay attacks The value is passed through unmodified from the Authentication Request to the ID Token Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values."
 
-    display: Optional[List[str]]
+    display: Optional[List[str]] = None
     'OPTIONAL. Space delimited, case sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent. The defined values are: "page", "popup", "touch" and "wap"'
 
-    prompt: Optional[List[str]]
+    prompt: Optional[List[str]] = None
     'OPTIONAL. Space delimited, case sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent. The defined values are: "none", "login", "consent" and "select_account".'
 
-    max_age: Optional[int]
+    max_age: Optional[int] = None
     "OPTIONAL. Maximum Authentication Age Specifies the allowable elapsed time in seconds since the last time the End-User was actively authenticated by the OP If the elapsed time is greater than this value, the OP MUST attempt to actively re-authenticate the End-User When max_age is used, the ID Token returned MUST include an auth_time Claim Value."
 
-    ui_locales: Optional[List[str]]
+    ui_locales: Optional[List[str]] = None
     "OPTIONAL. End-User's preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. " 'For instance, the value "fr-CA fr en" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). ' "An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider."
 
-    id_token_hint: Optional[str]
+    id_token_hint: Optional[str] = None
     "OPTIONAL. ID Token previously issued by the Authorization Server being passed as a hint about the End-User's current or past authenticated session with the Client If the End-User identified by the ID Token is logged in or is logged in by the request, then the Authorization Server returns a positive response; otherwise, it SHOULD return an error, such as login_required When possible, an id_token_hint SHOULD be present when prompt=none is used and an invalid_request error MAY be returned if it is not; however, the server SHOULD respond successfully when possible, even if it is not present The Authorization Server need not be listed as an audience of the ID Token when it is used as an id_token_hint value. "
 
-    login_hint: Optional[str]
+    login_hint: Optional[str] = None
     "OPTIONAL. Hint to the Authorization Server about the login identifier the End-User might use to log in (if necessary) This hint can be used by an RP if it first asks the End-User for their e-mail address (or other identifier) and then wants to pass that value as a hint to the discovered authorization service It is RECOMMENDED that the hint value match the value used for discovery (which is not supported by this library) This value MAY also be a phone number in the format specified for the `phone_number` Claim The use of this parameter is left to the OP's discretion."
 
-    acr_values: Optional[List[str]]
+    acr_values: Optional[List[str]] = None
     "OPTIONAL. Requested Authentication Context Class Reference values Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference The Authentication Context Class satisfied by the authentication performed is returned as the acr Claim Value, as specified in Section 2 The acr Claim is requested as a Voluntary Claim by this parameter."
 
 
@@ -495,25 +495,25 @@ class TokenRequest(OpenidBaseModel):
     grant_type: Union[Literal["authorization_code", "refresh_token", "password"], str]
     "REQUIRED. Which type of token exchange this request is."
 
-    code: Optional[str]
+    code: Optional[str] = None
     "REQUIRED, if grant type is 'code', otherwise optional. The authorization code received from the authorization server."
 
-    redirect_uri: Optional[str]
+    redirect_uri: Optional[str] = None
     "REQUIRED, if grant_Type is 'code', otherwise not needed. Must be identical to the value that was included in the :data:`AuthenticationRequest <AuthenticationRequest.redirect_uri>`."
 
-    client_id: Optional[str]
+    client_id: Optional[str] = None
     "REQUIRED, if the client is not authenticating with the authorization server. Basically, confidential clients don't need to include it but others do."
 
-    refresh_token: Optional[str]
+    refresh_token: Optional[str] = None
     "REQUIRED, if grant type is 'refresh_token'. The refresh token issued to the client."
 
-    username: Optional[str]
+    username: Optional[str] = None
     "REQUIRED, if grant type is 'password'"
 
-    password: Optional[str]
+    password: Optional[str] = None
     "REQUIRED, if grant type is 'password'"
 
-    scope: Optional[str]
+    scope: Optional[str] = None
     "REQUIRED, if grant type is 'password'. The scope requested by the application"
 
     @root_validator(skip_on_failure=True)
