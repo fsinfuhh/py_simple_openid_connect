@@ -48,6 +48,7 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
 
   Only the following flows and features are implemented:
   - ✔️ Authorization Code Flow
+  - ✔️ Direct Access Grant (or *Resource Owner Password Credentials Grant*)
   - ✔️ `client_secret_basic` client authentication
   - ✔️ `none` client authentication
   - ✔️ Query String serialization and parsing

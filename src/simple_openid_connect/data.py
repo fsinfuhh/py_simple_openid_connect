@@ -492,7 +492,7 @@ class TokenRequest(OpenidBaseModel):
     class Config:
         extra = Extra.allow
 
-    grant_type: Union[Literal["authorization_code", "refresh_token"], str]
+    grant_type: Union[Literal["authorization_code", "refresh_token", "password"], str]
     "REQUIRED. Which type of token exchange this request is."
 
     code: Optional[str]
@@ -505,7 +505,16 @@ class TokenRequest(OpenidBaseModel):
     "REQUIRED, if the client is not authenticating with the authorization server. Basically, confidential clients don't need to include it but others do."
 
     refresh_token: Optional[str]
-    "REQUIRED. The refresh token issued to the client."
+    "REQUIRED, if grant type is 'refresh_token'. The refresh token issued to the client."
+
+    username: Optional[str]
+    "REQUIRED, if grant type is 'password'"
+
+    password: Optional[str]
+    "REQUIRED, if grant type is 'password'"
+
+    scope: Optional[str]
+    "REQUIRED, if grant type is 'password'. The scope requested by the application"
 
     @root_validator(skip_on_failure=True)
     def _validate_required_based_on_grant_type(
@@ -522,6 +531,16 @@ class TokenRequest(OpenidBaseModel):
             assert (
                 values["refresh_token"] is not None
             ), "refresh_token is required when grant_type is 'refresh_token'"
+        elif values["grant_type"] == "password":
+            assert (
+                values["username"] is not None
+            ), "username is required when grant_type is 'password'"
+            assert (
+                values["password"] is not None
+            ), "password is required when grant_type is 'password'"
+            assert (
+                values["scope"] is not None
+            ), "scope is required when grant_type is 'password'"
 
         return values
 

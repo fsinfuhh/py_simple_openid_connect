@@ -35,6 +35,9 @@ from simple_openid_connect.exceptions import UnsupportedByProviderError
 from simple_openid_connect.flows.authorization_code_flow.client import (
     AuthorizationCodeFlowClient,
 )
+from simple_openid_connect.flows.direct_access_grant.client import (
+    DirectAccessGrantClient,
+)
 
 Self = TypeVar("Self", bound="OpenidClient")
 
@@ -52,6 +55,9 @@ class OpenidClient:
     authorization_code_flow: AuthorizationCodeFlowClient
     "*authorization code flow* related functionality"
 
+    direct_access_grant: DirectAccessGrantClient
+    "*Direct Access Grant* (or *Resource Owner Password Credentials Grant*) functionality"
+
     def __init__(
         self,
         provider_config: ProviderMetadata,
@@ -64,6 +70,7 @@ class OpenidClient:
         self.provider_config = provider_config
         self.provider_keys = provider_keys
         self.authorization_code_flow = AuthorizationCodeFlowClient(self)
+        self.direct_access_grant = DirectAccessGrantClient(self)
         self.scope = scope
         self.authentication_redirect_uri = authentication_redirect_uri
 
