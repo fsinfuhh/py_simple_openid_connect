@@ -254,7 +254,7 @@ class OpenidClient:
     def __getstate__(self) -> Mapping[str, Any]:
         # this implements support for pickling this class
         # it is basically the default pickle behavior but explicitly serializes keys because they are FFI backed and not normally picklable
-        result = self.__dict__
+        result = self.__dict__.copy()
         result["provider_keys"] = [k.serialize() for k in self.provider_keys]
         return result
 
