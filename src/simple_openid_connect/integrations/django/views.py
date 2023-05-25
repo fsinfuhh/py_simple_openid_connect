@@ -22,6 +22,7 @@ from django.views.decorators.cache import cache_control
 from simple_openid_connect.data import (
     FrontChannelLogoutNotification,
     IdToken,
+    RpInitiatedLogoutRequest,
     TokenSuccessResponse,
 )
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
@@ -111,7 +112,15 @@ class LogoutView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
-        return HttpResponseRedirect(client.initiate_logout())
+
+        if settings.LOGOUT_REDIRECT_URL is not None:
+            logout_request = RpInitiatedLogoutRequest(
+                post_logout_redirect_uri=resolve_url(settings.LOGOUT_REDIRECT_URL),
+            )
+        else:
+            logout_request = None
+
+        return HttpResponseRedirect(client.initiate_logout(logout_request))
 
 
 class FrontChannelLogoutNotificationView(View):
