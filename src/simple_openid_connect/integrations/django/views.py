@@ -115,7 +115,9 @@ class LogoutView(View):
 
         if settings.LOGOUT_REDIRECT_URL is not None:
             logout_request = RpInitiatedLogoutRequest(
-                post_logout_redirect_uri=resolve_url(settings.LOGOUT_REDIRECT_URL),
+                post_logout_redirect_uri=request.build_absolute_uri(
+                    resolve_url(settings.LOGOUT_REDIRECT_URL)
+                ),
                 client_id=client.client_auth.client_id,
             )
         else:
