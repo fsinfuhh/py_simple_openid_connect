@@ -31,17 +31,6 @@ from simple_openid_connect.integrations.django.models import OpenidUser
 logger = logging.getLogger(__name__)
 
 
-def _get_redirect_args(request: HttpRequest) -> Mapping[str, str]:
-    """
-    Calculate arguments which are appended to the redirect_uri
-    """
-    if "next" in request.GET.keys():
-        return {
-            "next": request.GET["next"],
-        }
-    return {}
-
-
 class InitLoginView(View):
     """
     The view which handles initiating a login.
@@ -51,10 +40,10 @@ class InitLoginView(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
+        if "next" in request.GET.keys():
+            request.session["next"] = request.GET["next"]
         client = OpenidAppConfig.get_instance().get_client(request)
-        redirect = client.authorization_code_flow.start_authentication(
-            additional_redirect_args=_get_redirect_args(request),
-        )
+        redirect = client.authorization_code_flow.start_authentication()
         return HttpResponseRedirect(redirect)
 
 
@@ -74,7 +63,6 @@ class LoginCallbackView(View):
 
         token_response = client.authorization_code_flow.handle_authentication_result(
             current_url=request.get_full_path(),
-            additional_redirect_args=_get_redirect_args(request),
         )
         if not isinstance(token_response, TokenSuccessResponse):
             return TemplateResponse(
@@ -96,8 +84,8 @@ class LoginCallbackView(View):
         login(request, user.user, backend=settings.AUTHENTICATION_BACKENDS[0])
 
         # redirect to the next get parameter if present, otherwise to the configured default
-        if "next" in request.GET.keys():
-            return HttpResponseRedirect(redirect_to=request.GET["next"])
+        if "next" in request.session.keys():
+            return HttpResponseRedirect(redirect_to=request.session["next"])
         else:
             return HttpResponseRedirect(
                 redirect_to=resolve_url(settings.LOGIN_REDIRECT_URL)
