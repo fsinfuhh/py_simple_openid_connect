@@ -27,14 +27,10 @@ class AuthorizationCodeFlowClient:
     def __init__(self, base_client: "OpenidClient"):
         self._base_client = base_client
 
-    def start_authentication(
-        self, additional_redirect_args: Optional[Mapping[str, str]] = None
-    ) -> str:
+    def start_authentication(self) -> str:
         """
         Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
         returning a which the end user now needs to visit.
-
-        :param additional_redirect_args: Additional URL parameters that are added to the redirect uri.
 
         :raises ImpossibleOperationError: If the client has no redirect_uri configured and therefore cannot perform this operation.
 
@@ -46,8 +42,6 @@ class AuthorizationCodeFlowClient:
             )
 
         redirect_uri = furl(self._base_client.authentication_redirect_uri)
-        if additional_redirect_args is not None:
-            redirect_uri.args.update(additional_redirect_args)
 
         return impl.start_authentication(
             self._base_client.provider_config.authorization_endpoint,

@@ -102,8 +102,7 @@ def test_directly_accessing_protected_resource(
                 {
                     "client_id": settings.OPENID_CLIENT_ID,
                     "redirect_uri": settings.OPENID_BASE_URI
-                    + resolve_url(settings.OPENID_REDIRECT_URI)
-                    + "?next=%2Ftest-protected-view%2F",
+                    + resolve_url(settings.OPENID_REDIRECT_URI),
                     "response_type": "code",
                     "scope": settings.OPENID_SCOPE,
                 }
@@ -113,7 +112,7 @@ def test_directly_accessing_protected_resource(
         headers={
             "Location": settings.OPENID_BASE_URI
             + resolve_url(settings.OPENID_REDIRECT_URI)
-            + "?code=code.foobar123&next=%2Ftest-protected-view%2F"
+            + "?code=code.foobar123"
         },
     )
     response_mock.post(
@@ -125,8 +124,7 @@ def test_directly_accessing_protected_resource(
                     "code": "code.foobar123",
                     "grant_type": "authorization_code",
                     "redirect_uri": settings.OPENID_BASE_URI
-                    + resolve_url(settings.OPENID_REDIRECT_URI)
-                    + "?next=%2Ftest-protected-view%2F",
+                    + resolve_url(settings.OPENID_REDIRECT_URI),
                 }
             ),
             matchers.header_matcher(
