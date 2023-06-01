@@ -41,7 +41,7 @@ class InitLoginView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
         if "next" in request.GET.keys():
-            request.session["next"] = request.GET["next"]
+            request.session["login_redirect_url"] = request.GET["next"]
         client = OpenidAppConfig.get_instance().get_client(request)
         redirect = client.authorization_code_flow.start_authentication()
         return HttpResponseRedirect(redirect)
@@ -84,8 +84,10 @@ class LoginCallbackView(View):
         login(request, user.user, backend=settings.AUTHENTICATION_BACKENDS[0])
 
         # redirect to the next get parameter if present, otherwise to the configured default
-        if "next" in request.session.keys():
-            return HttpResponseRedirect(redirect_to=request.session["next"])
+        if "login_redirect_url" in request.session.keys():
+            return HttpResponseRedirect(
+                redirect_to=request.session["login_redirect_url"]
+            )
         else:
             return HttpResponseRedirect(
                 redirect_to=resolve_url(settings.LOGIN_REDIRECT_URL)
