@@ -222,7 +222,7 @@ class IdToken(OpenidBaseModel):
             This is usually an empty list but if the token is intended to be used by more than one client, all of these need to be listed in the tokens :data:`IdToken.aud` field, and they all need to be known and trusted by this client.
         :param min_iat: Minimum value that the tokens :data:`IdToken.iat` claim must be.
             This value is a posix timestamp and defaults to 0 which allows arbitrarily old `iat` dates.
-        :param validate_acr: A callable that receives this tokens :data:`IdToken.acr` value and must perform it own validation.
+        :param validate_acr: A callable that receives this tokens :data:`IdToken.acr` value and must perform its own validation.
             This is necessary because the value of acr is outside OpenId-Connect specification and usage specific.
             If not given, acr is assumed to always be valid.
         :param min_auth_time: The point in time which is considered the minimum at which a user should have authenticated.

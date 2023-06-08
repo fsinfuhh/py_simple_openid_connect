@@ -2,7 +2,18 @@
 A more contiguous client implementation of the Openid-Connect protocol that offers simpler APIs at the cost of losing some flexibility.
 """
 
-from typing import Any, Dict, List, Literal, Mapping, Optional, Type, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from cryptojwt import JWK
 from cryptojwt.jwk.jwk import key_from_jwk_dict
@@ -175,14 +186,50 @@ class OpenidClient:
             self.provider_config.userinfo_endpoint, access_token
         )
 
-    def decode_id_token(self, raw_token: str) -> IdToken:
+    def decode_id_token(
+        self,
+        raw_token: str,
+        nonce: Union[str, None] = None,
+        extra_trusted_audiences: List[str] = [],
+        min_iat: float = 0,
+        validate_acr: Union[Callable[[str], None], None] = None,
+        min_auth_time: float = 0,
+    ) -> IdToken:
         """
-        Decode and verify an encoded and signed id token
+        Decode and verify an encoded and signed id token.
+
+        Issuer and client id for validation are taken from the client configuration but extra optional validation
+        information can be supplied as well.
 
         :param raw_token: The encoded and signed id token.
             This could e.g. be retrieved as part of the authentication process and returned by the OP in :data:`TokenSuccessResponse.id_token <simple_openid_connect.flows.authorization_code_flow.data.TokenSuccessResponse.id_token>`.
+        :param nonce: The nonce that was used during authentication.
+            It is carried over by the OP into ID-Tokens and must now match.
+        :param extra_trusted_audiences: Which token audiences (client ids) to consider trusted beside this client's own client_id.
+            This is usually an empty list but if the token is intended to be used by more than one client, all of these need to be listed in the tokens :data:`IdToken.aud` field, and they all need to be known and trusted by this client.
+        :param min_iat: Minimum value that the tokens :data:`IdToken.iat` claim must be.
+            This value is a posix timestamp and defaults to 0 which allows arbitrarily old `iat` dates.
+        :param validate_acr: A callable that receives this tokens :data:`IdToken.acr` value and must perform its own validation.
+            This is necessary because the value of acr is outside OpenId-Connect specification and usage specific.
+            If not given, acr is assumed to always be valid.
+        :param min_auth_time: The point in time which is considered the minimum at which a user should have authenticated.
+            It basically means that if the user was authenticated very far in the past and reused their session, the time at which the original authentication took place must be greater than this value.
+            This is only validated if the :data:`IdToken.auth_time` is present in the token.
+            This value is a posix timestamp and default to 0 which allows arbitrarily old `auth_time` dates.
+
+        :raises ValidationError: if the validation fails
         """
-        return IdToken.parse_jws(raw_token, self.provider_keys)
+        token = IdToken.parse_jws(raw_token, self.provider_keys)
+        token.validate_extern(
+            issuer=self.provider_config.issuer,
+            client_id=self.client_auth.client_id,
+            nonce=nonce,
+            extra_trusted_audiences=extra_trusted_audiences,
+            min_iat=min_iat,
+            validate_acr=validate_acr,
+            min_auth_time=min_auth_time,
+        )
+        return token
 
     def exchange_refresh_token(
         self, refresh_token: str
