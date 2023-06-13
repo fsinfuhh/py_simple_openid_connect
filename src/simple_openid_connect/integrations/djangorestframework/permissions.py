@@ -13,6 +13,7 @@ from django.http import HttpRequest
 from rest_framework.permissions import BasePermission
 
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
+from simple_openid_connect.integrations.django.models import OpenidSession
 from simple_openid_connect.integrations.djangorestframework.authentication import (
     AuthenticatedViaToken,
 )
@@ -20,7 +21,7 @@ from simple_openid_connect.integrations.djangorestframework.authentication impor
 logger = logging.getLogger(__name__)
 
 
-class HasTokenScope(BasePermission):  # type: ignore # ignores a metaclass conflict that doesn't really exist
+class _HasScope(BasePermission):  # type: ignore # ignores a metaclass conflict that doesn't really exist
     @staticmethod
     def _get_required_scopes(view: Any) -> str:
         if hasattr(view, "required_scopes"):
@@ -41,6 +42,31 @@ class HasTokenScope(BasePermission):  # type: ignore # ignores a metaclass confl
             for i_scope in required_scopes.split(" ")
         )
 
+
+class HasSessionScope(_HasScope):  # type: ignore
+    def has_permission(self, request: HttpRequest, view: Any) -> bool:
+        # validate that enough information is present to authorize the request
+        if not request.user.is_authenticated:
+            logger.error(
+                "session permission is supposed to be checked but the request was not authenticated; denying access"
+            )
+            return False
+        if not hasattr(request.user, "openid"):
+            logger.error(
+                "session permission is supposed to be checked but the request was not authenticated with an OpenidSession; denying access"
+            )
+            return False
+        session_scopes = OpenidSession.objects.filter(
+            sid=request.user.openid.id_token.sid
+        ).values_list("scope", flat=True)
+        required_scopes = self._get_required_scopes(view)
+        for session_scope in session_scopes:
+            if self._validate_scopes(required_scopes, session_scope):
+                return True
+        return False
+
+
+class HasTokenScope(_HasScope):  # type: ignore
     def has_permission(self, request: HttpRequest, view: Any) -> bool:
         # validate that enough information is present to authorize the request
         if not hasattr(request, "auth") or not isinstance(
