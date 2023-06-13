@@ -44,6 +44,8 @@ class _HasScope(BasePermission):  # type: ignore # ignores a metaclass conflict 
 
 
 class HasSessionScope(_HasScope):  # type: ignore
+    """Check whether an authenticated user has a session with the required scope"""
+
     def has_permission(self, request: HttpRequest, view: Any) -> bool:
         # validate that enough information is present to authorize the request
         if not request.user.is_authenticated:
@@ -56,9 +58,7 @@ class HasSessionScope(_HasScope):  # type: ignore
                 "session permission is supposed to be checked but the request was not authenticated with an OpenidSession; denying access"
             )
             return False
-        session_scopes = OpenidSession.objects.filter(
-            sid=request.user.openid.id_token.sid
-        ).values_list("scope", flat=True)
+        session_scopes = request.user.openid.sessions.values_list("scope", flat=True)
         required_scopes = self._get_required_scopes(view)
         for session_scope in session_scopes:
             if self._validate_scopes(required_scopes, session_scope):
@@ -67,6 +67,8 @@ class HasSessionScope(_HasScope):  # type: ignore
 
 
 class HasTokenScope(_HasScope):  # type: ignore
+    """Check whether an authenticated user has a token with the required scope"""
+
     def has_permission(self, request: HttpRequest, view: Any) -> bool:
         # validate that enough information is present to authorize the request
         if not hasattr(request, "auth") or not isinstance(
