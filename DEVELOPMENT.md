@@ -31,6 +31,12 @@ source ./venv/bin/activate
 pip install -e .[django,djangorestframework] -r requirements.dev.txt
 ```
 
+## How to run the Tests
+
+```shell
+pytest
+```
+
 ## How to release
 
 In order to release a new version, the following steps are necessary:

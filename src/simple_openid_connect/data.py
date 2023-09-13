@@ -337,6 +337,24 @@ class JwtAccessToken(OpenidBaseModel):
     amr: Optional[List[str]]
     "OPTIONAL. Authentication Methods References JSON array of strings that are identifiers for authentication methods used in the authentication For instance, values might indicate that both password and OTP authentication methods were used The definition of particular values to be used in the amr Claim is beyond the scope of this specification Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The amr value is an array of case sensitive strings."
 
+    scope: Optional[str]
+    "OPTIONAL. Scopes to which the token grants access. Multiple scopes are encoded space separated. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present."
+
+    def validate_extern(self, issuer: str) -> None:
+        """
+        Validate this Access-Token with external data for consistency.
+
+        :param issuer: The issuer that this token is supposed to originate from.
+            Should usually be :data:`ProviderMetadata.issuer`.
+        """
+        # validate issuer
+        validate_that(
+            self.iss == issuer, "Access-Token was issued from unexpected issuer"
+        )
+
+        # validate expiry
+        validate_that(self.exp > time.time(), "The Access-Token is expired")
+
 
 class UserinfoRequest(OpenidBaseModel):
     """

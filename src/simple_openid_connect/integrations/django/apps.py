@@ -15,7 +15,7 @@ from django.utils.module_loading import import_string
 from pydantic import BaseModel
 
 from simple_openid_connect.client import OpenidClient
-from simple_openid_connect.data import IdToken
+from simple_openid_connect.data import IdToken, JwtAccessToken
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class OpenidAppConfig(AppConfig):
         return import_string(self.safe_settings.OPENID_CREATE_USER_FUNC)  # type: ignore
 
     @property
-    def update_user_func(self) -> Callable[[Any, IdToken], None]:
+    def update_user_func(self) -> Callable[[Any, Union[IdToken, JwtAccessToken]], None]:
         """
         The function which is configured via django settings and which updates user objects based on id tokens.
         """

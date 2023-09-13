@@ -2,16 +2,16 @@
 Default implementations for mapping tokens to user objects
 """
 
-from typing import Any, Mapping, Type
+from typing import Any, Mapping, Type, Union
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 
-from simple_openid_connect.data import IdToken
+from simple_openid_connect.data import IdToken, JwtAccessToken
 
 
 def automap_user_attrs(
-    user_t: Type["AbstractBaseUser"], id_token: IdToken
+    user_t: Type["AbstractBaseUser"], id_token: Union[IdToken, JwtAccessToken]
 ) -> Mapping[str, Any]:
     """
     Inspect the given user model, discover its attributes based on some heuristics and fetch their values from the id token.
@@ -55,7 +55,7 @@ def create_user_from_token(id_token: IdToken) -> Any:
     return user_t.objects.create(**user_attrs)
 
 
-def update_user_from_token(user: Any, id_token: IdToken) -> None:
+def update_user_from_token(user: Any, id_token: Union[IdToken, JwtAccessToken]) -> None:
     """
     Implementation for updating an existing user object with new data
 
