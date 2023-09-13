@@ -7,9 +7,9 @@ and style of this project.
 
 ```text
 py_simple_openid_connect/
-├ src/simple_openid_connect/  (where all the main python code is located) 
-│  ├ data.py                  (message definitions for all OIDC interactions) 
-│  ├ client.py                (entry point for the high level client api) 
+├ src/simple_openid_connect/  (where all the main python code is located)
+│  ├ data.py                  (message definitions for all OIDC interactions)
+│  ├ client.py                (entry point for the high level client api)
 │  ├ <others>                 (implementations for specific OIDC features)
 │  ├ flows/                   (implementations of different authorization flows)
 │  └ integrations/            (additional integrations into external software)
