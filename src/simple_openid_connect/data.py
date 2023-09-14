@@ -492,7 +492,12 @@ class TokenRequest(OpenidBaseModel):
     class Config:
         extra = Extra.allow
 
-    grant_type: Union[Literal["authorization_code", "refresh_token", "password"], str]
+    grant_type: Union[
+        Literal[
+            "authorization_code", "refresh_token", "password", "client_credentials"
+        ],
+        str,
+    ]
     "REQUIRED. Which type of token exchange this request is."
 
     code: Optional[str] = None
