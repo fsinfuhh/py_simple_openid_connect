@@ -92,10 +92,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = "default-after-login"
 
-OPENID_BASE_URI = "http://localhost:8000"
-OPENID_ISSUER = "http://localhost:3000"
-OPENID_CLIENT_ID = "test-client"
-OPENID_CLIENT_SECRET = "foobar123"
+OPENID_BASE_URI = "https://app.example.com"
+OPENID_ISSUER = "https://provider.example.com"
+OPENID_CLIENT_ID = "test-client-id"
+OPENID_CLIENT_SECRET = "test-client-secret"
 OPENID_SCOPE = "openid profile email"
 
 LOGIN_URL = "simple_openid_connect:login"
