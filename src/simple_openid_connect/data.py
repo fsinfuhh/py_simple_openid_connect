@@ -301,6 +301,13 @@ class JwtAccessToken(OpenidBaseModel):
     The specification defines a profile for issuing access tokens in JSON Web Token (JWT) format.
     Authorization servers from different vendors may leverage this profile to issue access tokens in an interoperable
     manner but they are in no way required to do so.
+
+    .. note::
+
+        While the RFC defines some fields to be required, some vendors issue tokens that look they conform to the RFC
+        but in fact do not because some required fields are missing.
+        To allow usage of these tokens even though they do not strictly conform to the RFC, almost all fields are marked
+        optional.
     """
 
     class Config:
@@ -308,25 +315,25 @@ class JwtAccessToken(OpenidBaseModel):
         allow_mutation = False
 
     iss: AnyHttpUrl
-    "REQUIRED. The 'iss' (issuer) claim identifies the principal that issued the JWT. The processing of this claim is generally application specific. The 'iss' value is a case-sensitive string containing a StringOrURI value."
+    "The 'iss' (issuer) claim identifies the principal that issued the JWT. The processing of this claim is generally application specific. The 'iss' value is a case-sensitive string containing a StringOrURI value."
 
     exp: int
-    "REQUIRED. The 'exp' (expiration time) claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing. The processing of the 'exp' claim requires that the current date/time MUST be before the expiration date/time listed in the 'exp' claim. Implementers MAY provide for some small leeway, usually no more than a few minutes, to account for clock skew. Its value MUST be a number containing a NumericDate value."
+    "The 'exp' (expiration time) claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing. The processing of the 'exp' claim requires that the current date/time MUST be before the expiration date/time listed in the 'exp' claim. Implementers MAY provide for some small leeway, usually no more than a few minutes, to account for clock skew. Its value MUST be a number containing a NumericDate value."
 
-    aud: str
-    "REQUIRED. The 'aud' (audience) claim identifies the recipients that the JWT is intended for. Each principal intended to process the JWT MUST identify itself with a value in the audience claim. If the principal processing the claim does not identify itself with a value in the 'aud' claim when this claim is present, then the JWT MUST be rejected. In the general case, the 'aud' value is an array of case-sensitive strings, each containing a StringOrURI value. In the special case when the JWT has one audience, the 'aud' value MAY be a single case-sensitive string containing a StringOrURI value. The interpretation of audience values is generally application specific."
+    aud: Optional[str]
+    "The 'aud' (audience) claim identifies the recipients that the JWT is intended for. Each principal intended to process the JWT MUST identify itself with a value in the audience claim. If the principal processing the claim does not identify itself with a value in the 'aud' claim when this claim is present, then the JWT MUST be rejected. In the general case, the 'aud' value is an array of case-sensitive strings, each containing a StringOrURI value. In the special case when the JWT has one audience, the 'aud' value MAY be a single case-sensitive string containing a StringOrURI value. The interpretation of audience values is generally application specific."
 
-    sub: str
-    "REQUIRED. Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
+    sub: Optional[str]
+    "Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
 
-    client_id: str
-    "REQUIRED. The client_id claim carries the client identifier of the OpenId client that requested the token."
+    client_id: Optional[str]
+    "The client_id claim carries the client identifier of the OpenId client that requested the token."
 
-    iat: int
-    "REQUIRED. As defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at which the JWT access token was issued."
+    iat: Optional[int]
+    "As defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at which the JWT access token was issued."
 
-    jti: str
-    "REQUIRED. Unique identifier for the token."
+    jti: Optional[str]
+    "Unique identifier for the token."
 
     auth_time: Optional[int]
     "Time when the End-User authentication occurred Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time When a max_age request is made or when auth_time is requested as an Essential Claim, then this Claim is REQUIRED; otherwise, its inclusion is OPTIONAL (The auth_time Claim semantically corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] auth_time response parameter.)"
