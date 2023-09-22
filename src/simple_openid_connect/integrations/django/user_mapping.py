@@ -1,71 +1,205 @@
 """
-Default implementations for mapping tokens to user objects
+Default implementations for mapping tokens to user objects.
+
+This implementation can be overriden by extending the :class:`UserMapper` class and then setting the django settings
+variable ``OPENID_USER_MAPPER`` to an import string pointing to the newly created class.
 """
+import logging
+from typing import Any, Tuple, Union
 
-from typing import Any, Mapping, Type, Union
-
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 
-from simple_openid_connect.data import IdToken, JwtAccessToken
+from simple_openid_connect.client import OpenidClient
+from simple_openid_connect.data import (
+    IdToken,
+    JwtAccessToken,
+    TokenIntrospectionErrorResponse,
+    TokenIntrospectionSuccessResponse,
+    UserinfoSuccessResponse,
+)
+from simple_openid_connect.exceptions import ValidationError
+from simple_openid_connect.integrations.django.apps import OpenidAppConfig
+from simple_openid_connect.integrations.django.models import OpenidUser
+
+logger = logging.getLogger(__name__)
 
 
-def automap_user_attrs(
-    user_t: Type["AbstractBaseUser"], id_token: Union[IdToken, JwtAccessToken]
-) -> Mapping[str, Any]:
+FederatedUserData = Union[
+    IdToken, UserinfoSuccessResponse, TokenIntrospectionSuccessResponse, JwtAccessToken
+]
+"Type alias for the different classes which can provide information about a federated user."
+
+
+class UserMapper:
     """
-    Inspect the given user model, discover its attributes based on some heuristics and fetch their values from the id token.
+    A base class which is responsible for mapping federated users into the local system.
 
-    :param user_t: The user model type
-    :param id_token: The id token which contains information about the user
+    This class is used in different parts of *simple_openid_connect* and the callgraph is sketched below:
 
-    :return: A mapping of user model attribute to values as found in the id token
+    .. code-block:: text
+
+       ┌──────────────────────────────────┐   ┌──────────────────────────────────┐   ┌───────────────────┐
+       │ @access_token_required decorator │   │ DRF AccessTokenAuthentication    │   │ LoginCallbackView │
+       └────────────────┬─────────────────┘   └─────────────────┬────────────────┘   └─────────┬─────────┘
+                        │                                       │                              │
+                        └───────────────────┬───────────────────┘                              │
+                                            ↓                                                  │
+                     ┌──────────────────────┴─────────────────────┐                            │
+                     │ UserMapper.handle_federated_access_token() │                            │
+                     └──────────────────────┬─────────────────────┘                            │
+                                            │                                                  │
+                                            └──────────────────────────┬───────────────────────┘
+                                                                       ↓
+                                                  ┌────────────────────┴───────────────────┐
+                                                  │ UserMapper.handle_federated_userinfo() │
+                                                  └────────────────────┬───────────────────┘
+                                                                       ↓
+                                                      ┌────────────────┴────────────────┐
+                                                      │ UserMapper.automap_user_attrs() │
+                                                      └─────────────────────────────────┘
     """
-    result = {}
 
-    if issubclass(user_t, AbstractUser):
-        # username
-        if hasattr(id_token, "preferred_username"):
-            result[user_t.USERNAME_FIELD] = id_token.preferred_username
-        # email
-        if hasattr(id_token, "email"):
-            result[user_t.EMAIL_FIELD] = id_token.email
-        # given name
-        if hasattr(id_token, "given_name"):
-            result["first_name"] = id_token.given_name
-        # family name
-        if hasattr(id_token, "family_name"):
-            result["last_name"] = id_token.family_name
+    def handle_federated_userinfo(self, user_data: FederatedUserData) -> Any:
+        """
+        Entry point for dynamically creating or updating user data based on information obtained through OpenID.
 
-    return result
+        The function automatically creates a new user model instance if the user is unknown or updates the locally
+        stored user information based on the federated data.
 
+        :param user_data: Information about the user.
 
-def create_user_from_token(id_token: IdToken) -> Any:
-    """
-    Implementation for creating a user object from an id token.
+        :returns: An instance of the applications user model.
+        """
+        # validate that user data contains at least a user id
+        if user_data.sub is None:
+            raise ValidationError(
+                "could not map user to token because the issuer did not return a 'sub' claim in its token introspection response"
+            )
 
-    It works by calling :func:`automap_user_attrs` with the token and passing that to the user models `objects.create()` method.
+        openid_user = OpenidUser.objects.get_or_create_for_sub(user_data.sub)
+        user = openid_user.user
+        self.automap_user_attrs(user, user_data)
+        user.save()
+        return user
 
-    :param id_token: The id token
+    def handle_federated_access_token(
+        self,
+        access_token: str,
+        oidc_client: OpenidClient,
+        required_scopes: Union[str, None] = None,
+    ) -> Tuple[Any, FederatedUserData]:
+        """
+        Entry point for dynamically creating or updating user data based on an access token which was provided by a user.
 
-    :returns: The created user object
-    """
-    user_t = get_user_model()
-    user_attrs = automap_user_attrs(user_t, id_token)
-    return user_t.objects.create(**user_attrs)
+        This method inspects the token and then calls into :meth:`UserMapper.handle_federated_userinfo()` once more information
+        about the user is available.
 
+        :param access_token: The raw access token that was passed to this application which should identify the user.
+        :param oidc_client: An OpenID client which is used to access the OpenID providers signing keys or to introspect the token if necessary.
+        :param required_scopes: Scopes to which the access token is required to have access.
+            If ``None`` is passed, the default scopes from django settings ``OPENID_SCOPE`` are used.
+            Pass an empty string if no scopes are required.
 
-def update_user_from_token(user: Any, id_token: Union[IdToken, JwtAccessToken]) -> None:
-    """
-    Implementation for updating an existing user object with new data
+        :returns: An instance of the applications user model.
 
-    This works by calling :func:`automap_user_attrs` with the token and setting all those attributes on the user object.
+        :raises ValidationError: If the passed token cannot be validated or is decidedly invalid.
+        """
+        if required_scopes is None:
+            required_scopes = OpenidAppConfig.get_instance().safe_settings.OPENID_SCOPE
 
-    :param user: The user object that should be updated.
-    :param id_token: The token which contains user information.
-    """
-    user_t = get_user_model()
-    user_attrs = automap_user_attrs(user_t, id_token)
-    for name, value in user_attrs.items():
-        setattr(user, name, value)
-    user.save()
+        # try to parse the raw token as JWT
+        user_data = (
+            None
+        )  # type: JwtAccessToken | TokenIntrospectionSuccessResponse | None
+        try:
+            # parse an validate the general token structure
+            token = JwtAccessToken.parse_jwt(
+                access_token,
+                oidc_client.provider_keys,
+                oidc_client.provider_config.issuer,
+            )
+            token.validate_extern(oidc_client.provider_config.issuer)
+
+            # validate token scope for required access
+            if token.scope is None:
+                raise ValidationError("token does not contain required scopes claim")
+            elif any(
+                i_scope not in token.scope.split(" ")
+                for i_scope in required_scopes.split(" ")
+            ):
+                raise ValidationError(
+                    f"token has access to scopes '{token.scope}' but '{required_scopes}' are required"
+                )
+
+            # the token is determined to be valid, so we can use it as user_data
+            user_data = token
+
+        # fall back to introspecting the token at the issuer
+        except Exception:
+            logger.debug(
+                "could not parse access token as JWT, falling back to calling the providers token introspection endpoint"
+            )
+            introspect_response = oidc_client.introspect_token(access_token)
+            if isinstance(introspect_response, TokenIntrospectionErrorResponse):
+                logger.critical(
+                    "could not introspect token for validity: %s", introspect_response
+                )
+                raise ValidationError(
+                    f"could not introspect token at the issuer: {introspect_response}"
+                )
+
+            # fail if the token is expired
+            if not introspect_response.active:
+                raise ValidationError("token is expired")
+
+            # validate token scope for required access
+            if introspect_response.scope is None:
+                logger.error(
+                    "could not determine access token access because the issuer did not return the tokens scope during token instrospection"
+                )
+                raise ValidationError(
+                    "could not determine token scope because the issuer did not return the tokens scope during token introspection"
+                )
+            elif any(
+                i_scope not in introspect_response.scope.split(" ")
+                for i_scope in required_scopes.split(" ")
+            ):
+                raise ValidationError(
+                    f"token has access to scopes '{introspect_response.scope}' but '{required_scopes}' are required"
+                )
+
+            # the token is determined to be valid, so we can use it as user_data
+            user_data = introspect_response
+
+        return self.handle_federated_userinfo(user_data), user_data
+
+    def automap_user_attrs(
+        self,
+        user: "AbstractBaseUser",
+        user_data: FederatedUserData,
+    ) -> None:
+        """
+        Inspect the given user instance model, discover its attributes based on some heuristics and set their values
+        from the passed user information.
+
+        .. note::
+
+           ``user.save()`` is not automatically called by this method to allow extending it via class inheritance
+            without causing multiple database operations.
+
+        :param user: The user instance on which attributes should be set
+        :param user_data: Information about the user which was made available through OpenID.
+        """
+        if isinstance(user, AbstractUser):
+            # username
+            if hasattr(user_data, "preferred_username"):
+                setattr(user, user.USERNAME_FIELD, user_data.preferred_username)
+            # email
+            if hasattr(user_data, "email"):
+                setattr(user, user.EMAIL_FIELD, user_data.email)
+            # given name
+            if hasattr(user_data, "given_name") and hasattr(user, "first_name"):
+                user.first_name = user_data.given_name
+            # family name
+            if hasattr(user_data, "family_name") and hasattr(user, "family_name"):
+                user.last_name = user_data.family_name

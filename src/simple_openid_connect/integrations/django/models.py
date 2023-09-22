@@ -18,53 +18,18 @@ class OpenidUserManager(models.Manager["OpenidUser"]):
     Custom user manager for the :class:`OpenidUser` model.
     """
 
-    def get_or_create_from_id_token(self, id_token: IdToken) -> "OpenidUser":
+    def get_or_create_for_sub(self, sub: str) -> "OpenidUser":
         """
-        Dynamically get the existing user from the provided token or create a new user if none already exists.
-        """
+        Dynamically get the existing model instance from the provided subject or create a new one if none already exists.
 
-        queryset = self.filter(sub=id_token.sub)
-        if queryset.exists():
-            # update existing objects
-            openid_user = queryset.get()
-            openid_user.id_token = id_token
-            openid_user.save()
-            OpenidAppConfig.get_instance().update_user_func(openid_user.user, id_token)
-            return openid_user
-        else:
-            # create new objects
-            user = OpenidAppConfig.get_instance().create_user_func(id_token)
-            openid_user = self.create(
-                user=user, sub=id_token.sub, _id_token=id_token.json()
-            )
-            return openid_user
-
-    def get_or_create_for_sub(
-        self, sub: str, username: Optional[str] = None
-    ) -> "OpenidUser":
-        """
-        Dynamically get the existing user from the provided subject or create a new user if none already exists.
-
-        This also ensures that a django auth model user exists (with the given username if present).
-        This method is intended to be used when minimal user information is known but *things* should still be linked to
-        a user i.e. when this app serves as a resource server and receives its user information through access token
-        introspection.
+        This method also ensures that a django auth model user exists which is linked to this OpenidUser.
         """
         user_t = get_user_model()
         queryset = self.filter(sub=sub)
         if queryset.exists():
-            # update existing object
-            openid_user = queryset.get()
-            if username is not None and hasattr(user_t, "USERNAME_FIELD"):
-                setattr(openid_user.user, user_t.USERNAME_FIELD, username)
-                openid_user.user.save()
-            return openid_user
+            return queryset.get()
         else:
-            # create new objects
-            if username is not None and hasattr(user_t, "USERNAME_FIELD"):
-                user = user_t.objects.create(**{user_t.USERNAME_FIELD: username})
-            else:
-                user = user_t.objects.create()
+            user = user_t.objects.create()
             return self.create(user=user, sub=sub)
 
 

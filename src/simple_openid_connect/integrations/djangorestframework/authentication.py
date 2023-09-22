@@ -13,11 +13,14 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
 from simple_openid_connect.data import (
+    JwtAccessToken,
     TokenIntrospectionErrorResponse,
     TokenIntrospectionSuccessResponse,
 )
+from simple_openid_connect.exceptions import ValidationError
 from simple_openid_connect.integrations.django import models
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
+from simple_openid_connect.integrations.django.user_mapping import FederatedUserData
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +32,12 @@ class AuthenticatedViaToken:
     """
 
     def __init__(
-        self, token: str, token_introspection: TokenIntrospectionSuccessResponse
+        self,
+        token: str,
+        user_data: FederatedUserData,
     ):
         self.token = token
-        self.token_introspection = token_introspection
+        self.user_data = user_data
 
     def __str__(self) -> str:
         return self.token
@@ -40,24 +45,8 @@ class AuthenticatedViaToken:
 
 class AccessTokenAuthentication(BaseAuthentication):
     """
-    An authentication scheme that interprets ``Authorization: Bearer ...`` http headers as access tokens and validates
-    by using the Openid providers token introspection capabilities.
-
-    By default, this may confirm that a request is authenticated and has appropriate access while not identifying a user.
-    In that case, only an ``AnonymousUser`` instance is set on the request.
-    If this is not desired, either set the ``allow_anonymous`` constructor parameter to ``False`` or use the
-    :class:`AccessTokenNoAnonAuthentication` authentication class.
+    An authentication scheme that interprets ``Authorization: Bearer ...`` http headers as access tokens.
     """
-
-    def __init__(
-        self,
-        allow_anonymous: Optional[bool] = True,
-    ):
-        """
-        :param allow_anonymous: Whether access is allowed when the token is valid but no user can be identified.
-            This is the case if the Openid providers token introspection endpoint does not return a user id.
-        """
-        self.allow_anonymous = allow_anonymous
 
     def authenticate(
         self, request: HttpRequest
@@ -68,52 +57,20 @@ class AccessTokenAuthentication(BaseAuthentication):
         ].startswith("Bearer "):
             return None
 
-        # introspect passed token
-        token = request.headers["Authorization"].split(" ", 1)[1]
         oidc_client = OpenidAppConfig.get_instance().get_client(request)
-        introspect_response = oidc_client.introspect_token(token)
+        raw_token = request.headers["Authorization"].split(" ", 1)[1]
 
-        if isinstance(introspect_response, TokenIntrospectionErrorResponse):
-            logger.error(
-                "could not introspect access token for validity: %s",
-                introspect_response,
+        # handle access token while not verifying scopes because those are verified by a permission class
+        try:
+            (
+                user,
+                userinfo,
+            ) = OpenidAppConfig.get_instance().user_mapper.handle_federated_access_token(
+                raw_token, oidc_client, required_scopes=""
             )
+            return user, AuthenticatedViaToken(raw_token, userinfo)
+        except ValidationError:
             raise AuthenticationFailed()
-
-        # raise if the token is expired
-        if not introspect_response.active:
-            logger.info(
-                "failing authentication because the access token is expired, token=%s",
-                token,
-            )
-            raise AuthenticationFailed()
-
-        # fetch user (if possible) and return authentication result
-        if introspect_response.sub is not None:
-            user = models.OpenidUser.objects.get_or_create_for_sub(
-                introspect_response.sub, introspect_response.username
-            ).user
-            return user, AuthenticatedViaToken(token, introspect_response)
-        else:
-            if not self.allow_anonymous:
-                logger.error(
-                    "failing authentication because anonymous access is forbidden but the token introspection returned no user information that can be used to identify the requesting user"
-                )
-                raise AuthenticationFailed()
-            return AnonymousUser(), AuthenticatedViaToken(token, introspect_response)
 
     def authenticate_header(self, request: HttpRequest) -> str:
         return "Bearer"
-
-
-class AccessTokenNoAnonAuthentication(AccessTokenAuthentication):
-    """
-    An authentication scheme that overwrites the default behavior of :class:`AccessTokenAuthentication` so that tokens
-    are only considered valid if a user can be uniquely identified.
-    """
-
-    def __init__(
-        self,
-        allow_anonymous: Optional[bool] = False,
-    ):
-        super().__init__(allow_anonymous)

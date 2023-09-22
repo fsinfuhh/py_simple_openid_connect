@@ -3,7 +3,8 @@ Django AppConfig for this app
 """
 
 import logging
-from typing import Any, Callable, Optional, Union
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from django.apps import AppConfig, apps
 from django.conf import settings
@@ -15,7 +16,9 @@ from django.utils.module_loading import import_string
 from pydantic import BaseModel
 
 from simple_openid_connect.client import OpenidClient
-from simple_openid_connect.data import IdToken, JwtAccessToken
+
+if TYPE_CHECKING:
+    from simple_openid_connect.integrations.django.user_mapping import UserMapper
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +34,8 @@ class SettingsModel(BaseModel):
     OPENID_SCOPE: str = "openid"
     OPENID_REDIRECT_URI: Optional[str] = "simple_openid_connect:login-callback"
     OPENID_BASE_URI: Optional[str]
-    OPENID_CREATE_USER_FUNC = (
-        "simple_openid_connect.integrations.django.user_mapping.create_user_from_token"
-    )
-    OPENID_UPDATE_USER_FUNC = (
-        "simple_openid_connect.integrations.django.user_mapping.update_user_from_token"
+    OPENID_USER_MAPPER = (
+        "simple_openid_connect.integrations.django.user_mapping.UserMapper"
     )
 
     class Config:
@@ -59,8 +59,7 @@ class OpenidAppConfig(AppConfig):
         # assert that are settings are as required
         try:
             _ = self.safe_settings
-            _ = self.create_user_func
-            _ = self.update_user_func
+            _ = self.user_mapper
         except Exception as e:
             raise ImproperlyConfigured(
                 f"django settings are invalid for openid usage: {e}"
@@ -75,26 +74,27 @@ class OpenidAppConfig(AppConfig):
         assert isinstance(instance, OpenidAppConfig)
         return instance
 
-    @property
+    @cached_property
     def safe_settings(self) -> SettingsModel:
         """
         type-validated version of django settings
         """
         return SettingsModel.from_orm(settings)
 
-    @property
-    def create_user_func(self) -> Callable[[IdToken], Any]:
+    @cached_property
+    def user_mapper(self) -> "UserMapper":
         """
-        The function which is configured via django settings and which creates new users based on id tokens.
+        A UserMapper instance of which the actual implementation is configured via django settings.
         """
-        return import_string(self.safe_settings.OPENID_CREATE_USER_FUNC)  # type: ignore
+        from simple_openid_connect.integrations.django.user_mapping import UserMapper
 
-    @property
-    def update_user_func(self) -> Callable[[Any, Union[IdToken, JwtAccessToken]], None]:
-        """
-        The function which is configured via django settings and which updates user objects based on id tokens.
-        """
-        return import_string(self.safe_settings.OPENID_UPDATE_USER_FUNC)  # type: ignore
+        cls = import_string(self.safe_settings.OPENID_USER_MAPPER)
+        if not issubclass(cls, UserMapper):
+            raise ImproperlyConfigured(
+                "OPENID_USER_MAPPER setting does not point to a subclass of UserMapper",
+                cls,
+            )
+        return cls()  # type: ignore
 
     def get_client(
         self, own_base_uri: Union[HttpRequest, str, None] = None

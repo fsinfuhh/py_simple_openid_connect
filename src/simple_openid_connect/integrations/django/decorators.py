@@ -77,74 +77,15 @@ def access_token_required(
             oidc_client = OpenidAppConfig.get_instance().get_client(request)
             raw_token = request.headers["Authorization"].split(" ", 1)[1]
 
-            # try to parse the token as JWT based access token
             try:
-                token = JwtAccessToken.parse_jwt(
-                    raw_token,
-                    oidc_client.provider_keys,
-                    oidc_client.provider_config.issuer,
+                (
+                    request.user,
+                    _,
+                ) = OpenidAppConfig.get_instance().user_mapper.handle_federated_access_token(
+                    raw_token, oidc_client, _required_scopes
                 )
-                try:
-                    token.validate_extern(oidc_client.provider_config.issuer)
-                except ValidationError:
-                    return _invalid_token_response(request)
-
-                # verify the tokens scope
-                if token.scope is None:
-                    logger.critical(
-                        "parsed access token as valid JWT but it did not contain a scopes claim"
-                    )
-                    raise Exception()  # fall back to introspection
-                elif any(
-                    scope not in token.scope.split(" ")
-                    for scope in _required_scopes.split(" ")
-                ):
-                    return _invalid_token_response(request)
-
-                # if the token contains user information, add it to the request
-                if token.sub is not None and hasattr(token, "username"):
-                    request.user = models.OpenidUser.objects.get_or_create_for_sub(
-                        token.sub, token.username
-                    ).user
-                    OpenidAppConfig.get_instance().update_user_func(request.user, token)
-
-            # fall back to introspecting the token at the issuer
-            except Exception:
-                logger.debug(
-                    "Could not parse token as JWT, trying token introspection next"
-                )
-
-                # introspect passed token
-                introspect_response = oidc_client.introspect_token(raw_token)
-
-                if isinstance(introspect_response, TokenIntrospectionErrorResponse):
-                    logger.critical(
-                        "could not introspect token for validity: %s",
-                        introspect_response,
-                    )
-                    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-
-                # return an error if the token is expired
-                if not introspect_response.active:
-                    return _invalid_token_response(request)
-
-                # validate token scope for required access
-                if introspect_response.scope is None:
-                    logger.critical(
-                        "could not determine access because token introspection did not return token scopes"
-                    )
-                    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-                elif any(
-                    scope not in introspect_response.scope.split(" ")
-                    for scope in _required_scopes.split(" ")
-                ):
-                    return _invalid_token_response(request)
-
-                # if the introspection response contains user information, add it to the request
-                if introspect_response.sub is not None:
-                    request.user = models.OpenidUser.objects.get_or_create_for_sub(
-                        introspect_response.sub, introspect_response.username
-                    ).user
+            except ValidationError:
+                return _invalid_token_response(request)
 
             # execute the decorated view function
             return view_func(request, *args, **kwargs)
