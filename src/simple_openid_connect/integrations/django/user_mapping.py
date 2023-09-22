@@ -120,15 +120,18 @@ class UserMapper:
             token.validate_extern(oidc_client.provider_config.issuer)
 
             # validate token scope for required access
-            if token.scope is None:
-                raise ValidationError("token does not contain required scopes claim")
-            elif any(
-                i_scope not in token.scope.split(" ")
-                for i_scope in required_scopes.split(" ")
-            ):
-                raise ValidationError(
-                    f"token has access to scopes '{token.scope}' but '{required_scopes}' are required"
-                )
+            if required_scopes != "":
+                if token.scope is None:
+                    raise ValidationError(
+                        "token does not contain required scopes claim"
+                    )
+                elif any(
+                    i_scope not in token.scope.split(" ")
+                    for i_scope in required_scopes.split(" ")
+                ):
+                    raise ValidationError(
+                        f"token has access to scopes '{token.scope}' but '{required_scopes}' are required"
+                    )
 
             # the token is determined to be valid, so we can use it as user_data
             user_data = token
