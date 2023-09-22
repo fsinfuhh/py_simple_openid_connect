@@ -100,7 +100,7 @@ class UserMapper:
             If ``None`` is passed, the default scopes from django settings ``OPENID_SCOPE`` are used.
             Pass an empty string if no scopes are required.
 
-        :returns: An instance of the applications user model.
+        :returns: An instance of the applications user model as well as additional data about the user.
 
         :raises ValidationError: If the passed token cannot be validated or is decidedly invalid.
         """
