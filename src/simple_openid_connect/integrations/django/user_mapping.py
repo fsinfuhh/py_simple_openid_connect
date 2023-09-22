@@ -196,6 +196,8 @@ class UserMapper:
             # username
             if hasattr(user_data, "preferred_username"):
                 setattr(user, user.USERNAME_FIELD, user_data.preferred_username)
+            elif hasattr(user_data, "username"):
+                setattr(user, user.USERNAME_FIELD, user_data.username)
             # email
             if hasattr(user_data, "email"):
                 setattr(user, user.EMAIL_FIELD, user_data.email)
