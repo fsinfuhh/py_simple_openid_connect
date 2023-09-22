@@ -37,6 +37,23 @@ pip install -e .[django,djangorestframework] -r requirements.dev.txt
 pytest
 ```
 
+## How to build the Documentation
+
+Assuming that the virtual environment is already activated, the following commands can be executed to build a local
+version of the projects documentation.
+
+```shell
+cd docs
+make html
+```
+
+Afterwards, the documentation is available as html files under `docs/_build/html`.
+To view it, either open the files directly in your browser or use your favourite local http server to serve the content
+(e.g. by running `python -m http.server -d docs/_build/html 8080`).
+
+Sometimes, a clean build is required to update the documentation extracted from the source code.
+This can be done by running `make clean`.
+
 ## How to release
 
 In order to release a new version, the following steps are necessary:
