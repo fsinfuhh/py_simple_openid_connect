@@ -296,7 +296,7 @@ class IdToken(OpenidBaseModel):
 
 class JwtAccessToken(OpenidBaseModel):
     """
-    The content that might be encoded into an access token according to `RFC 9068 <https://www.rfc-editor.org/rfc/rfc9068`_.
+    The content that might be encoded into an access token according to `RFC 9068 <https://www.rfc-editor.org/rfc/rfc9068>`_.
 
     The specification defines a profile for issuing access tokens in JSON Web Token (JWT) format.
     Authorization servers from different vendors may leverage this profile to issue access tokens in an interoperable

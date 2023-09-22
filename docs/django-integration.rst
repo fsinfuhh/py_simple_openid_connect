@@ -56,11 +56,11 @@ Recommended settings
     The Openid scopes which are requested from the provider when a user logs in.
     It should be a list of scopes as space separated string and should contain the ``openid`` scope.
 
-- ``LOGIN_URL`` (`django docs <https://docs.djangoproject.com/en/dev/ref/settings/#login-url>`_)
+- ``LOGIN_URL`` (`django LOGIN_URL docs <https://docs.djangoproject.com/en/dev/ref/settings/#login-url>`_)
     This is recommended to be set to ``simple_openid_connect_django:login`` to serve this libraries login page which handles Openid authentication.
     If additional authentication methods are also used, don't do this.
 
-- ``LOGOUT_REDIRECT_URL`` (`django docs <https://docs.djangoproject.com/en/dev/ref/settings/#logout-redirect-url>`_)
+- ``LOGOUT_REDIRECT_URL`` (`django LOGOUT_REDIRECT_URL docs <https://docs.djangoproject.com/en/dev/ref/settings/#logout-redirect-url>`_)
     This is the url the user is redirected to after logging out. If it is not set, some Openid providers do not redirect the user back to the application.
 
 Usage
