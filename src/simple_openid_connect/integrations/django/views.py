@@ -76,7 +76,7 @@ class LoginCallbackView(View):
             )
 
         # validate the received tokens
-        id_token = IdToken.parse_jws(token_response.id_token, client.provider_keys)
+        id_token = IdToken.parse_jwt(token_response.id_token, client.provider_keys)
         id_token.validate_extern(
             client.provider_config.issuer, client.client_auth.client_id
         )

@@ -113,7 +113,7 @@ class UserMapper:
         )  # type: JwtAccessToken | TokenIntrospectionSuccessResponse | None
         try:
             # parse an validate the general token structure
-            token = JwtAccessToken.parse_jws(
+            token = JwtAccessToken.parse_jwt(
                 access_token,
                 oidc_client.provider_keys,
             )
