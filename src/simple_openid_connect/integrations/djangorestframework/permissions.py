@@ -75,10 +75,13 @@ class HasTokenScope(_HasScope):  # type: ignore
             request.auth, AuthenticatedViaToken
         ):
             logger.error(
-                "token permission is supposed to be checked but the request was not authenticated appropriately with an access token; denying access"
+                "token permission is supposed to be checked but the request was not authenticated via an access token; denying access"
             )
             return False
-        if request.auth.token_introspection.scope is None:
+        if (
+            not hasattr(request.auth.user_data, "scope")
+            or request.auth.user_data.scope is None
+        ):
             logger.error(
                 "token permission could not be checked because the token introspection does not contain token scopes; denying access"
             )
@@ -86,6 +89,4 @@ class HasTokenScope(_HasScope):  # type: ignore
 
         # authorize the request
         required_scopes = self._get_required_scopes(view)
-        return self._validate_scopes(
-            required_scopes, request.auth.token_introspection.scope
-        )
+        return self._validate_scopes(required_scopes, request.auth.user_data.scope)

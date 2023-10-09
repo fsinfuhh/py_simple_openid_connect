@@ -226,7 +226,7 @@ class OpenidClient:
 
         :raises ValidationError: if the validation fails
         """
-        token = IdToken.parse_jws(raw_token, self.provider_keys)
+        token = IdToken.parse_jwt(raw_token, self.provider_keys)
         token.validate_extern(
             issuer=self.provider_config.issuer,
             client_id=self.client_auth.client_id,

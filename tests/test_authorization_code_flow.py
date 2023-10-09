@@ -10,7 +10,7 @@ def test_authorization_request(user_agent, dummy_auth_response):
     url = authorization_code_flow.start_authentication(
         "https://provider.example.com/auth",
         "openid",
-        "client-id",
+        "test-client-id",
         "https://app.example.com/login-callback",
     )
     response = user_agent.naviagte_to(url)
@@ -29,8 +29,8 @@ def test_token_exchange(user_agent, dummy_token_response):
         AuthenticationSuccessResponse(code="code.foobar123"),
         "https://app.example.com/login-callback",
         ClientSecretBasicAuth(
-            "client-id",
-            "client-secret",
+            "test-client-id",
+            "test-client-secret",
         ),
     )
 
@@ -44,7 +44,7 @@ def test_handle_authentication_result(user_agent, dummy_token_response):
     response = authorization_code_flow.handle_authentication_result(
         "https://app.example.com/login-callback?code=code.foobar123",
         "https://provider.example.com/token",
-        ClientSecretBasicAuth("client-id", "client-secret"),
+        ClientSecretBasicAuth("test-client-id", "test-client-secret"),
     )
 
     # assert

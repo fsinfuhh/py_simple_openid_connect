@@ -16,8 +16,8 @@ def make_client() -> OpenidClient:
     return OpenidClient.from_issuer_url(
         url="https://provider.example.com",
         authentication_redirect_uri="https://app.example.com/login-callback",
-        client_id="client-id",
-        client_secret="client-secret",
+        client_id="test-client-id",
+        client_secret="test-client-secret",
     )
 
 

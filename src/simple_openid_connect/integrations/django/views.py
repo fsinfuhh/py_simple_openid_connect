@@ -61,6 +61,7 @@ class LoginCallbackView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         client = OpenidAppConfig.get_instance().get_client(request)
 
+        # exchange the passed code for tokens
         token_response = client.authorization_code_flow.handle_authentication_result(
             current_url=request.get_full_path(),
         )
@@ -74,14 +75,17 @@ class LoginCallbackView(View):
                 status=HTTPStatus.UNAUTHORIZED,
             )
 
-        id_token = IdToken.parse_jws(token_response.id_token, client.provider_keys)
+        # validate the received tokens
+        id_token = IdToken.parse_jwt(token_response.id_token, client.provider_keys)
         id_token.validate_extern(
             client.provider_config.issuer, client.client_auth.client_id
         )
 
-        user = OpenidUser.objects.get_or_create_from_id_token(id_token)
-        user.update_session(token_response)
-        login(request, user.user, backend=settings.AUTHENTICATION_BACKENDS[0])
+        # handle federated user information (create a new user if necessary or update local info) and log the user in
+        user = OpenidAppConfig.get_instance().user_mapper.handle_federated_userinfo(
+            id_token
+        )
+        login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
 
         # redirect to the next get parameter if present, otherwise to the configured default
         if "login_redirect_url" in request.session.keys():

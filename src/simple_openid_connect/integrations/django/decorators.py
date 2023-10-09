@@ -10,7 +10,8 @@ from typing import Any, Callable, Optional, TypeVar, Union
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
-from simple_openid_connect.data import TokenIntrospectionErrorResponse
+from simple_openid_connect.data import JwtAccessToken, TokenIntrospectionErrorResponse
+from simple_openid_connect.exceptions import ValidationError
 from simple_openid_connect.integrations.django import models
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 from simple_openid_connect.utils import is_application_json
@@ -73,38 +74,18 @@ def access_token_required(
                     headers={"WWW-Authenticate": "Bearer"},
                 )
 
-            # introspect passed token
-            token = request.headers["Authorization"].split(" ", 1)[1]
             oidc_client = OpenidAppConfig.get_instance().get_client(request)
-            introspect_response = oidc_client.introspect_token(token)
+            raw_token = request.headers["Authorization"].split(" ", 1)[1]
 
-            if isinstance(introspect_response, TokenIntrospectionErrorResponse):
-                logger.critical(
-                    "could not introspect token for validity: %s", introspect_response
+            try:
+                (
+                    request.user,
+                    _,
+                ) = OpenidAppConfig.get_instance().user_mapper.handle_federated_access_token(
+                    raw_token, oidc_client, _required_scopes
                 )
-                return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-
-            # return an error if the token is expired
-            if not introspect_response.active:
+            except ValidationError:
                 return _invalid_token_response(request)
-
-            # validate token scope for required access
-            if introspect_response.scope is None:
-                logger.critical(
-                    "could not determine access because token introspection did not return token scopes"
-                )
-                return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-            elif any(
-                scope not in introspect_response.scope.split(" ")
-                for scope in _required_scopes.split(" ")
-            ):
-                return _invalid_token_response(request)
-
-            # if the introspection response contains user information, add it to the request
-            if introspect_response.sub is not None:
-                request.user = models.OpenidUser.objects.get_or_create_for_sub(
-                    introspect_response.sub, introspect_response.username
-                ).user
 
             # execute the decorated view function
             return view_func(request, *args, **kwargs)

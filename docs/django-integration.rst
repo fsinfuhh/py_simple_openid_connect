@@ -56,11 +56,11 @@ Recommended settings
     The Openid scopes which are requested from the provider when a user logs in.
     It should be a list of scopes as space separated string and should contain the ``openid`` scope.
 
-- ``LOGIN_URL`` (`django docs <https://docs.djangoproject.com/en/dev/ref/settings/#login-url>`_)
+- ``LOGIN_URL`` (`django LOGIN_URL docs <https://docs.djangoproject.com/en/dev/ref/settings/#login-url>`_)
     This is recommended to be set to ``simple_openid_connect_django:login`` to serve this libraries login page which handles Openid authentication.
     If additional authentication methods are also used, don't do this.
 
-- ``LOGOUT_REDIRECT_URL`` (`django docs <https://docs.djangoproject.com/en/dev/ref/settings/#logout-redirect-url>`_)
+- ``LOGOUT_REDIRECT_URL`` (`django LOGOUT_REDIRECT_URL docs <https://docs.djangoproject.com/en/dev/ref/settings/#logout-redirect-url>`_)
     This is the url the user is redirected to after logging out. If it is not set, some Openid providers do not redirect the user back to the application.
 
 Usage
@@ -74,15 +74,37 @@ It interoperates with Django's builtin authentication so things like the ``login
 If you want to authenticate a user via Openid, simply visit ``/auth/openid/login`` on your app.
 
 
-Customizing User Mapping
-------------------------
+Custom User Mapping
+-------------------
 
-User objects are automatically created from id tokens and also updated when the user re-authenticates.
-The default behavior is to look for some well known id token attributes and map them to well known django attributes.
-See :mod:`user_mapping <simple_openid_connect.integrations.django.user_mapping>` for the implementation.
+User objects are automatically created when the user authenticates to a django server using this integration.
+This is done when the server is a relying party as well as when it is a resource server.
+The goal is to be as transparent as possible to programmers because a user object is always available and associated
+with authenticated requests.
 
-This can be customized by defining ``OPENID_CREATE_USER_FUNC`` or ``OPENID_UPDATE_USER_FUNC`` in your django settings.
-These should be a dotted module path with the function being the last name in the path.
+Sometimes it is useful though to customize the behavior in which tokens are mapped to users or which information
+is extracted from the tokens.
+This can be done in two steps:
+
+1. Subclass :class:`UserMapper <simple_openid_connect.integrations.django.user_mapping.UserMapper>` and overwrite the
+   methods which should be changed.
+
+   For details about which methods exist on the class, what they should do and what their signatures are, take a look
+   at the ``UserMapper`` class documentation.
+
+   .. code-block:: python
+
+      from simple_openid_connect.integrations.django.user_mapping import UserMapper
+
+      class CustomUserMapper(UserMapper):
+          def automap_user_attrs(self, user, user_data):
+              super().automap_user_attrs(self, user, user_data)
+              if user_data.preferred_username == "admin":
+                  user.is_superuser = True
+                  user.is_staff = True
+
+2. Configure simple_openid_connect to use the new ``UserMapper`` class by setting the ``OPENID_USER_MAPPER`` attribute
+   in your projects ``settings.py``.
 
 
 Accessing ``OpenidClient``

@@ -14,6 +14,7 @@ def test_invalid_token_text(
     dummy_provider_settings,
     dummy_provider_config,
     dummy_token_introspection_response,
+    response_mock,
 ):
     # act
     response = client.get(

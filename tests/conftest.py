@@ -118,7 +118,7 @@ def dummy_auth_response(response_mock):
     Mocked response for the authorization endpoint
 
     - endpoint url: `https://provider.example.com/auth`
-    - client_id: `client-id`
+    - client_id: `test-client-id`
     - valid redirect_uri: `https://app.example.com/login-callback`
     - returned code: `code.foobar123`
     """
@@ -127,7 +127,7 @@ def dummy_auth_response(response_mock):
         match=[
             matchers.query_param_matcher(
                 {
-                    "client_id": "client-id",
+                    "client_id": "test-client-id",
                     "redirect_uri": "https://app.example.com/login-callback",
                     "response_type": "code",
                     "scope": "openid",
@@ -147,7 +147,7 @@ def dummy_token_response(response_mock):
     Mocked response for the token endpoint
 
     - endpoint url: `https://provider.example.com/token`
-    - client_id: `client-id`
+    - client_id: `test-client-id`
     - client_secret: `client-secret`
     - valid redirect_uri: `https://app.example.com/login-callback`
     - expected code: `code.foobar123`
@@ -160,7 +160,7 @@ def dummy_token_response(response_mock):
         match=[
             matchers.urlencoded_params_matcher(
                 {
-                    "client_id": "client-id",
+                    "client_id": "test-client-id",
                     "code": "code.foobar123",
                     "grant_type": "authorization_code",
                     "redirect_uri": "https://app.example.com/login-callback",
@@ -168,7 +168,7 @@ def dummy_token_response(response_mock):
             ),
             matchers.header_matcher(
                 {
-                    "Authorization": f"Basic {b64encode(b'client-id:client-secret').decode()}",
+                    "Authorization": f"Basic {b64encode(b'test-client-id:test-client-secret').decode()}",
                 }
             ),
         ],
@@ -235,7 +235,7 @@ def dummy_token_introspection_response(response_mock):
 
     - endpoint url: `https://provider.example.com/token-introspection`
     - access token: `access_token.foobar123`
-    - client credentials: `client-id` & `client-secret`
+    - client credentials: `test-client-id` & `test-client-secret`
 
     - returned: `active=true`
 
@@ -251,7 +251,7 @@ def dummy_token_introspection_response(response_mock):
             ),
             matchers.header_matcher(
                 {
-                    "Authorization": f"Basic {b64encode(b'client-id:client-secret').decode()}",
+                    "Authorization": f"Basic {b64encode(b'test-client-id:test-client-secret').decode()}",
                 }
             ),
         ],
@@ -264,7 +264,7 @@ def dummy_token_introspection_response(response_mock):
         match=[
             matchers.header_matcher(
                 {
-                    "Authorization": f"Basic {b64encode(b'client-id:client-secret').decode()}",
+                    "Authorization": f"Basic {b64encode(b'test-client-id:test-client-secret').decode()}",
                 }
             )
         ],

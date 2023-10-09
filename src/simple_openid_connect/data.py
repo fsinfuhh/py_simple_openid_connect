@@ -294,6 +294,75 @@ class IdToken(OpenidBaseModel):
             )
 
 
+class JwtAccessToken(OpenidBaseModel):
+    """
+    The content that might be encoded into an access token according to `RFC 9068 <https://www.rfc-editor.org/rfc/rfc9068>`_.
+
+    The specification defines a profile for issuing access tokens in JSON Web Token (JWT) format.
+    Authorization servers from different vendors may leverage this profile to issue access tokens in an interoperable
+    manner but they are in no way required to do so.
+
+    .. note::
+
+        While the RFC defines some fields to be required, some vendors issue tokens that look like they conform to the RFC
+        but in fact do not because some required fields are missing.
+        To allow usage of these tokens even though they do not strictly conform to the RFC, almost all fields are marked
+        optional.
+    """
+
+    class Config:
+        extra = Extra.allow
+        allow_mutation = False
+
+    iss: AnyHttpUrl
+    "The 'iss' (issuer) claim identifies the principal that issued the JWT. The processing of this claim is generally application specific. The 'iss' value is a case-sensitive string containing a StringOrURI value."
+
+    exp: int
+    "The 'exp' (expiration time) claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing. The processing of the 'exp' claim requires that the current date/time MUST be before the expiration date/time listed in the 'exp' claim. Implementers MAY provide for some small leeway, usually no more than a few minutes, to account for clock skew. Its value MUST be a number containing a NumericDate value."
+
+    aud: Optional[str]
+    "The 'aud' (audience) claim identifies the recipients that the JWT is intended for. Each principal intended to process the JWT MUST identify itself with a value in the audience claim. If the principal processing the claim does not identify itself with a value in the 'aud' claim when this claim is present, then the JWT MUST be rejected. In the general case, the 'aud' value is an array of case-sensitive strings, each containing a StringOrURI value. In the special case when the JWT has one audience, the 'aud' value MAY be a single case-sensitive string containing a StringOrURI value. The interpretation of audience values is generally application specific."
+
+    sub: Optional[str]
+    "Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
+
+    client_id: Optional[str]
+    "The client_id claim carries the client identifier of the OpenId client that requested the token."
+
+    iat: Optional[int]
+    "As defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at which the JWT access token was issued."
+
+    jti: Optional[str]
+    "Unique identifier for the token."
+
+    auth_time: Optional[int]
+    "Time when the End-User authentication occurred Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time When a max_age request is made or when auth_time is requested as an Essential Claim, then this Claim is REQUIRED; otherwise, its inclusion is OPTIONAL (The auth_time Claim semantically corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] auth_time response parameter.)"
+
+    acr: Optional[str]
+    "OPTIONAL. Authentication Context Class Reference String specifying an Authentication Context Class Reference value that identifies the Authentication Context Class that the authentication performed satisfied. The value '0' indicates the End-User authentication did not meet the requirements of ISO/IEC 29115 [ISO29115] level 1. Authentication using a long-lived browser cookie, for instance, is one example where the use of 'level 0' is appropriate. Authentications with level 0 SHOULD NOT be used to authorize access to any resource of any monetary value (This corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] nist_auth_level 0.)  An absolute URI or an RFC 6711 [RFC6711] registered name SHOULD be used as the acr value; registered names MUST NOT be used with a different meaning than that which is registered Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The acr value is a case sensitive string."
+
+    amr: Optional[List[str]]
+    "OPTIONAL. Authentication Methods References JSON array of strings that are identifiers for authentication methods used in the authentication For instance, values might indicate that both password and OTP authentication methods were used The definition of particular values to be used in the amr Claim is beyond the scope of this specification Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The amr value is an array of case sensitive strings."
+
+    scope: Optional[str]
+    "OPTIONAL. Scopes to which the token grants access. Multiple scopes are encoded space separated. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present."
+
+    def validate_extern(self, issuer: str) -> None:
+        """
+        Validate this access token with external data for consistency.
+
+        :param issuer: The issuer that this token is supposed to originate from.
+            Should usually be :data:`ProviderMetadata.issuer`.
+        """
+        # validate issuer
+        validate_that(
+            self.iss == issuer, "The access token was issued from unexpected issuer"
+        )
+
+        # validate expiry
+        validate_that(self.exp > time.time(), "The access token is expired")
+
+
 class UserinfoRequest(OpenidBaseModel):
     """
     A request that can be sent to an OP to request information about a user
