@@ -304,7 +304,7 @@ class JwtAccessToken(OpenidBaseModel):
 
     .. note::
 
-        While the RFC defines some fields to be required, some vendors issue tokens that look they conform to the RFC
+        While the RFC defines some fields to be required, some vendors issue tokens that look like they conform to the RFC
         but in fact do not because some required fields are missing.
         To allow usage of these tokens even though they do not strictly conform to the RFC, almost all fields are marked
         optional.
@@ -349,18 +349,18 @@ class JwtAccessToken(OpenidBaseModel):
 
     def validate_extern(self, issuer: str) -> None:
         """
-        Validate this Access-Token with external data for consistency.
+        Validate this access token with external data for consistency.
 
         :param issuer: The issuer that this token is supposed to originate from.
             Should usually be :data:`ProviderMetadata.issuer`.
         """
         # validate issuer
         validate_that(
-            self.iss == issuer, "Access-Token was issued from unexpected issuer"
+            self.iss == issuer, "The access token was issued from unexpected issuer"
         )
 
         # validate expiry
-        validate_that(self.exp > time.time(), "The Access-Token is expired")
+        validate_that(self.exp > time.time(), "The access token is expired")
 
 
 class UserinfoRequest(OpenidBaseModel):
