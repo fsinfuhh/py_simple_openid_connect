@@ -98,7 +98,7 @@ This can be done in two steps:
 
       class CustomUserMapper(UserMapper):
           def automap_user_attrs(self, user, user_data):
-              super().automap_user_attrs(self, user, user_data)
+              super().automap_user_attrs(user, user_data)
               if user_data.preferred_username == "admin":
                   user.is_superuser = True
                   user.is_staff = True
