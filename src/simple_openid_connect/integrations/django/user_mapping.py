@@ -8,6 +8,7 @@ import logging
 from typing import Any, Tuple, Union
 
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
+from django.db import transaction
 
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (
@@ -76,11 +77,12 @@ class UserMapper:
                 "could not map user to token because the issuer did not return a 'sub' claim in its token introspection response"
             )
 
-        openid_user = OpenidUser.objects.get_or_create_for_sub(user_data.sub)
-        user = openid_user.user
-        self.automap_user_attrs(user, user_data)
-        user.save()
-        return user
+        with transaction.atomic():
+            openid_user = OpenidUser.objects.get_or_create_for_sub(user_data.sub)
+            user = openid_user.user
+            self.automap_user_attrs(user, user_data)
+            user.save()
+            return user
 
     def handle_federated_access_token(
         self,
