@@ -78,6 +78,7 @@ class OpenidUser(models.Model):
                 session.refresh_token_expiry = calc_expiry(
                     token_response.refresh_expires_in
                 )
+                session.id_token = id_token
                 return
 
         # fall back to creating a new session
@@ -89,6 +90,7 @@ class OpenidUser(models.Model):
             access_token_expiry=calc_expiry(token_response.expires_in),
             refresh_token=token_response.refresh_token or "",
             refresh_token_expiry=calc_expiry(token_response.refresh_expires_in),
+            _id_token=id_token.json(),
         )
 
 
@@ -108,3 +110,12 @@ class OpenidSession(models.Model):
     access_token_expiry = models.DateTimeField(null=True)
     refresh_token = models.TextField(blank=True)
     refresh_token_expiry = models.DateTimeField(null=True)
+    _id_token = models.TextField("json representation of this sessions is token")
+
+    @property
+    def id_token(self) -> IdToken:
+        return IdToken.parse_raw(self._id_token)
+
+    @id_token.setter
+    def id_token(self, value: IdToken) -> None:
+        self._id_token = value.json()

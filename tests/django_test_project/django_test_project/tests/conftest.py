@@ -75,5 +75,5 @@ def dyn_client(client) -> DynClient:
 @pytest.fixture
 def test_user(db) -> User:
     user = User.objects.create_user("user1")
-    openid_user = models.OpenidUser.objects.create(sub="1", user=user, _id_token="")
+    openid_user = models.OpenidUser.objects.create(sub="1", user=user)
     return user
