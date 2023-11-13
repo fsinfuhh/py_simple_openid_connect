@@ -24,7 +24,6 @@ from simple_openid_connect.integrations.django.models import OpenidUser
 
 logger = logging.getLogger(__name__)
 
-
 FederatedUserData = Union[
     IdToken, UserinfoSuccessResponse, TokenIntrospectionSuccessResponse, JwtAccessToken
 ]
@@ -200,6 +199,12 @@ class UserMapper:
                 setattr(user, user.USERNAME_FIELD, user_data.preferred_username)
             elif hasattr(user_data, "username"):
                 setattr(user, user.USERNAME_FIELD, user_data.username)
+            elif hasattr(user_data, "sub"):
+                setattr(user, user.USERNAME_FIELD, user_data.sub)
+            else:
+                logger.warning(
+                    "Could not determine a username from federated user data. Creating more than one user will probably fail because the users username attribute is mapped to be empty and django enforces a unique-constraint on usernames."
+                )
             # email
             if hasattr(user_data, "email"):
                 setattr(user, user.EMAIL_FIELD, user_data.email)
