@@ -85,6 +85,7 @@ class LoginCallbackView(View):
         user = OpenidAppConfig.get_instance().user_mapper.handle_federated_userinfo(
             id_token
         )
+        user.openid.update_session(token_response, id_token)
         login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
 
         # redirect to the next get parameter if present, otherwise to the configured default

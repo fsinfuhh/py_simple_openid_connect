@@ -50,19 +50,10 @@ class OpenidUser(models.Model):
     user = models.OneToOneField(
         to=get_user_model(), on_delete=models.CASCADE, related_name="openid"
     )
-    _id_token = models.TextField(
-        help_text="json representation of the most current id token"
-    )
 
-    @property
-    def id_token(self) -> IdToken:
-        return IdToken.parse_raw(self._id_token)
-
-    @id_token.setter
-    def id_token(self, value: IdToken) -> None:
-        self._id_token = value.json()
-
-    def update_session(self, token_response: TokenSuccessResponse) -> None:
+    def update_session(
+        self, token_response: TokenSuccessResponse, id_token: IdToken
+    ) -> None:
         """
         Update session information based on the given openid token response.
 
@@ -76,8 +67,8 @@ class OpenidUser(models.Model):
             return None
 
         # update the existing session if possible
-        if self.id_token.sid is not None:
-            query = OpenidSession.objects.filter(sid=self.id_token.sid)
+        if id_token.sid is not None:
+            query = OpenidSession.objects.filter(sid=id_token.sid)
             if query.exists():
                 session = query.get()  # type: OpenidSession
                 session.scope = str(token_response.scope)
@@ -92,7 +83,7 @@ class OpenidUser(models.Model):
         # fall back to creating a new session
         OpenidSession.objects.create(
             user=self,
-            sid=self.id_token.sid or "",
+            sid=id_token.sid or "",
             scope=str(token_response.scope),
             access_token=token_response.access_token,
             access_token_expiry=calc_expiry(token_response.expires_in),
