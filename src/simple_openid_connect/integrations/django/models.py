@@ -13,6 +13,12 @@ from simple_openid_connect.data import IdToken, TokenSuccessResponse
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 
 
+def _calc_expiry(t: Optional[int]) -> Optional[datetime]:
+    if t is not None:
+        return timezone.now() + timedelta(seconds=t)
+    return None
+
+
 class OpenidUserManager(models.Manager["OpenidUser"]):
     """
     Custom user manager for the :class:`OpenidUser` model.
@@ -53,7 +59,7 @@ class OpenidUser(models.Model):
 
     def update_session(
         self, token_response: TokenSuccessResponse, id_token: IdToken
-    ) -> None:
+    ) -> "OpenidSession":
         """
         Update session information based on the given openid token response.
 
@@ -61,36 +67,26 @@ class OpenidUser(models.Model):
         object is created.
         """
 
-        def calc_expiry(t: Optional[int]) -> Optional[datetime]:
-            if t is not None:
-                return timezone.now() + timedelta(seconds=t)
-            return None
-
         # update the existing session if possible
         if id_token.sid is not None:
             query = OpenidSession.objects.filter(sid=id_token.sid)
             if query.exists():
                 session = query.get()  # type: OpenidSession
-                session.scope = str(token_response.scope)
-                session.access_token = token_response.access_token
-                session.access_token_expiry = calc_expiry(token_response.expires_in)
-                session.refresh_token = token_response.refresh_token or ""
-                session.refresh_token_expiry = calc_expiry(
-                    token_response.refresh_expires_in
-                )
+                session.update_session(token_response)
                 session.id_token = id_token
-                return
+                session.save()
+                return session
 
         # fall back to creating a new session
-        OpenidSession.objects.create(
+        return OpenidSession.objects.create(
             user=self,
             sid=id_token.sid or "",
             scope=str(token_response.scope),
             access_token=token_response.access_token,
-            access_token_expiry=calc_expiry(token_response.expires_in),
+            access_token_expiry=_calc_expiry(token_response.expires_in),
             refresh_token=token_response.refresh_token or "",
-            refresh_token_expiry=calc_expiry(token_response.refresh_expires_in),
-            _id_token=id_token.json(),
+            refresh_token_expiry=_calc_expiry(token_response.refresh_expires_in),
+            _id_token=id_token.json(),  # type: ignore
         )
 
 
@@ -119,3 +115,10 @@ class OpenidSession(models.Model):
     @id_token.setter
     def id_token(self, value: IdToken) -> None:
         self._id_token = value.json()
+
+    def update_session(self, token_response: TokenSuccessResponse) -> None:
+        self.scope = str(token_response.scope)
+        self.access_token = token_response.access_token
+        self.access_token_expiry = _calc_expiry(token_response.expires_in)
+        self.refresh_token = token_response.refresh_token or ""
+        self.refresh_token_expiry = _calc_expiry(token_response.refresh_expires_in)
