@@ -18,6 +18,15 @@ At first django settings need to be adapted to include ``simple_openid_connect.i
         "simple_openid_connect.integrations.django",
     ]
 
+``simple_openid_connect.integrations.django.TokenVerificationMiddleware`` should also be added to the middleware stack.
+This middleware makes sure that access tokens of users are still valid. It is not required if the library is only used as a Resource Server (see below)::
+
+    # settings.py
+    MIDDLEWARE = [
+        ...,
+        "simple_openid_connect.integrations.django.TokenVerificationMiddleware",
+    ]
+
 Add url routes
 --------------
 
