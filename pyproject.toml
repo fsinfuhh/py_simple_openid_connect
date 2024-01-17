@@ -29,7 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 django = [
-    "django>=3.2,<5.0",
+    "django>=3.2",
 ]
 djangorestframework = [
     "djangorestframework~=3.13",
