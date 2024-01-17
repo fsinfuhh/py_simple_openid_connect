@@ -35,7 +35,7 @@ Simple and opinionated OpenID-Connect relying party and resource server implemen
 
 | Name                                                            | Package Feature       | Integration Docs                                                                                   | Supported Versions     |
 |-----------------------------------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------|------------------------|
-| [Django](https://www.djangoproject.com/)                        | `django`              | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v3.2`, `v4.0`, `v4.1` |
+| [Django](https://www.djangoproject.com/)                        | `django`              | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v3.2`, `v4.2`, `v5.0` |
 | [Django-Rest-Framework](https://www.django-rest-framework.org/) | `djangorestframework` | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/drf-integration.html)    | `v3.13`, `v3.14`       |
 
 
