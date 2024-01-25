@@ -40,4 +40,4 @@ class TokenVerificationMiddleware:
             openid_session.save()
             return response
         else:
-            return HttpResponseRedirect(reverse("logout"))
+            return HttpResponseRedirect(reverse("login"))

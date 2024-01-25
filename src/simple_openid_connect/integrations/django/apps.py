@@ -182,6 +182,7 @@ def check_middleware(*args, **kwargs) -> List[Union[Warning, Error]]:
                 "Access tokens are not checked for expiry and users are not automatically logged out when their access token expires.",
                 hint="Add 'simple_openid_connect.integrations.django.middleware.TokenVerificationMiddleware' to MIDDLEWARE.",
                 obj="simple_openid_connect",
+                id="simple_openid_connect.W001",
             )
         ]
     else:
