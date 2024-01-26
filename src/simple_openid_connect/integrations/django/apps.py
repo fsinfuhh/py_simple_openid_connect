@@ -1,14 +1,15 @@
 """
 Django AppConfig for this app
 """
-
+import inspect
 import logging
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from django.apps import AppConfig, apps
 from django.conf import settings
 from django.core.cache import cache
+from django.core.checks import Error, Warning, register
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.shortcuts import resolve_url
@@ -146,3 +147,43 @@ class OpenidAppConfig(AppConfig):
             cache.set("openid_client", client)
 
         return client
+
+
+@register  # type: ignore
+def check_middleware(*args, **kwargs) -> List[Union[Warning, Error]]:
+    from simple_openid_connect.integrations.django.middleware import (
+        TokenVerificationMiddleware,
+    )
+
+    if (
+        hasattr(settings, "OPENID_REDIRECT_URI")
+        and settings.OPENID_REDIRECT_URI is None  # type: ignore
+    ):
+        # redirect uri is set to None,
+        # so the library is probably used as a resource server,
+        # therefore we don't need the middleware
+        return []
+
+    has_token_verification_middleware = False
+    for middleware in settings.MIDDLEWARE:
+        try:
+            middleware_cls = import_string(middleware)
+        except ImportError:
+            continue
+        if inspect.isclass(middleware_cls) and issubclass(
+            middleware_cls, TokenVerificationMiddleware
+        ):
+            has_token_verification_middleware = True
+            break
+
+    if not has_token_verification_middleware:
+        return [
+            Warning(
+                "Access tokens are not checked for expiry and users are not automatically logged out when their access token expires.",
+                hint="Add 'simple_openid_connect.integrations.django.middleware.TokenVerificationMiddleware' to MIDDLEWARE.",
+                obj="simple_openid_connect",
+                id="simple_openid_connect.W001",
+            )
+        ]
+    else:
+        return []

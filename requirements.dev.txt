@@ -6,7 +6,7 @@ drf-spectacular
 flit
 furo
 hypothesis
-mypy>=0.991
+mypy>=1.7.0
 pytest
 pytest-django
 pytest-explicit
