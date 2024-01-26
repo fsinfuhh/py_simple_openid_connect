@@ -2,7 +2,9 @@ import logging
 from datetime import datetime, timezone
 from typing import Callable
 
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import resolve_url
 from django.urls import reverse
 
 from simple_openid_connect.data import TokenSuccessResponse
@@ -40,4 +42,4 @@ class TokenVerificationMiddleware:
             openid_session.save()
             return response
         else:
-            return HttpResponseRedirect(reverse("login"))
+            return HttpResponseRedirect(resolve_url(settings.LOGIN_URL))
