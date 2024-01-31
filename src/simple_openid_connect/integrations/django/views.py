@@ -26,7 +26,7 @@ from simple_openid_connect.data import (
     TokenSuccessResponse,
 )
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
-from simple_openid_connect.integrations.django.models import OpenidUser
+from simple_openid_connect.integrations.django.models import OpenidSession
 
 logger = logging.getLogger(__name__)
 
@@ -106,16 +106,24 @@ class LogoutView(View):
     """
 
     def get(self, request: HttpRequest) -> HttpResponse:
+        session_id = request.session.get("openid_session")
         logout(request)
         client = OpenidAppConfig.get_instance().get_client(request)
 
         if settings.LOGOUT_REDIRECT_URL is not None:
+            openid_session = (
+                OpenidSession.objects.get(id=session_id) if session_id else None
+            )
+
             logout_request = RpInitiatedLogoutRequest(
                 post_logout_redirect_uri=request.build_absolute_uri(
                     resolve_url(settings.LOGOUT_REDIRECT_URL)
-                ),
-                client_id=client.client_auth.client_id,
+                )
             )
+            if openid_session is not None and openid_session.raw_id_token is not None:
+                logout_request.id_token_hint = openid_session.raw_id_token
+            else:
+                logout_request.client_id = client.client_auth.client_id
         else:
             logout_request = None
 

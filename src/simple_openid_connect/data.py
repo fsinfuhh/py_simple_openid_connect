@@ -4,8 +4,9 @@ Datatypes and models for various OpenID messages
 import enum
 import logging
 import time
-from typing import Any, Callable, List, Literal, Mapping, Optional, Union
+from typing import Any, Callable, List, Literal, Mapping, Optional, Type, Union
 
+from cryptojwt import JWK
 from pydantic import AnyHttpUrl, Extra, Field, root_validator
 
 from simple_openid_connect.base_data import OpenidBaseModel
@@ -165,7 +166,7 @@ class IdToken(OpenidBaseModel):
 
     class Config:
         extra = Extra.allow
-        allow_mutation = False
+        allow_mutation = True
 
     iss: AnyHttpUrl
     "REQUIRED. Issuer Identifier for the Issuer of the response The iss value is a case sensitive URL using the https scheme that contains scheme, host, and optionally, port number and path components and no query or fragment components."
@@ -199,6 +200,9 @@ class IdToken(OpenidBaseModel):
 
     sid: Optional[str]
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
+
+    raw_token: Optional[str]
+    "The raw token received from the issuer."
 
     def validate_extern(
         self,
@@ -292,6 +296,14 @@ class IdToken(OpenidBaseModel):
                 self.auth_time >= min_auth_time,
                 "The session associated with this ID-Token was authenticated too far in the past",
             )
+
+    @classmethod
+    def parse_jwt(
+        cls: Type["IdToken"], value: str, signing_keys: List[JWK]
+    ) -> "IdToken":
+        token = super().parse_jwt(value, signing_keys)
+        token.raw_token = value
+        return token
 
 
 class JwtAccessToken(OpenidBaseModel):

@@ -116,6 +116,10 @@ class OpenidSession(models.Model):
     def id_token(self, value: IdToken) -> None:
         self._id_token = value.json()
 
+    @property
+    def raw_id_token(self) -> Optional[str]:
+        return self.id_token.raw_token
+
     def update_session(self, token_response: TokenSuccessResponse) -> None:
         self.scope = str(token_response.scope)
         self.access_token = token_response.access_token
