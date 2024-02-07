@@ -212,5 +212,5 @@ class UserMapper:
             if hasattr(user_data, "given_name") and hasattr(user, "first_name"):
                 user.first_name = user_data.given_name
             # family name
-            if hasattr(user_data, "family_name") and hasattr(user, "family_name"):
+            if hasattr(user_data, "family_name") and hasattr(user, "last_name"):
                 user.last_name = user_data.family_name
