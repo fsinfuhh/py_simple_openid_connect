@@ -87,6 +87,7 @@ class OpenidUser(models.Model):
             refresh_token=token_response.refresh_token or "",
             refresh_token_expiry=_calc_expiry(token_response.refresh_expires_in),
             _id_token=id_token.json(),  # type: ignore[unused-ignore,misc]
+            raw_id_token=token_response.id_token,
         )
 
 
@@ -107,6 +108,7 @@ class OpenidSession(models.Model):
     refresh_token = models.TextField(blank=True)
     refresh_token_expiry = models.DateTimeField(null=True)
     _id_token = models.TextField("json representation of this sessions is token")
+    raw_id_token = models.TextField(blank=True)
 
     @property
     def id_token(self) -> IdToken:
@@ -122,3 +124,4 @@ class OpenidSession(models.Model):
         self.access_token_expiry = _calc_expiry(token_response.expires_in)
         self.refresh_token = token_response.refresh_token or ""
         self.refresh_token_expiry = _calc_expiry(token_response.refresh_expires_in)
+        self.raw_id_token = token_response.id_token
