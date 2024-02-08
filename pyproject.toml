@@ -23,8 +23,8 @@ requires-python = "~=3.9"
 dependencies = [
     "cryptojwt~=1.8",
     "furl~=2.1",
-    "pydantic~=1.10",
-    "requests~=2.28",
+    "pydantic~=2.6",
+    "requests~=2.31",
 ]
 
 [project.optional-dependencies]

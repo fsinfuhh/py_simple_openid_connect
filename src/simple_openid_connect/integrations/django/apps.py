@@ -14,7 +14,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.shortcuts import resolve_url
 from django.utils.module_loading import import_string
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from simple_openid_connect.client import OpenidClient
 
@@ -29,18 +29,17 @@ class SettingsModel(BaseModel):
     A pydantic model used to validate django settings
     """
 
+    model_config = ConfigDict(from_attributes=True)
+
     OPENID_ISSUER: str
     OPENID_CLIENT_ID: str
-    OPENID_CLIENT_SECRET: Optional[str]
+    OPENID_CLIENT_SECRET: Optional[str] = None
     OPENID_SCOPE: str = "openid"
     OPENID_REDIRECT_URI: Optional[str] = "simple_openid_connect:login-callback"
-    OPENID_BASE_URI: Optional[str]
-    OPENID_USER_MAPPER = (
+    OPENID_BASE_URI: Optional[str] = None
+    OPENID_USER_MAPPER: str = (
         "simple_openid_connect.integrations.django.user_mapping.UserMapper"
     )
-
-    class Config:
-        orm_mode = True
 
 
 class OpenidAppConfig(AppConfig):

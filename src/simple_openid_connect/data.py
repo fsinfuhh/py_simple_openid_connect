@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Any, Callable, List, Literal, Mapping, Optional, Union
 
-from pydantic import AnyHttpUrl, Extra, Field, root_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from simple_openid_connect.base_data import OpenidBaseModel
 from simple_openid_connect.utils import validate_that
@@ -23,32 +23,30 @@ class ProviderMetadata(OpenidBaseModel):
     See `OpenID Connect Spec: Provider Metadata <https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata>`_
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
+    model_config = ConfigDict(extra="allow", frozen=True)
 
-    issuer: AnyHttpUrl
+    issuer: str
     "REQUIRED. URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier This MUST be identical to the iss Claim value in ID Tokens issued from this Issuer."
 
-    authorization_endpoint: AnyHttpUrl
+    authorization_endpoint: str
     "REQUIRED. URL of the OP's OAuth 2.0 Authorization Endpoint."
 
-    token_endpoint: Optional[AnyHttpUrl]
+    token_endpoint: Optional[str] = None
     "URL of the OP's OAuth 2.0 Token Endpoint. This is REQUIRED unless only the Implicit Flow is used."
 
-    userinfo_endpoint: Optional[AnyHttpUrl]
+    userinfo_endpoint: Optional[str] = None
     "RECOMMENDED. URL of the OP's UserInfo Endpoint. This URL MUST use the https scheme and MAY contain port, path, and query parameter components."
 
-    jwks_uri: AnyHttpUrl
+    jwks_uri: str
     "REQUIRED. URL of the OP's JSON Web Key Set document This contains the signing key(s) the RP uses to validate signatures from the OP The JWK Set MAY also contain the Server's encryption key(s), which are used by RPs to encrypt requests to the Server When both signing and encryption keys are made available, a use (Key Use) parameter value is REQUIRED for all keys in the referenced JWK Set to indicate each key's intended usage Although some algorithms allow the same key to be used for both signatures and encryption, doing so is NOT RECOMMENDED, as it is less secure The JWK x5c parameter MAY be used to provide X.509 representations of keys provided When used, the bare key values MUST still be present and MUST match those in the certificate. "
 
-    registration_endpoint: Optional[AnyHttpUrl]
+    registration_endpoint: Optional[str] = None
     "RECOMMENDED. URL of the OP's Dynamic Client Registration Endpoint"
 
-    scopes_supported: Optional[List[str]]
+    scopes_supported: Optional[List[str]] = None
     "RECOMMENDED. JSON array containing a list of the OAuth 2.0 scope values that this server supports The server MUST support the openid scope value Servers MAY choose not to advertise some supported scope values even when this parameter is used, although those defined in SHOULD be listed, if supported."
 
-    response_types_supported: Optional[List[str]]
+    response_types_supported: Optional[List[str]] = None
     "REQUIRED. JSON array containing a list of the OAuth 2.0 response_type values that this OP supports Dynamic OpenID Providers MUST support the code, id_token, and the token id_token Response Type values."
 
     response_modes_supported: Optional[List[str]] = ["query", "fragment"]
@@ -57,7 +55,7 @@ class ProviderMetadata(OpenidBaseModel):
     grant_types_supported: Optional[List[str]] = ["authorization_code", "implicit"]
     "OPTIONAL. JSON array containing a list of the OAuth 2.0 Grant Type values that this OP supports Dynamic OpenID Providers MUST support the authorization_code and implicit Grant Type values and MAY support other Grant Types. " 'If omitted, the default value is ["authorization_code", "implicit"].'
 
-    acr_values_supported: Optional[List[str]]
+    acr_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the Authentication Context Class References that this OP supports."
 
     subject_types_supported: List[str]
@@ -66,28 +64,28 @@ class ProviderMetadata(OpenidBaseModel):
     id_token_signing_alg_values_supported: List[str]
     "REQUIRED. JSON array containing a list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT The algorithm RS256 MUST be included The value none MAY be supported, but MUST NOT be used unless the Response Type used returns no ID Token from the Authorization Endpoint (such as when using the Authorization Code Flow)."
 
-    id_token_encryption_alg_values_supported: Optional[List[str]]
+    id_token_encryption_alg_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT."
 
-    id_token_encryption_enc_values_supported: Optional[List[str]]
+    id_token_encryption_enc_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT."
 
-    userinfo_signing_alg_values_supported: Optional[List[str]]
+    userinfo_signing_alg_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the UserInfo Endpoint to encode the Claims in a JWT The value none MAY be included."
 
-    userinfo_encryption_alg_values_supported: Optional[List[str]]
+    userinfo_encryption_alg_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the UserInfo Endpoint to encode the Claims in a JWT."
 
-    userinfo_encryption_enc_values_supported: Optional[List[str]]
+    userinfo_encryption_enc_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the UserInfo Endpoint to encode the Claims in a JWT."
 
-    request_object_signing_alg_values_supported: Optional[List[str]]
+    request_object_signing_alg_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the OP for Request Objects, which are described in Section 6.1 of OpenID Connect Core 1.0 These algorithms are used both when the Request Object is passed by value (using the request parameter) and when it is passed by reference (using the request_uri parameter) Servers SHOULD support none and RS256."
 
-    request_object_encryption_alg_values_supported: Optional[List[str]]
+    request_object_encryption_alg_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects These algorithms are used both when the Request Object is passed by value and when it is passed by reference."
 
-    request_object_encryption_enc_values_supported: Optional[List[str]]
+    request_object_encryption_enc_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects These algorithms are used both when the Request Object is passed by value and when it is passed by reference."
 
     token_endpoint_auth_methods_supported: List[str] = Field(
@@ -95,25 +93,25 @@ class ProviderMetadata(OpenidBaseModel):
     )
     "OPTIONAL. JSON array containing a list of Client Authentication methods supported by this Token Endpoint The options are client_secret_post, client_secret_basic, client_secret_jwt, and private_key_jwt, as described in Section 9 of OpenID Connect Core 1.0 Other authentication methods MAY be defined by extensions. If omitted, the default is client_secret_basic -- the HTTP Basic Authentication Scheme specified in Section 2.3.1 of OAuth 2.0 [RFC6749]."
 
-    token_endpoint_auth_signing_alg_values_supported: Optional[List[str]]
+    token_endpoint_auth_signing_alg_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods Servers SHOULD support RS256 The value none MUST NOT be used."
 
-    display_values_supported: Optional[List[str]]
+    display_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the display parameter values that the OpenID Provider supports These values are described in Section 3.1.2.1 of OpenID Connect Core 1.0."
 
-    claim_types_supported: Optional[List[str]]
+    claim_types_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the Claim Types that the OpenID Provider supports These Claim Types are described in Section 5.6 of OpenID Connect Core 1.0 Values defined by this specification are normal, aggregated, and distributed If omitted, the implementation supports only normal Claims."
 
-    claims_supported: Optional[List[str]]
+    claims_supported: Optional[List[str]] = None
     "RECOMMENDED. JSON array containing a list of the Claim Names of the Claims that the OpenID Provider MAY be able to supply values for Note that for privacy or other reasons, this might not be an exhaustive list."
 
-    service_documentation: Optional[AnyHttpUrl]
+    service_documentation: Optional[str] = None
     "OPTIONAL. URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider In particular, if the OpenID Provider does not support Dynamic Client Registration, then information on how to register Clients needs to be provided in this documentation."
 
-    claims_locales_supported: Optional[List[str]]
+    claims_locales_supported: Optional[List[str]] = None
     "OPTIONAL. Languages and scripts supported for values in Claims being returned, represented as a JSON array of BCP47 [RFC5646] language tag values Not all languages and scripts are necessarily supported for all Claim values."
 
-    ui_locales_supported: Optional[List[str]]
+    ui_locales_supported: Optional[List[str]] = None
     "OPTIONAL. Languages and scripts supported for the user interface, represented as a JSON array of BCP47 [RFC5646] language tag values."
 
     claims_parameter_supported: Optional[bool] = False
@@ -128,13 +126,13 @@ class ProviderMetadata(OpenidBaseModel):
     require_request_uri_registration: Optional[bool] = False
     "OPTIONAL. Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter Pre-registration is REQUIRED when the value is true. If omitted, the default value is false."
 
-    op_policy_uri: Optional[AnyHttpUrl]
+    op_policy_uri: Optional[str] = None
     "OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP The registration process SHOULD display this URL to the person registering the Client if it is given."
 
-    op_tos_uri: Optional[AnyHttpUrl]
+    op_tos_uri: Optional[str] = None
     "OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service The registration process SHOULD display this URL to the person registering the Client if it is given. "
 
-    end_session_endpoint: Optional[AnyHttpUrl]
+    end_session_endpoint: Optional[str] = None
     "REQUIRED, if supported by OP. URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP."
 
     frontchannel_logout_supported: bool = Field(default=False)
@@ -149,7 +147,7 @@ class ProviderMetadata(OpenidBaseModel):
     backchannel_logout_session_supported: bool = Field(default=False)
     "OPTIONAL. Boolean value specifying whether the OP can pass a sid (session ID) Claim in the Logout Token to identify the RP session with the OP. If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false. "
 
-    introspection_endpoint: Optional[AnyHttpUrl]
+    introspection_endpoint: Optional[str] = None
     "OPTIONAL. URL that the OpenID Provider provides to resource servers to introspect access tokens in accordance to `RFC7662: OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_."
 
 
@@ -163,11 +161,9 @@ class IdToken(OpenidBaseModel):
     See `Section 2 of OpenID Connect Core 1.0 <https://openid.net/specs/openid-connect-core-1_0.html#IDToken>`_
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
+    model_config = ConfigDict(extra="allow", frozen=True)
 
-    iss: AnyHttpUrl
+    iss: str
     "REQUIRED. Issuer Identifier for the Issuer of the response The iss value is a case sensitive URL using the https scheme that contains scheme, host, and optionally, port number and path components and no query or fragment components."
 
     sub: str
@@ -182,22 +178,22 @@ class IdToken(OpenidBaseModel):
     iat: int
     "REQUIRED. Time at which the JWT was issued Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time."
 
-    auth_time: Optional[int]
+    auth_time: Optional[int] = None
     "Time when the End-User authentication occurred Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time When a max_age request is made or when auth_time is requested as an Essential Claim, then this Claim is REQUIRED; otherwise, its inclusion is OPTIONAL (The auth_time Claim semantically corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] auth_time response parameter.)"
 
-    nonce: Optional[str]
+    nonce: Optional[str] = None
     "String value used to associate a Client session with an ID Token, and to mitigate replay attacks The value is passed through unmodified from the Authentication Request to the ID Token If present in the ID Token, Clients MUST verify that the nonce Claim Value is equal to the value of the nonce parameter sent in the Authentication Request If present in the Authentication Request, Authorization Servers MUST include a nonce Claim in the ID Token with the Claim Value being the nonce value sent in the Authentication Request Authorization Servers SHOULD perform no other processing on nonce values used The nonce value is a case sensitive string. "
 
-    acr: Optional[str]
+    acr: Optional[str] = None
     "OPTIONAL. Authentication Context Class Reference String specifying an Authentication Context Class Reference value that identifies the Authentication Context Class that the authentication performed satisfied. The value '0' indicates the End-User authentication did not meet the requirements of ISO/IEC 29115 [ISO29115] level 1. Authentication using a long-lived browser cookie, for instance, is one example where the use of 'level 0' is appropriate. Authentications with level 0 SHOULD NOT be used to authorize access to any resource of any monetary value (This corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] nist_auth_level 0.)  An absolute URI or an RFC 6711 [RFC6711] registered name SHOULD be used as the acr value; registered names MUST NOT be used with a different meaning than that which is registered Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The acr value is a case sensitive string."
 
-    amr: Optional[List[str]]
+    amr: Optional[List[str]] = None
     "OPTIONAL. Authentication Methods References JSON array of strings that are identifiers for authentication methods used in the authentication For instance, values might indicate that both password and OTP authentication methods were used The definition of particular values to be used in the amr Claim is beyond the scope of this specification Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The amr value is an array of case sensitive strings."
 
-    azp: Optional[str]
+    azp: Optional[str] = None
     "OPTIONAL. Authorized party - the party to which the ID Token was issued If present, it MUST contain the OAuth 2.0 Client ID of this party This Claim is only needed when the ID Token has a single audience value and that audience is different than the authorized party It MAY be included even when the authorized party is the same as the sole audience The azp value is a case sensitive string containing a StringOrURI value."
 
-    sid: Optional[str]
+    sid: Optional[str] = None
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
 
     def validate_extern(
@@ -310,41 +306,39 @@ class JwtAccessToken(OpenidBaseModel):
         optional.
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
+    model_config = ConfigDict(extra="allow", frozen=True)
 
-    iss: AnyHttpUrl
+    iss: str
     "The 'iss' (issuer) claim identifies the principal that issued the JWT. The processing of this claim is generally application specific. The 'iss' value is a case-sensitive string containing a StringOrURI value."
 
     exp: int
     "The 'exp' (expiration time) claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing. The processing of the 'exp' claim requires that the current date/time MUST be before the expiration date/time listed in the 'exp' claim. Implementers MAY provide for some small leeway, usually no more than a few minutes, to account for clock skew. Its value MUST be a number containing a NumericDate value."
 
-    aud: Optional[str]
+    aud: Optional[str] = None
     "The 'aud' (audience) claim identifies the recipients that the JWT is intended for. Each principal intended to process the JWT MUST identify itself with a value in the audience claim. If the principal processing the claim does not identify itself with a value in the 'aud' claim when this claim is present, then the JWT MUST be rejected. In the general case, the 'aud' value is an array of case-sensitive strings, each containing a StringOrURI value. In the special case when the JWT has one audience, the 'aud' value MAY be a single case-sensitive string containing a StringOrURI value. The interpretation of audience values is generally application specific."
 
-    sub: Optional[str]
+    sub: Optional[str] = None
     "Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
 
-    client_id: Optional[str]
+    client_id: Optional[str] = None
     "The client_id claim carries the client identifier of the OpenId client that requested the token."
 
-    iat: Optional[int]
+    iat: Optional[int] = None
     "As defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at which the JWT access token was issued."
 
-    jti: Optional[str]
+    jti: Optional[str] = None
     "Unique identifier for the token."
 
-    auth_time: Optional[int]
+    auth_time: Optional[int] = None
     "Time when the End-User authentication occurred Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time When a max_age request is made or when auth_time is requested as an Essential Claim, then this Claim is REQUIRED; otherwise, its inclusion is OPTIONAL (The auth_time Claim semantically corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] auth_time response parameter.)"
 
-    acr: Optional[str]
+    acr: Optional[str] = None
     "OPTIONAL. Authentication Context Class Reference String specifying an Authentication Context Class Reference value that identifies the Authentication Context Class that the authentication performed satisfied. The value '0' indicates the End-User authentication did not meet the requirements of ISO/IEC 29115 [ISO29115] level 1. Authentication using a long-lived browser cookie, for instance, is one example where the use of 'level 0' is appropriate. Authentications with level 0 SHOULD NOT be used to authorize access to any resource of any monetary value (This corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] nist_auth_level 0.)  An absolute URI or an RFC 6711 [RFC6711] registered name SHOULD be used as the acr value; registered names MUST NOT be used with a different meaning than that which is registered Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The acr value is a case sensitive string."
 
-    amr: Optional[List[str]]
+    amr: Optional[List[str]] = None
     "OPTIONAL. Authentication Methods References JSON array of strings that are identifiers for authentication methods used in the authentication For instance, values might indicate that both password and OTP authentication methods were used The definition of particular values to be used in the amr Claim is beyond the scope of this specification Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific The amr value is an array of case sensitive strings."
 
-    scope: Optional[str]
+    scope: Optional[str] = None
     "OPTIONAL. Scopes to which the token grants access. Multiple scopes are encoded space separated. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present."
 
     def validate_extern(self, issuer: str) -> None:
@@ -356,7 +350,8 @@ class JwtAccessToken(OpenidBaseModel):
         """
         # validate issuer
         validate_that(
-            self.iss == issuer, "The access token was issued from unexpected issuer"
+            self.iss == issuer,
+            "The access token was issued from unexpected issuer",
         )
 
         # validate expiry
@@ -379,9 +374,7 @@ class UserinfoSuccessResponse(OpenidBaseModel):
     to more claims.
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
+    model_config = ConfigDict(extra="allow", frozen=True)
 
     sub: str
     "Subject of this response, basically a unique user id."
@@ -392,12 +385,10 @@ class UserinfoErrorResponse(OpenidBaseModel):
     An error response that is sent back from an OP after requesting user information
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
+    model_config = ConfigDict(extra="allow", frozen=True)
 
     error: str
-    error_description: Optional[str]
+    error_description: Optional[str] = None
 
 
 class AuthenticationRequest(OpenidBaseModel):
@@ -405,8 +396,7 @@ class AuthenticationRequest(OpenidBaseModel):
     An Authentication Request requests that the End-User be authenticated by the Authorization Server.
     """
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
     scope: str
     "REQUIRED. OpenID Connect authentication requests MUST contain the openid scope value. Multiple scopes are encoded space separated If the openid scope value is not present, the behavior is entirely unspecified Other scope values MAY be present."
@@ -459,13 +449,12 @@ class AuthenticationSuccessResponse(OpenidBaseModel):
     When using the Authorization Code Flow (this flow), the Authorization Response MUST return the parameters defined by adding them as query parameters to the redirect_uri specified in the Authorization Request using the application/x-www-form-urlencoded format, unless a different Response Mode was specified.
     """
 
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(frozen=True)
 
     code: str
     "REQUIRED. The authorization code generated by the authorization server The authorization code MUST expire shortly after it is issued to mitigate the risk of leaks A maximum authorization code lifetime of 10 minutes is RECOMMENDED The client MUST NOT use the authorization code more than once If an authorization code is used more than once, the authorization server MUST deny the request and SHOULD revoke (when possible) all tokens previously issued based on that authorization code The authorization code is bound to the client identifier and redirect URI."
 
-    state: Optional[str]
+    state: Optional[str] = None
     "REQUIRED if the `state` parameter was present in the client authorization request The exact value received from the client."
 
 
@@ -479,10 +468,7 @@ class AuthenticationErrorResponse(OpenidBaseModel):
     (General HTTP errors are returned to the User Agent using the appropriate HTTP status code.)
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-        use_enum_values = True
+    model_config = ConfigDict(extra="allow", frozen=True, use_enum_values=True)
 
     class ErrorType(enum.Enum):
         """
@@ -540,13 +526,13 @@ class AuthenticationErrorResponse(OpenidBaseModel):
     error: ErrorType
     "REQUIRED.  An error code"
 
-    error_description: Optional[str]
+    error_description: Optional[str] = None
     "OPTIONAL. Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."
 
-    error_uri: Optional[str]
+    error_uri: Optional[str] = None
     "OPTIONAL. A URI identifying a human-readable web page with information about the error, used to provide the client developer with additional information about the error."
 
-    state: Optional[str]
+    state: Optional[str] = None
     "REQUIRED if a `state` parameter was present in the client authorization request. The exact value received from the client."
 
 
@@ -558,8 +544,7 @@ class TokenRequest(OpenidBaseModel):
     This request MUST be sent to the token endpoint using POST with "application/x-www-form-urlencoded" body.
     """
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
     grant_type: Union[
         Literal[
@@ -590,7 +575,8 @@ class TokenRequest(OpenidBaseModel):
     scope: Optional[str] = None
     "REQUIRED, if grant type is 'password'. The scope requested by the application"
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def _validate_required_based_on_grant_type(
         cls, values: Mapping[str, Any]
     ) -> Mapping[str, Any]:
@@ -624,8 +610,7 @@ class TokenSuccessResponse(OpenidBaseModel):
     After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an ID Token and an Access Token
     """
 
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(frozen=True)
 
     access_token: str
     "REQUIRED. The access token issued by the authorization server."
@@ -633,16 +618,16 @@ class TokenSuccessResponse(OpenidBaseModel):
     token_type: str
     "REQUIRED. The type of the token issued Value is case insensitive. Usually this is `Bearer` which is a type that MUST be supported by all OPs."
 
-    expires_in: Optional[int]
+    expires_in: Optional[int] = None
     'RECOMMENDED.  The lifetime in seconds of the access token. For example, the value "3600" denotes that the access token will expire in one hour from the time the response was generated. If omitted, the authorization server SHOULD provide the expiration time via other means or document the default value.'
 
-    refresh_token: Optional[str]
+    refresh_token: Optional[str] = None
     "OPTIONAL. The refresh token, which can be used to obtain new access tokens using the same authorization grant as described in `Section 6 of RFC6749 <https://www.rfc-editor.org/rfc/rfc6749#section-6>`_."
 
-    refresh_expires_in: Optional[int]
+    refresh_expires_in: Optional[int] = None
     "OPTIONAL. The lifetime in seconds of the refresh token."
 
-    scope: Optional[str]
+    scope: Optional[str] = None
     "OPTIONAL, if identical to the scope requested by the client; otherwise, REQUIRED. The scope of the access token."
 
     id_token: str
@@ -656,10 +641,7 @@ class TokenErrorResponse(OpenidBaseModel):
     It contains additional information about the error that occurred.
     """
 
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-        use_enum_values = True
+    model_config = ConfigDict(extra="allow", frozen=True, use_enum_values=True)
 
     class ErrorType(enum.Enum):
         """
@@ -687,10 +669,10 @@ class TokenErrorResponse(OpenidBaseModel):
     error: ErrorType
     "REQUIRED. An error code"
 
-    error_description: Optional[str]
+    error_description: Optional[str] = None
     "OPTIONAL.  Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."
 
-    error_uri: Optional[str]
+    error_uri: Optional[str] = None
     "OPTIONAL.  A URI identifying a human-readable web page with information about the error, used to provide the client developer with additional information about the error."
 
 
@@ -726,13 +708,12 @@ class FrontChannelLogoutNotification(OpenidBaseModel):
     when they log out at the OP.
     """
 
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(frozen=True)
 
-    iss: Optional[str]
+    iss: Optional[str] = None
     "Issuer Identifier for the OP issuing the front-channel logout request."
 
-    sid: Optional[str]
+    sid: Optional[str] = None
     "Identifier for the Session."
 
 
@@ -760,13 +741,12 @@ class BackChannelLogoutToken(OpenidBaseModel):
         x: Mapping[str, Any] = Field(
             alias="http://schemas.openid.net/event/backchannel-logout",
             default={},
-            const=True,
         )
 
     iss: str
     "REQUIRED. Issuer Identifier"
 
-    sub: Optional[str]
+    sub: Optional[str] = None
     "OPTIONAL. Subject Identifier (user id)"
 
     aud: str
@@ -781,7 +761,7 @@ class BackChannelLogoutToken(OpenidBaseModel):
     events: Events
     "REQUIRED. Claim whose value is a JSON object containing the member name http://schemas.openid.net/event/backchannel-logout. This declares that the JWT is a Logout Token. The corresponding member value MUST be a JSON object and SHOULD be the empty JSON object {}. "
 
-    sid: Optional[str]
+    sid: Optional[str] = None
     "OPTIONAL. Session ID - String identifier for a Session. This represents a Session of a User Agent or device for a logged-in End-User at an RP. Different sid values are used to identify distinct sessions at an OP. The sid value need only be unique in the context of a particular issuer. Its contents are opaque to the RP."
 
     def validate_extern(
@@ -879,13 +859,12 @@ class TokenIntrospectionRequest(OpenidBaseModel):
     If the authorization server is unable to determine the state of the token without additional information, it SHOULD return an :class:`introspection response <TokenIntrospectionResponse>` indicating the token is not active.
     """
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
     token: str
     "REQUIRED. The string value of the token. The may be a refresh_token or access_token which must be understood by supporting OPs but may also be others."
 
-    token_type_hint: Optional[str]
+    token_type_hint: Optional[str] = None
     'OPTIONAL. A hint about the type of the token submitted for introspection. The protected resource MAY pass this parameter to help the authorization server optimize the token lookup. If the server is unable to locate the token using the given hint, it MUST extend its search across all of its supported token types. An OP MAY ignore this parameter, particularly if it is able to detect the token type automatically. Values for this field are defined in the "OAuth Token Type Hints" registry defined in OAuth Token Revocation `RFC7009: OAuth 2.0 Token Revocation <https://www.rfc-editor.org/rfc/rfc7009>`_.'
 
 
@@ -898,43 +877,42 @@ class TokenIntrospectionSuccessResponse(OpenidBaseModel):
     The response MAY be cached by the protected resource to improve performance and reduce load on the introspection endpoint, but at the cost of liveness of the information used by the protected resource to make authorization decisions.
     """
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
     active: bool
     'REQUIRED. Boolean indicator of whether or not the presented token is currently active. The specifics of a token\'s "active" state will vary depending on the implementation of the authorization server and the information it keeps about its tokens, but a `true` value return for the "active" property will generally indicate that a given **token has been issued by this authorization server**, **has not been revoked by the resource owner**, and **is within its given time window of validity** (e.g., after its issuance time and before its expiration time).'
 
-    scope: Optional[str]
+    scope: Optional[str] = None
     "OPTIONAL. A string containing a space-separated list of scopes associated with this token."
 
-    client_id: Optional[str]
+    client_id: Optional[str] = None
     "OPTIONAL. Client identifier for the client that requested this token."
 
-    username: Optional[str]
+    username: Optional[str] = None
     "OPTIONAL. Human-readable identifier for the resource owner who authorized this token."
 
-    token_type: Optional[str]
+    token_type: Optional[str] = None
     "OPTIONAL.  Type of the token as defined in `Section 5.1 of OAuth2.0 [RFC6749] <https://www.rfc-editor.org/rfc/rfc6749#section-5.1>`_."
 
-    exp: Optional[int]
+    exp: Optional[int] = None
     "OPTIONAL. Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token will expire."
 
-    iat: Optional[int]
+    iat: Optional[int] = None
     "OPTIONAL. Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token was originally issued."
 
-    nbf: Optional[int]
+    nbf: Optional[int] = None
     "OPTIONAL. Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token is not to be used before."
 
-    sub: Optional[str]
+    sub: Optional[str] = None
     "OPTIONAL. Subject of the token. Usually a machine-readable identifier of the resource owner who authorized this token (user id)."
 
-    aud: Optional[str]
+    aud: Optional[str] = None
     "OPTIONAL. Service-specific string identifier or list of string identifiers representing the intended audience for this token."
 
-    iss: Optional[str]
+    iss: Optional[str] = None
     "OPTIONAL. String representing the issuer (OP) of this token."
 
-    jti: Optional[str]
+    jti: Optional[str] = None
     "OPTIONAL. String identifier for the token."
 
 
