@@ -24,7 +24,7 @@ This middleware makes sure that access tokens of users are still valid. It is no
     # settings.py
     MIDDLEWARE = [
         ...,
-        "simple_openid_connect.integrations.django.TokenVerificationMiddleware",
+        "simple_openid_connect.integrations.django.middleware.TokenVerificationMiddleware",
     ]
 
 Add url routes
