@@ -69,8 +69,17 @@ Recommended settings
     This is recommended to be set to ``simple_openid_connect:login`` to serve this libraries login page which handles Openid authentication.
     If additional authentication methods are also used, don't do this.
 
+- ``LOGIN_REDIRECT_URL`` (`django LOGIN_REDIRECT_URL docs <https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url>`_)
+    This is the URL to which a user is redirected after a successful login.
+
 - ``LOGOUT_REDIRECT_URL`` (`django LOGOUT_REDIRECT_URL docs <https://docs.djangoproject.com/en/dev/ref/settings/#logout-redirect-url>`_)
     This is the url the user is redirected to after logging out. If it is not set, some Openid providers do not redirect the user back to the application.
+
+Settings Reference
+------------------
+
+For a list of all settings that are read by *simple_openid_connect*, see the :class:`SettingsModel <simple_openid_connect.integrations.django.apps.SettingsModel>`.
+
 
 Usage
 =====
