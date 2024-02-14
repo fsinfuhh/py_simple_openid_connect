@@ -32,17 +32,34 @@ class SettingsModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     OPENID_ISSUER: str
+    "The Openid issuer to use. This is required to be an `https` url and an Openid discovery document should be served under ``{issuer}/.well-known/openid-configuration``."
+
     OPENID_CLIENT_ID: str
+    "The client id that was issued to you from your OpenId provider."
+
     OPENID_CLIENT_SECRET: Optional[str] = None
+    "The client secret that was issued to you from your OpenId provider if this is a confidential client."
+
     OPENID_SCOPE: str = "openid"
+    "The Openid scopes which are requested from the provider when a user logs in. It should be a list of scopes as space separated string and should contain the ``openid`` scope."
+
     OPENID_REDIRECT_URI: Optional[str] = "simple_openid_connect:login-callback"
+    "The URL or ``named URL pattern <https://docs.djangoproject.com/en/dev/topics/http/urls/#naming-url-patterns>``_ where users are redirected to from the OpenId provider and at which the authentication result is processed.\nThis is sometimes also called a callback uri."
+
     OPENID_BASE_URI: Optional[str] = None
+    "The absolute base uri of this application. This is used to construct valid redirect urls to the current application."
+
     OPENID_USER_MAPPER: str = (
         "simple_openid_connect.integrations.django.user_mapping.UserMapper"
     )
+    "An string specifying a class that inherits from :class:`simple_openid_connect.integrations.django.user_mapping.UserMapper`."
 
 
 class OpenidAppConfig(AppConfig):
+    """
+    The Django AppConfig for simple_openid_connect
+    """
+
     name = "simple_openid_connect.integrations.django"
     label = "simple_openid_connect_django"
 

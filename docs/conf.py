@@ -3,15 +3,26 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import sys
 from pathlib import Path
 
+import django
+
 import simple_openid_connect
 
+# configure python so that the source code is importable
 BASE_PATH = Path(__file__).parent.parent
 sys.path.append(str(BASE_PATH / "src"))
+
+# configure the development django project so that sphinx can import the django integrations code
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", "simple_openid_connect.integrations.django.settings"
+)
+django.setup()
 
 
 project = "simple_openid_connect"
@@ -28,6 +39,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
 ]
 
 intersphinx_mapping = {
