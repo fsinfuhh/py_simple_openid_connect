@@ -21,10 +21,8 @@ def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
     :raises OpenidProtocolError: When the communication with the provider was not possible or the response was not in an
         expected format
     """
-    if issuer.endswith("/"):
-        config_url = f"{issuer}.well-known/openid-configuration"
-    else:
-        config_url = f"{issuer}/.well-known/openid-configuration"
+    issuer = issuer.rstrip("/")
+    config_url = f"{issuer}/.well-known/openid-configuration"
     response = requests.get(config_url)
 
     if not utils.is_application_json(response.headers["Content-Type"]):
@@ -35,7 +33,7 @@ def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
 
     try:
         result = ProviderMetadata.parse_raw(response.content)
-        assert result.issuer == issuer, "issuer mismatch"
+        assert result.issuer.rstrip('/') == issuer, "issuer mismatch"
     except Exception as e:
         raise OpenidProtocolError(
             "The provider did not respond with a provider configuration according to spec"
