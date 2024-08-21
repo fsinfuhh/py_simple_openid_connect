@@ -82,4 +82,6 @@ The list of [OpenID specifications](https://openid.net/developers/specs/) can be
 
 - ✔️ Full [OpenID Connect Back-Channel Logout 1.0](https://openid.net/specs/openid-connect-backchannel-1_0.html)
 
+- ✔️ Full [Proof Key for Code Exchange (PKCE)](https://www.rfc-editor.org/rfc/rfc7636)
+
 - ✔️ Full [OAuth 2.0 Token Introspection](https://www.rfc-editor.org/rfc/rfc7662)

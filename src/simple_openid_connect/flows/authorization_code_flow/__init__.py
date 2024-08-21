@@ -7,7 +7,7 @@ The Authorization Server can also authenticate the Client before exchanging the 
 """
 import copy
 import logging
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import requests
 from furl import furl
@@ -27,7 +27,12 @@ logger = logging.getLogger(__name__)
 
 
 def start_authentication(
-    authorization_endpoint: str, scope: str, client_id: str, redirect_uri: str
+    authorization_endpoint: str,
+    scope: str,
+    client_id: str,
+    redirect_uri: str,
+    code_challenge: Optional[str] = None,
+    code_challenge_method: Optional[str] = None,
 ) -> str:
     """
     Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
@@ -40,6 +45,8 @@ def start_authentication(
         client_id=client_id,
         redirect_uri=redirect_uri,
         response_type="code",
+        code_challenge=code_challenge,
+        code_challenge_method=code_challenge_method,
     )
     return request.encode_url(authorization_endpoint)
 
@@ -49,6 +56,9 @@ def handle_authentication_result(
     token_endpoint: str,
     client_authentication: ClientAuthenticationMethod,
     redirect_uri: Union[Literal["auto"], str] = "auto",
+    code_verifier: Optional[str] = None,
+    code_challenge: Optional[str] = None,
+    code_challenge_method: Optional[str] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
@@ -87,6 +97,9 @@ def handle_authentication_result(
         authentication_response=auth_response_msg,
         redirect_uri=redirect_uri,
         client_authentication=client_authentication,
+        code_verifier=code_verifier,
+        code_challenge=code_challenge,
+        code_challenge_method=code_challenge_method,
     )
 
 
@@ -95,6 +108,9 @@ def exchange_code_for_tokens(
     authentication_response: AuthenticationSuccessResponse,
     redirect_uri: str,
     client_authentication: ClientAuthenticationMethod,
+    code_verifier: Optional[str] = None,
+    code_challenge: Optional[str] = None,
+    code_challenge_method: Optional[str] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Exchange a received code for access, refresh and id tokens.
@@ -116,6 +132,9 @@ def exchange_code_for_tokens(
         redirect_uri=redirect_uri,
         client_id=client_authentication.client_id,
         grant_type="authorization_code",
+        code_verifier=code_verifier,
+        code_challenge=code_challenge,
+        code_challenge_method=code_challenge_method,
     )
     response = requests.post(
         token_endpoint,

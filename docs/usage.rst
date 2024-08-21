@@ -103,3 +103,41 @@ It should be interpreted as pseudocode without any specific web or application f
         token_response = client.authorization_code_flow.handle_authentication_result(current_url)
         # token_response now contains access and id tokens
         ...
+
+Proof Key for Code Exchange (PKCE)
+----------------------------------
+
+The Proof Key for Code Exchange (PKCE) is a security extension to OAuth2.0 that is used to prevent authorization code injection attacks.
+
+The PKCE extension is used in the authorization code flow.
+
+Example usage of PKCE::
+
+    import pkce
+
+    client = OpenidClient.from_issuer_url(
+        url="https://provider.example.com/openid",
+        authentication_redirect_uri="https://myapp.example.com/login-callback",
+        client_id="client-id",
+    )
+    code_verifier, code_challenge = pkce.generate_pkce_pair()
+
+    def on_login():
+        # this method should be called when the user wants to log in
+        # it returns an HTTP redirect to the Openid provider
+        return HttpRedirect(to=client.authorization_code_flow.start_authentication(
+            code_challenge=code_challenge,
+            code_challenge_method="S256"
+        ))
+
+    def on_login_callback(current_url):
+        token_response = client.authorization_code_flow.handle_authentication_result(
+            current_url,
+            code_verifier=code_verifier,
+            code_challenge=code_challenge,
+            code_challenge_method="S256",
+        )
+        # token_response now contains access and id tokens
+        ...
+
+This example requires the ``pkce`` python package to be installed.
