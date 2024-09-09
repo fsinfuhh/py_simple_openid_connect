@@ -113,7 +113,7 @@ The PKCE extension is used in the authorization code flow.
 
 Example usage of PKCE::
 
-    import pkce
+    from simple_openid_connect import pkce
 
     client = OpenidClient.from_issuer_url(
         url="https://provider.example.com/openid",
@@ -139,5 +139,3 @@ Example usage of PKCE::
         )
         # token_response now contains access and id tokens
         ...
-
-This example requires the ``pkce`` python package to be installed.
