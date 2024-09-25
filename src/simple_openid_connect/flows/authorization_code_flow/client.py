@@ -29,6 +29,7 @@ class AuthorizationCodeFlowClient:
 
     def start_authentication(
         self,
+        state: Optional[str] = None,
         code_challenge: Optional[str] = None,
         code_challenge_method: Optional[str] = None,
     ) -> str:
@@ -36,6 +37,7 @@ class AuthorizationCodeFlowClient:
         Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
         returning a which the end user now needs to visit.
 
+        :param state: The state intended to prevent Cross-Site Request Forgery.
         :param code_challenge: The code challenge intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
         :param code_challenge_method: The code challenge method intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], typically "S256" or "plain".
 
@@ -55,6 +57,7 @@ class AuthorizationCodeFlowClient:
             self._base_client.scope,
             self._base_client.client_auth.client_id,
             redirect_uri.tostr(),
+            state=state,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
         )
@@ -63,6 +66,7 @@ class AuthorizationCodeFlowClient:
         self,
         current_url: str,
         additional_redirect_args: Optional[Mapping[str, str]] = None,
+        state: Optional[str] = None,
         code_verifier: Optional[str] = None,
         code_challenge: Optional[str] = None,
         code_challenge_method: Optional[str] = None,
@@ -74,6 +78,7 @@ class AuthorizationCodeFlowClient:
             The authentication result should be encoded into this url by the authorization server.
         :param additional_redirect_args: Additional URL parameters that were added to the redirect uri.
             They are probably still present in `current_url` but since they could be of any shape, no attempt is made here to automatically reconstruct them.
+        :param state: The `state` that was specified during the authentication initiation.
         :param code_verifier: The code verifier intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
         :param code_challenge: The code challenge intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
         :param code_challenge_method: The code challenge method intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], typically "S256" or "plain".
@@ -103,6 +108,7 @@ class AuthorizationCodeFlowClient:
             token_endpoint=self._base_client.provider_config.token_endpoint,
             client_authentication=self._base_client.client_auth,
             redirect_uri=redirect_uri.tostr(),
+            state=state,
             code_verifier=code_verifier,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
