@@ -32,6 +32,7 @@ def start_authentication(
     client_id: str,
     redirect_uri: str,
     state: Optional[str] = None,
+    prompt: Optional[list[str]] = None,
     code_challenge: Optional[str] = None,
     code_challenge_method: Optional[str] = None,
 ) -> str:
@@ -40,6 +41,8 @@ def start_authentication(
     returning a which the end user now needs to visit.
 
     :param state: The state intended to prevent Cross-Site Request Forgery.
+    :param prompt: Specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+        The defined values are: "none", "login", "consent" and "select_account", multiple may be given as a list.
 
     :returns: A URL to which the user agent should be redirected
     """
@@ -49,6 +52,7 @@ def start_authentication(
         redirect_uri=redirect_uri,
         response_type="code",
         state=state,
+        prompt=prompt,
         code_challenge=code_challenge,
         code_challenge_method=code_challenge_method,
     )

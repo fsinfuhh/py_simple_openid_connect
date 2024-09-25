@@ -30,6 +30,7 @@ class AuthorizationCodeFlowClient:
     def start_authentication(
         self,
         state: Optional[str] = None,
+        prompt: Optional[list[str]] = None,
         code_challenge: Optional[str] = None,
         code_challenge_method: Optional[str] = None,
     ) -> str:
@@ -38,6 +39,8 @@ class AuthorizationCodeFlowClient:
         returning a which the end user now needs to visit.
 
         :param state: The state intended to prevent Cross-Site Request Forgery.
+        :param prompt: Specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+            The defined values are: "none", "login", "consent" and "select_account", multiple may be given as a list.
         :param code_challenge: The code challenge intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
         :param code_challenge_method: The code challenge method intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], typically "S256" or "plain".
 
@@ -58,6 +61,7 @@ class AuthorizationCodeFlowClient:
             self._base_client.client_auth.client_id,
             redirect_uri.tostr(),
             state=state,
+            prompt=prompt,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
         )
