@@ -272,7 +272,7 @@ class IdToken(OpenidBaseModel):
         )
 
         # 11. validate nonce
-        if self.nonce is not None:
+        if nonce is not None or self.nonce is not None:
             validate_that(
                 self.nonce == nonce,
                 "The ID-Token's nonce does not match its expected value",
