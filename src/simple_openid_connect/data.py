@@ -440,6 +440,12 @@ class AuthenticationRequest(OpenidBaseModel):
     acr_values: Optional[List[str]] = None
     "OPTIONAL. Requested Authentication Context Class Reference values Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference The Authentication Context Class satisfied by the authentication performed is returned as the acr Claim Value, as specified in Section 2 The acr Claim is requested as a Voluntary Claim by this parameter."
 
+    code_challenge: Optional[str] = None
+    "OPTIONAL. Code Challenge. This parameter is intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], to be used with code_challenge_method."
+
+    code_challenge_method: Optional[str] = None
+    "OPTIONAL. Code Challenge Method. This parameter is intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], to be used with code_challenge."
+
 
 class AuthenticationSuccessResponse(OpenidBaseModel):
     """
@@ -574,6 +580,15 @@ class TokenRequest(OpenidBaseModel):
 
     scope: Optional[str] = None
     "REQUIRED, if grant type is 'password'. The scope requested by the application"
+
+    code_verifier: Optional[str] = None
+    "OPTIONAL. Code Verifier. This parameter is intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], to be used with code_challenge and code_challenge_method."
+
+    code_challenge: Optional[str] = None
+    "OPTIONAL. Code Challenge. This parameter is intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], to be used with code_verifier, code_challenge_method."
+
+    code_challenge_method: Optional[str] = None
+    "OPTIONAL. Code Challenge Method. This parameter is intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], to be used with code_verifier, code_challenge."
 
     @model_validator(mode="before")
     @classmethod

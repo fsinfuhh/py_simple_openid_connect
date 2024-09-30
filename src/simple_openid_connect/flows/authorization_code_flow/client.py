@@ -27,10 +27,17 @@ class AuthorizationCodeFlowClient:
     def __init__(self, base_client: "OpenidClient"):
         self._base_client = base_client
 
-    def start_authentication(self) -> str:
+    def start_authentication(
+        self,
+        code_challenge: Optional[str] = None,
+        code_challenge_method: Optional[str] = None,
+    ) -> str:
         """
         Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
         returning a which the end user now needs to visit.
+
+        :param code_challenge: The code challenge intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
+        :param code_challenge_method: The code challenge method intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], typically "S256" or "plain".
 
         :raises ImpossibleOperationError: If the client has no redirect_uri configured and therefore cannot perform this operation.
 
@@ -48,12 +55,17 @@ class AuthorizationCodeFlowClient:
             self._base_client.scope,
             self._base_client.client_auth.client_id,
             redirect_uri.tostr(),
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method,
         )
 
     def handle_authentication_result(
         self,
         current_url: str,
         additional_redirect_args: Optional[Mapping[str, str]] = None,
+        code_verifier: Optional[str] = None,
+        code_challenge: Optional[str] = None,
+        code_challenge_method: Optional[str] = None,
     ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
         """
         Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
@@ -62,6 +74,9 @@ class AuthorizationCodeFlowClient:
             The authentication result should be encoded into this url by the authorization server.
         :param additional_redirect_args: Additional URL parameters that were added to the redirect uri.
             They are probably still present in `current_url` but since they could be of any shape, no attempt is made here to automatically reconstruct them.
+        :param code_verifier: The code verifier intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
+        :param code_challenge: The code challenge intended for use with Proof Key for Code Exchange (PKCE) [RFC7636].
+        :param code_challenge_method: The code challenge method intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], typically "S256" or "plain".
 
         :raises AuthenticationFailedError: If the current url indicates an authentication failure that prevents an access token from being retrieved.
         :raises UnsupportedByProviderError: If the provider only supports implicit flow and has no token endpoint.
@@ -88,6 +103,9 @@ class AuthorizationCodeFlowClient:
             token_endpoint=self._base_client.provider_config.token_endpoint,
             client_authentication=self._base_client.client_auth,
             redirect_uri=redirect_uri.tostr(),
+            code_verifier=code_verifier,
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method,
         )
 
     def exchange_code_for_tokens(
