@@ -21,7 +21,7 @@ from simple_openid_connect.data import (
     TokenRequest,
     TokenSuccessResponse,
 )
-from simple_openid_connect.exceptions import AuthenticationFailedError
+from simple_openid_connect.exceptions import AuthenticationFailedError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +31,20 @@ def start_authentication(
     scope: str,
     client_id: str,
     redirect_uri: str,
+    state: Optional[str] = None,
+    nonce: Optional[str] = None,
+    prompt: Optional[list[str]] = None,
     code_challenge: Optional[str] = None,
     code_challenge_method: Optional[str] = None,
 ) -> str:
     """
     Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
     returning a which the end user now needs to visit.
+
+    :param state: The state intended to prevent Cross-Site Request Forgery.
+    :param nonce: String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+    :param prompt: Specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+        The defined values are: "none", "login", "consent" and "select_account", multiple may be given as a list.
 
     :returns: A URL to which the user agent should be redirected
     """
@@ -45,6 +53,9 @@ def start_authentication(
         client_id=client_id,
         redirect_uri=redirect_uri,
         response_type="code",
+        state=state,
+        nonce=nonce,
+        prompt=prompt,
         code_challenge=code_challenge,
         code_challenge_method=code_challenge_method,
     )
@@ -56,6 +67,7 @@ def handle_authentication_result(
     token_endpoint: str,
     client_authentication: ClientAuthenticationMethod,
     redirect_uri: Union[Literal["auto"], str] = "auto",
+    state: Optional[str] = None,
     code_verifier: Optional[str] = None,
     code_challenge: Optional[str] = None,
     code_challenge_method: Optional[str] = None,
@@ -70,8 +82,10 @@ def handle_authentication_result(
     :param client_authentication: A way for the client to authenticate itself
     :param redirect_uri: The `redirect_uri` that was specified during the authentication initiation.
         If the special value `auto` is used, it is assumed that `current_url` is the that callback and it is stripped of query parameters and fragments to reproduce the originally supplied one.
+    :param state: The `state` that was specified during the authentication initiation.
 
     :raises AuthenticationFailedError: If the current url indicates an authentication failure that prevents an access token from being retrieved.
+    :raises ValidationError: If the returned state does not match the given state.
 
     :returns: The result of the token exchange
     """
@@ -92,6 +106,10 @@ def handle_authentication_result(
         )
 
     auth_response_msg = AuthenticationSuccessResponse.parse_url(str(current_furl))
+
+    if state != auth_response_msg.state:
+        raise ValidationError("Returned state does not match given state.")
+
     return exchange_code_for_tokens(
         token_endpoint=token_endpoint,
         authentication_response=auth_response_msg,
