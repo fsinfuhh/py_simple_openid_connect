@@ -21,7 +21,7 @@ from simple_openid_connect.integrations.djangorestframework.authentication impor
 logger = logging.getLogger(__name__)
 
 
-class _HasScope(BasePermission):  # type: ignore # ignores a metaclass conflict that doesn't really exist
+class _HasScope(BasePermission):
     @staticmethod
     def _get_required_scopes(view: Any) -> str:
         if hasattr(view, "required_scopes"):
@@ -43,7 +43,7 @@ class _HasScope(BasePermission):  # type: ignore # ignores a metaclass conflict 
         )
 
 
-class HasSessionScope(_HasScope):  # type: ignore
+class HasSessionScope(_HasScope):
     """Check whether an authenticated user has a session with the required scope"""
 
     def has_permission(self, request: HttpRequest, view: Any) -> bool:
@@ -66,7 +66,7 @@ class HasSessionScope(_HasScope):  # type: ignore
         return False
 
 
-class HasTokenScope(_HasScope):  # type: ignore
+class HasTokenScope(_HasScope):
     """Check whether an authenticated user has a token with the required scope"""
 
     def has_permission(self, request: HttpRequest, view: Any) -> bool:
