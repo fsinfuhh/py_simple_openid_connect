@@ -20,15 +20,29 @@ py_simple_openid_connect/
    └ <others>                 (pytest based test suit)
 ```
 
-## How to set up the project
+## How to set up a dev environment
+
+### With nix
+
+If you use nix, this project provides a `flake.nix` file that defines a development shell with all dependencies installed.
+It can be entered by typing `nix develop`.
+Additionally, a [nix-direnv](https://github.com/nix-community/nix-direnv) configuration file is also present which also sets up a python environment suitable for development.
+
+### Manually
+
+Ensure you have the following system dependencies installed:
+- `python~=3.9`
+- a python virtual environment manager. This document assumes [uv](https://github.com/astral-sh/uv).
+
+Afterwards, follow the below commands to set up your development environment:
 
 ```shell
 # create a virtual python environment
-virtualenv venv
-# activate it
-source ./venv/bin/activate
-# install this project into the venv + dev dependencies
-pip install -e .[django,djangorestframework] -r requirements.dev.txt
+uv venv
+# install this project + its dev dependencies into the virtual environment
+uv pip install -e .[django,djangorestframework] -r requirements.dev.txt
+# activate the venv python interpreter for use (use the correct activation script for your shell though)
+source .venv/bin/activate
 ```
 
 ## How to run the Tests

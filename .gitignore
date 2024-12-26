@@ -1,4 +1,5 @@
 .idea
+.direnv
 venv
 dist
 docs/_build
