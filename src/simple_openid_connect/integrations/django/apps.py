@@ -52,7 +52,7 @@ class SettingsModel(BaseModel):
     OPENID_USER_MAPPER: str = (
         "simple_openid_connect.integrations.django.user_mapping.UserMapper"
     )
-    "An string specifying a class that inherits from :class:`simple_openid_connect.integrations.django.user_mapping.UserMapper`."
+    "A string specifying a class that inherits from :class:`simple_openid_connect.integrations.django.user_mapping.UserMapper`."
 
 
 class OpenidAppConfig(AppConfig):

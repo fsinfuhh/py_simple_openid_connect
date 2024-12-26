@@ -31,6 +31,18 @@ from simple_openid_connect.integrations.django.models import OpenidSession
 logger = logging.getLogger(__name__)
 
 
+class InvalidAuthStateError(Exception):
+    """
+    Exception that is thrown when the LoginCallbackView is served and the user-agent has no authentication procedure currently in progress
+    """
+
+    def __init__(self) -> None:
+        super().__init__(
+            self,
+            "User-Agent has no authentication procedures in progress so the login-callback will not be processed",
+        )
+
+
 class InitLoginView(View):
     """
     The view which handles initiating a login.
@@ -42,6 +54,11 @@ class InitLoginView(View):
         logout(request)
         if "next" in request.GET.keys():
             request.session["login_redirect_url"] = request.GET["next"]
+
+        # save the login state into the session to prevent CSRF attacks (openid state parameter could be used instead)
+        # See https://www.rfc-editor.org/rfc/rfc6749#section-10.12
+        request.session["openid_auth_in_progress"] = True
+
         client = OpenidAppConfig.get_instance().get_client(request)
         redirect = client.authorization_code_flow.start_authentication()
         return HttpResponseRedirect(redirect)
@@ -60,6 +77,12 @@ class LoginCallbackView(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         client = OpenidAppConfig.get_instance().get_client(request)
+
+        # prevent CSRF attacks by verifying that the user agent is curently in the process of authenticating
+        if request.session.get("openid_auth_in_progress", False) is not True:
+            raise InvalidAuthStateError()
+        else:
+            del request.session["openid_auth_in_progress"]
 
         # exchange the passed code for tokens
         token_response = client.authorization_code_flow.handle_authentication_result(

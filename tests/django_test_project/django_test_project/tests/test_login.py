@@ -8,6 +8,7 @@ from django.shortcuts import resolve_url
 from responses import matchers
 
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
+from simple_openid_connect.integrations.django.views import InvalidAuthStateError
 
 
 @pytest.mark.django_db
@@ -159,3 +160,22 @@ def test_directly_accessing_protected_resource(
     assert response.status_code == 200
     assert response.wsgi_request.path == resolve_url("test-protected-view")
     assert response.content == b"hello user user1"
+
+
+@pytest.mark.django_db
+def test_unsolicited_callback_csrf(
+    dyn_client, dummy_provider_config, dummy_provider_settings, response_mock, jwks
+):
+    # arrange
+    settings = OpenidAppConfig.get_instance().safe_settings
+
+    # act
+    # throws ConnectionError when the implementation tries to redeem the code
+    with pytest.raises(InvalidAuthStateError):
+        response = dyn_client.get(
+            "https://app.example.com"
+            + resolve_url(settings.OPENID_REDIRECT_URI)
+            + "?code=code.foobar123"
+        )
+
+    # assert
