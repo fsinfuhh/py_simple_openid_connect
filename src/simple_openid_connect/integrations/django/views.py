@@ -2,6 +2,7 @@
 View functions which handle openid authentication and their related callbacks
 """
 import logging
+import secrets
 from http import HTTPStatus
 from typing import Mapping
 
@@ -43,6 +44,17 @@ class InvalidAuthStateError(Exception):
         )
 
 
+class InvalidNonceError(Exception):
+    """
+    Exception that is thrown when an authentication response contains an invalid or no nonce value
+    """
+
+    def __init__(self) -> None:
+        super().__init__(
+            self, "Authentication response contained an invalid or no nonce value"
+        )
+
+
 class InitLoginView(View):
     """
     The view which handles initiating a login.
@@ -59,8 +71,13 @@ class InitLoginView(View):
         # See https://www.rfc-editor.org/rfc/rfc6749#section-10.12
         request.session["openid_auth_in_progress"] = True
 
+        # prevent replay attacks by generating and specifying a nonce
+        nonce = secrets.token_urlsafe(48)
+        request.session["openid_auth_nonce"] = nonce
+
+        # redirect the user-agent to the oidc provider
         client = OpenidAppConfig.get_instance().get_client(request)
-        redirect = client.authorization_code_flow.start_authentication()
+        redirect = client.authorization_code_flow.start_authentication(nonce=nonce)
         return HttpResponseRedirect(redirect)
 
 
@@ -101,7 +118,9 @@ class LoginCallbackView(View):
         # validate the received tokens
         id_token = IdToken.parse_jwt(token_response.id_token, client.provider_keys)
         id_token.validate_extern(
-            client.provider_config.issuer, client.client_auth.client_id
+            client.provider_config.issuer,
+            client.client_auth.client_id,
+            nonce=request.session["openid_auth_nonce"],
         )
 
         # handle federated user information (create a new user if necessary or update local info) and log the user in

@@ -1,4 +1,5 @@
 import json
+import secrets
 import sys
 from base64 import b64encode
 
@@ -13,10 +14,17 @@ from simple_openid_connect.integrations.django.views import InvalidAuthStateErro
 
 @pytest.mark.django_db
 def test_directly_calling_login_endpoint(
-    dyn_client, dummy_provider_config, dummy_provider_settings, response_mock, jwks
+    dyn_client,
+    dummy_provider_config,
+    dummy_provider_settings,
+    response_mock,
+    jwks,
+    monkeypatch,
 ):
     # arrange
     settings = OpenidAppConfig.get_instance().safe_settings
+    NONCE = "42"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: NONCE)
     client_auth = b64encode(
         f"{settings.OPENID_CLIENT_ID}:{settings.OPENID_CLIENT_SECRET}".encode()
     ).decode()
@@ -30,6 +38,7 @@ def test_directly_calling_login_endpoint(
                     + resolve_url(settings.OPENID_REDIRECT_URI),
                     "response_type": "code",
                     "scope": settings.OPENID_SCOPE,
+                    "nonce": NONCE,
                 }
             )
         ],
@@ -69,6 +78,7 @@ def test_directly_calling_login_endpoint(
                         "aud": settings.OPENID_CLIENT_ID,
                         "iat": 0,
                         "exp": sys.maxsize,
+                        "nonce": NONCE,
                     }
                 )
             ).sign_compact(jwks),
@@ -89,10 +99,17 @@ def test_directly_calling_login_endpoint(
 
 @pytest.mark.django_db
 def test_directly_accessing_protected_resource(
-    dyn_client, dummy_provider_config, dummy_provider_settings, response_mock, jwks
+    dyn_client,
+    dummy_provider_config,
+    dummy_provider_settings,
+    response_mock,
+    jwks,
+    monkeypatch,
 ):
     # arrange
     settings = OpenidAppConfig.get_instance().safe_settings
+    NONCE = "42"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: NONCE)
     client_auth = b64encode(
         f"{settings.OPENID_CLIENT_ID}:{settings.OPENID_CLIENT_SECRET}".encode()
     ).decode()
@@ -106,6 +123,7 @@ def test_directly_accessing_protected_resource(
                     + resolve_url(settings.OPENID_REDIRECT_URI),
                     "response_type": "code",
                     "scope": settings.OPENID_SCOPE,
+                    "nonce": NONCE,
                 }
             )
         ],
@@ -145,6 +163,7 @@ def test_directly_accessing_protected_resource(
                         "aud": settings.OPENID_CLIENT_ID,
                         "iat": 0,
                         "exp": sys.maxsize,
+                        "nonce": NONCE,
                     }
                 )
             ).sign_compact(jwks),
