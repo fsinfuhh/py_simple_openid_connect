@@ -1,12 +1,12 @@
 """
-Simple module to generate PKCE code verifier and code challenge.
+Implementation of `PKCE <https://datatracker.ietf.org/doc/html/rfc7636>`_ code challenge and verifier generation.
 
-Original code from @MartinThoma in this file:
-https://github.com/RomeoDespres/pkce/blob/master/pkce/__init__.py
+Original code from `@RomeoDespres <https://github.com/RomeoDespres/>`_ in their `pkce repository <https://github.com/RomeoDespres/pkce/blob/b74b1864dc8a2018ca86566a5cfa2fd9fe751c4d/pkce/__init__.py>`_:
 
 
 Examples
 --------
+
 >>> from simple_openid_connect import pkce
 >>> code_verifier, code_challenge = pkce.generate_pkce_pair()
 
@@ -22,22 +22,12 @@ from typing import Tuple
 
 
 def generate_code_verifier(length: int = 128) -> str:
-    """Return a random PKCE-compliant code verifier.
+    """
+    Return a random PKCE-compliant code verifier.
 
-    Parameters
-    ----------
-    length : int
-        Code verifier length. Must verify `43 <= length <= 128`.
-
-    Returns
-    -------
-    code_verifier : str
-        Code verifier.
-
-    Raises
-    ------
-    ValueError
-        When `43 <= length <= 128` is not verified.
+    :param length: Code verifier length. Must be betwen 43 and 128.
+    :raises ValueError: When `length` is not between 43 and 128.
+    :returns: A url-safe string ready to be used as a code verifier.
     """
     if not 43 <= length <= 128:
         msg = "Parameter `length` must verify `43 <= length <= 128`."
@@ -47,23 +37,12 @@ def generate_code_verifier(length: int = 128) -> str:
 
 
 def generate_pkce_pair(code_verifier_length: int = 128) -> Tuple[str, str]:
-    """Return random PKCE-compliant code verifier and code challenge.
+    """
+    Return random PKCE-compliant code verifier and its corresponding code challenge.
 
-    Parameters
-    ----------
-    code_verifier_length : int
-        Code verifier length. Must verify
-        `43 <= code_verifier_length <= 128`.
-
-    Returns
-    -------
-    code_verifier : str
-    code_challenge : str
-
-    Raises
-    ------
-    ValueError
-        When `43 <= code_verifier_length <= 128` is not verified.
+    :param code_verifier_length: Length of the generated code verifier. Must be between 43 and 128.
+    :raises ValueError: When `code_verifier_length` is not between 43 and 128.
+    :returns code_verifier, code_challenge: A tuple containing the code verifier along with its corresponding challenge.
     """
     if not 43 <= code_verifier_length <= 128:
         msg = "Parameter `code_verifier_length` must verify "
@@ -75,22 +54,12 @@ def generate_pkce_pair(code_verifier_length: int = 128) -> Tuple[str, str]:
 
 
 def get_code_challenge(code_verifier: str) -> str:
-    """Return the PKCE-compliant code challenge for a given verifier.
+    """
+    Generate the corresponding code challenge for a given verifier.
 
-    Parameters
-    ----------
-    code_verifier : str
-        Code verifier. Must verify `43 <= len(code_verifier) <= 128`.
-
-    Returns
-    -------
-    code_challenge : str
-        Code challenge that corresponds to the input code verifier.
-
-    Raises
-    ------
-    ValueError
-        When `43 <= len(code_verifier) <= 128` is not verified.
+    :param code_verifier: The code verifier from which a challenge should be derived.
+    :raises ValueError: When `code_verifier` is not bettween 43 and 128 long.
+    :returns: The url-safe challenge string that corresponds to the given verifier.
     """
     if not 43 <= len(code_verifier) <= 128:
         msg = "Parameter `code_verifier` must verify "
