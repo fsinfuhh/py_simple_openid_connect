@@ -33,30 +33,6 @@ FederatedUserData = Union[
 class UserMapper:
     """
     A base class which is responsible for mapping federated users into the local system.
-
-    This class is used in different parts of *simple_openid_connect* and the callgraph is sketched below:
-
-    .. code-block:: text
-
-       ┌──────────────────────────────────┐   ┌──────────────────────────────────┐   ┌───────────────────┐
-       │ @access_token_required decorator │   │ DRF AccessTokenAuthentication    │   │ LoginCallbackView │
-       └────────────────┬─────────────────┘   └─────────────────┬────────────────┘   └─────────┬─────────┘
-                        │                                       │                              │
-                        └───────────────────┬───────────────────┘                              │
-                                            ↓                                                  │
-                     ┌──────────────────────┴─────────────────────┐                            │
-                     │ UserMapper.handle_federated_access_token() │                            │
-                     └──────────────────────┬─────────────────────┘                            │
-                                            │                                                  │
-                                            └──────────────────────────┬───────────────────────┘
-                                                                       ↓
-                                                  ┌────────────────────┴───────────────────┐
-                                                  │ UserMapper.handle_federated_userinfo() │
-                                                  └────────────────────┬───────────────────┘
-                                                                       ↓
-                                                      ┌────────────────┴────────────────┐
-                                                      │ UserMapper.automap_user_attrs() │
-                                                      └─────────────────────────────────┘
     """
 
     def handle_federated_userinfo(self, user_data: FederatedUserData) -> Any:
