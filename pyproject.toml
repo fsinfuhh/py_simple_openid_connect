@@ -1,7 +1,7 @@
 [project]
 name = "simple_openid_connect"
 description = "Simple and opinionated OpenID-Connect relying party and resource server implementation"
-authors = [{ name = "Finn-Thorben Sell", email = "dev@finn-thorben.me" }]
+authors = [{ name = "lilly", email = "li@lly.sh" }]
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [

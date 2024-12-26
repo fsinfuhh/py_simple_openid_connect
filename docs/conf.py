@@ -26,8 +26,8 @@ django.setup()
 
 
 project = "simple_openid_connect"
-copyright = "2022, Finn-Thorben Sell"
-author = "Finn-Thorben Sell"
+copyright = "2024, Fachschaft Informatik der Universität Hamburg"
+author = "Fachschaft Informatik der Universität Hamburg"
 release = "v" + simple_openid_connect.__version__
 
 # -- General configuration ---------------------------------------------------
