@@ -29,6 +29,8 @@ The OpenID Connect protocol, in abstract, follows the following steps.
 4. The RP can send a request with the Access Token to the UserInfo Endpoint.
 5. The UserInfo Endpoint returns Claims about the End-User.
 
+To protect user against certain CSRF and replay attacks, see the :doc:`notes about nonce and state <./nonce_and_state>`.
+
 These steps are illustrated in the following diagram::
 
     +--------+                                   +--------+
