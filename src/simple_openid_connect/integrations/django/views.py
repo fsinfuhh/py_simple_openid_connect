@@ -3,6 +3,7 @@ View functions which handle openid authentication and their related callbacks
 """
 import logging
 import secrets
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import Mapping
 
@@ -69,7 +70,9 @@ class InitLoginView(View):
 
         # save the login state into the session to prevent CSRF attacks (openid state parameter could be used instead)
         # See https://www.rfc-editor.org/rfc/rfc6749#section-10.12
-        request.session["openid_auth_in_progress"] = True
+        request.session["openid_auth_start_time"] = datetime.now(
+            tz=timezone.utc
+        ).timestamp()
 
         # prevent replay attacks by generating and specifying a nonce
         nonce = secrets.token_urlsafe(48)
@@ -93,13 +96,19 @@ class LoginCallbackView(View):
     """
 
     def get(self, request: HttpRequest) -> HttpResponse:
+        app_settings = OpenidAppConfig.get_instance().safe_settings
         client = OpenidAppConfig.get_instance().get_client(request)
 
-        # prevent CSRF attacks by verifying that the user agent is curently in the process of authenticating
-        if request.session.get("openid_auth_in_progress", False) is not True:
+        # prevent CSRF attacks by verifying that the user agent is curently in the process of authenticating and that the authentication was not started more than the configured amount of time ago
+        if request.session.get("openid_auth_start_time", None) is None or (
+            datetime.now(tz=timezone.utc)
+            - datetime.fromtimestamp(
+                request.session["openid_auth_start_time"], tz=timezone.utc
+            )
+        ) > timedelta(seconds=app_settings.OPENID_LOGIN_TIMEOUT):
             raise InvalidAuthStateError()
         else:
-            del request.session["openid_auth_in_progress"]
+            del request.session["openid_auth_start_time"]
 
         # exchange the passed code for tokens
         token_response = client.authorization_code_flow.handle_authentication_result(

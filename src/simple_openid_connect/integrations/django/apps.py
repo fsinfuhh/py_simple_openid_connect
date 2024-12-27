@@ -54,6 +54,9 @@ class SettingsModel(BaseModel):
     )
     "A string specifying a class that inherits from :class:`simple_openid_connect.integrations.django.user_mapping.UserMapper`."
 
+    OPENID_LOGIN_TIMEOUT: int = 60 * 5
+    "Time in seconds which a login procedure is allowed to take at maximum. If a user takes more than this time between initiating a login and completing it, the login process fails and they have to redo it."
+
 
 class OpenidAppConfig(AppConfig):
     """
