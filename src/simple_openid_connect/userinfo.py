@@ -39,6 +39,6 @@ def fetch_userinfo(
         )
 
     if response.status_code == 200:
-        return UserinfoSuccessResponse.parse_raw(response.content)
+        return UserinfoSuccessResponse.model_validate_json(response.content)
     else:
-        return UserinfoErrorResponse.parse_raw(response.content)
+        return UserinfoErrorResponse.model_validate_json(response.content)

@@ -103,7 +103,7 @@ def dummy_provider_config(jwks, response_mock):
             introspection_endpoint="https://provider.example.com/token-introspection",
             subject_types_supported=["public"],
             id_token_signing_alg_values_supported=["RS256"],
-        ).dict(exclude_defaults=True),
+        ).model_dump(exclude_defaults=True),
     )
     response_mock.get(
         url="https://provider.example.com/jwks",

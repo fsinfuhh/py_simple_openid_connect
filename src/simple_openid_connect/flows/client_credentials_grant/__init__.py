@@ -47,6 +47,6 @@ def authenticate(
     )
 
     if response.status_code == 200:
-        return TokenSuccessResponse.parse_raw(response.content)
+        return TokenSuccessResponse.model_validate_json(response.content)
     else:
-        return TokenErrorResponse.parse_raw(response.content)
+        return TokenErrorResponse.model_validate_json(response.content)

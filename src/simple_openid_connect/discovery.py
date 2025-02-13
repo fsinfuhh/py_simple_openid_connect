@@ -33,7 +33,7 @@ def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
         )
 
     try:
-        result = ProviderMetadata.parse_raw(response.content)
+        result = ProviderMetadata.model_validate_json(response.content)
         assert result.issuer.rstrip("/") == issuer, "issuer mismatch"
     except Exception as e:
         raise OpenidProtocolError(

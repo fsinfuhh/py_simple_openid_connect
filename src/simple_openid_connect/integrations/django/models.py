@@ -112,7 +112,7 @@ class OpenidSession(models.Model):
 
     @property
     def id_token(self) -> IdToken:
-        return IdToken.parse_raw(self._id_token)
+        return IdToken.model_validate_json(self._id_token)
 
     @id_token.setter
     def id_token(self, value: IdToken) -> None:

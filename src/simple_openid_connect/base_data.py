@@ -32,7 +32,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
 
         """
         query = Query()
-        query.set(self.dict(exclude_defaults=True))
+        query.set(self.model_dump(exclude_defaults=True))
         return query.encode()  # type: ignore # because furl has no typedefs, but we know what this returns
 
     def encode_url(self, url: str) -> str:
@@ -44,7 +44,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         it should never need to generate responses.
         """
         url_parsed = furl(url)
-        url_parsed.args.update(self.dict(exclude_defaults=True))
+        url_parsed.args.update(self.model_dump(exclude_defaults=True))
         return url_parsed.tostr()  # type: ignore # because furl has no typedefs, but we know what this returns
 
     @classmethod
@@ -54,7 +54,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         """
         query = Query(s)
         one_value_params = {key: query.params[key] for key in query.params.keys()}
-        return cls.parse_obj(one_value_params)
+        return cls.model_validate(one_value_params)
 
     @classmethod
     def parse_url(
@@ -97,4 +97,4 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         """
         verifier = JWS()
         msg = verifier.verify_compact(value, signing_keys)
-        return cls.parse_obj(msg)
+        return cls.model_validate(msg)

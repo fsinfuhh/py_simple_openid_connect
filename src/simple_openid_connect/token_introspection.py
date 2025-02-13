@@ -40,6 +40,6 @@ def introspect_token(
     )
 
     if response.status_code == 200:
-        return TokenIntrospectionSuccessResponse.parse_raw(response.content)
+        return TokenIntrospectionSuccessResponse.model_validate_json(response.content)
     else:
-        return TokenIntrospectionErrorResponse.parse_raw(response.content)
+        return TokenIntrospectionErrorResponse.model_validate_json(response.content)
