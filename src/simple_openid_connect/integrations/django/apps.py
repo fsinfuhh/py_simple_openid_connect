@@ -100,7 +100,7 @@ class OpenidAppConfig(AppConfig):
         """
         type-validated version of django settings
         """
-        return SettingsModel.from_orm(settings)
+        return SettingsModel.model_validate(settings)
 
     @cached_property
     def user_mapper(self) -> "UserMapper":

@@ -86,7 +86,7 @@ class OpenidUser(models.Model):
             access_token_expiry=_calc_expiry(token_response.expires_in),
             refresh_token=token_response.refresh_token or "",
             refresh_token_expiry=_calc_expiry(token_response.refresh_expires_in),
-            _id_token=id_token.json(),  # type: ignore[unused-ignore,misc]
+            _id_token=id_token.model_dump_json(),  # type: ignore[unused-ignore,misc]
             raw_id_token=token_response.id_token,
         )
 
@@ -112,7 +112,7 @@ class OpenidSession(models.Model):
 
     @property
     def id_token(self) -> IdToken:
-        return IdToken.parse_raw(self._id_token)
+        return IdToken.model_validate_json(self._id_token)
 
     @id_token.setter
     def id_token(self, value: IdToken) -> None:
