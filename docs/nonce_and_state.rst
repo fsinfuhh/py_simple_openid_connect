@@ -30,11 +30,9 @@ Protection using ``state``
 
 A relying party can protect against this kind of CSRF attack by only allowing a code-for-token exchange if the users user-agent is currently in a state where authantication is performed.
 In other words, the redirect URI endpoint must only succeed if the user-agent has visited the login initiation URI before and started an authentication flow.
+It should also bind the authentication flow to the user-agent that initiated it.
 
-One way to achieve this is by supplying a cryptographically signed ``state`` parameter during login initiation and, because it is passed through to the redirect URI, validating it in the redirect URI's handler.
-
-Passing ``state`` through URIs, however, is not the only way.
-If the relying party has another secure mechanism to store state of a user-agent, e.g. through a web frameworks session mechanism, that can be used to store the authantication state as well.
+One way to achieve this is by generating an opaque value which we now call ``state`` during login initiation, associating it to the user agent (e.g. by saving it in a session) and, because it is passed through to the redirect URI, validating it in the redirect URI's handler.
 
 
 Using ``nonce``
