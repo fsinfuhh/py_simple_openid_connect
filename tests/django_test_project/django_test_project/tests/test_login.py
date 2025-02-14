@@ -23,8 +23,8 @@ def test_directly_calling_login_endpoint(
 ):
     # arrange
     settings = OpenidAppConfig.get_instance().safe_settings
-    NONCE = "42"
-    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: NONCE)
+    SECRET_CONSTANT = "42"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: SECRET_CONSTANT)
     client_auth = b64encode(
         f"{settings.OPENID_CLIENT_ID}:{settings.OPENID_CLIENT_SECRET}".encode()
     ).decode()
@@ -38,7 +38,8 @@ def test_directly_calling_login_endpoint(
                     + resolve_url(settings.OPENID_REDIRECT_URI),
                     "response_type": "code",
                     "scope": settings.OPENID_SCOPE,
-                    "nonce": NONCE,
+                    "nonce": SECRET_CONSTANT,
+                    "state": SECRET_CONSTANT,
                 }
             )
         ],
@@ -47,6 +48,7 @@ def test_directly_calling_login_endpoint(
             "Location": settings.OPENID_BASE_URI
             + resolve_url(settings.OPENID_REDIRECT_URI)
             + "?code=code.foobar123"
+            + f"&state={SECRET_CONSTANT}"
         },
     )
     response_mock.post(
@@ -78,7 +80,7 @@ def test_directly_calling_login_endpoint(
                         "aud": settings.OPENID_CLIENT_ID,
                         "iat": 0,
                         "exp": sys.maxsize,
-                        "nonce": NONCE,
+                        "nonce": SECRET_CONSTANT,
                     }
                 )
             ).sign_compact(jwks),
@@ -108,8 +110,8 @@ def test_directly_accessing_protected_resource(
 ):
     # arrange
     settings = OpenidAppConfig.get_instance().safe_settings
-    NONCE = "42"
-    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: NONCE)
+    SECRET_CONSTANT = "42"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: SECRET_CONSTANT)
     client_auth = b64encode(
         f"{settings.OPENID_CLIENT_ID}:{settings.OPENID_CLIENT_SECRET}".encode()
     ).decode()
@@ -123,7 +125,8 @@ def test_directly_accessing_protected_resource(
                     + resolve_url(settings.OPENID_REDIRECT_URI),
                     "response_type": "code",
                     "scope": settings.OPENID_SCOPE,
-                    "nonce": NONCE,
+                    "nonce": SECRET_CONSTANT,
+                    "state": SECRET_CONSTANT,
                 }
             )
         ],
@@ -132,6 +135,7 @@ def test_directly_accessing_protected_resource(
             "Location": settings.OPENID_BASE_URI
             + resolve_url(settings.OPENID_REDIRECT_URI)
             + "?code=code.foobar123"
+            + f"&state={SECRET_CONSTANT}"
         },
     )
     response_mock.post(
@@ -163,7 +167,7 @@ def test_directly_accessing_protected_resource(
                         "aud": settings.OPENID_CLIENT_ID,
                         "iat": 0,
                         "exp": sys.maxsize,
-                        "nonce": NONCE,
+                        "nonce": SECRET_CONSTANT,
                     }
                 )
             ).sign_compact(jwks),

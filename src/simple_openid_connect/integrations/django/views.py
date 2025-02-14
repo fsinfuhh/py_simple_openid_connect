@@ -69,19 +69,26 @@ class InitLoginView(View):
         if "next" in request.GET.keys():
             request.session["login_redirect_url"] = request.GET["next"]
 
-        # save the login state into the session to prevent CSRF attacks (openid state parameter could be used instead)
-        # See https://www.rfc-editor.org/rfc/rfc6749#section-10.12
+        # save the login state into the session to prevent CSRF attacks
+        # ref: https://simple-openid-connect.readthedocs.io/en/stable/nonce_and_state.html
+        state = secrets.token_urlsafe(32)
+        request.session["openid_auth_state"] = state
+
+        # save the time at which authentication was started
         request.session["openid_auth_start_time"] = datetime.now(
             tz=timezone.utc
         ).timestamp()
 
         # prevent replay attacks by generating and specifying a nonce
+        # ref: https://simple-openid-connect.readthedocs.io/en/stable/nonce_and_state.html
         nonce = secrets.token_urlsafe(48)
         request.session["openid_auth_nonce"] = nonce
 
         # redirect the user-agent to the oidc provider
         client = OpenidAppConfig.get_instance().get_client(request)
-        redirect = client.authorization_code_flow.start_authentication(nonce=nonce)
+        redirect = client.authorization_code_flow.start_authentication(
+            state=state, nonce=nonce
+        )
         return HttpResponseRedirect(redirect)
 
 
@@ -100,7 +107,12 @@ class LoginCallbackView(View):
         app_settings = OpenidAppConfig.get_instance().safe_settings
         client = OpenidAppConfig.get_instance().get_client(request)
 
-        # prevent CSRF attacks by verifying that the user agent is curently in the process of authenticating and that the authentication was not started more than the configured amount of time ago
+        # prevent CSRF attacks by verifying the state parameter
+        # ref: https://simple-openid-connect.readthedocs.io/en/stable/nonce_and_state.html
+        if request.session.get("openid_auth_state", None) is None:
+            raise InvalidAuthStateError()
+
+        # don't allow login completion if the process was started too long ago
         if request.session.get("openid_auth_start_time", None) is None or (
             datetime.now(tz=timezone.utc)
             - datetime.fromtimestamp(
@@ -114,6 +126,7 @@ class LoginCallbackView(View):
         # exchange the passed code for tokens
         token_response = client.authorization_code_flow.handle_authentication_result(
             current_url=request.get_full_path(),
+            state=request.session["openid_auth_state"],
         )
         if not isinstance(token_response, TokenSuccessResponse):
             return TemplateResponse(
