@@ -5,7 +5,7 @@ Django AppConfig for this app
 import inspect
 import logging
 from functools import cached_property
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from django.apps import AppConfig, apps
 from django.conf import settings
@@ -169,8 +169,11 @@ class OpenidAppConfig(AppConfig):
         return client
 
 
-@register  # type: ignore
-def check_middleware(*args, **kwargs) -> List[Union[Warning, Error]]:
+@register
+def check_middleware(*args: Any, **kwargs: Any) -> List[Union[Warning, Error]]:
+    """
+    Check that our TokenVerificationMiddleware has been added to django settings
+    """
     from simple_openid_connect.integrations.django.middleware import (
         TokenVerificationMiddleware,
     )
