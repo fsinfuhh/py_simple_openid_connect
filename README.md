@@ -31,12 +31,16 @@ Simple and opinionated OpenID-Connect relying party and resource server implemen
   Instead, abstract the underlying OpenID protocol into usable, clear functions but nothing more.
 
 
-## Framework Integrations
+## Language & Framework Support
+
+We aim to follow pythons officially supported versions. This is currently python `v3.9`, `v3.10`, `v3.11`, `v3.12` and `v3.13`.
+
+In addition to being an OpenID library from which one can build their own authentication solutaion, we also offer explicit integrations into the following frameworks and projects:
 
 | Name                                                            | Package Feature       | Integration Docs                                                                                   | Supported Versions     |
 |-----------------------------------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------|------------------------|
-| [Django](https://www.djangoproject.com/)                        | `django`              | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v3.2`, `v4.2`, `v5.0` |
-| [Django-Rest-Framework](https://www.django-rest-framework.org/) | `djangorestframework` | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/drf-integration.html)    | `v3.13`, `v3.14`       |
+| [Django](https://www.djangoproject.com/)                        | `django`              | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v4.2`, `v5.0`, `v5.1` |
+| [Django-Rest-Framework](https://www.django-rest-framework.org/) | `djangorestframework` | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/drf-integration.html)    | `v3.14`, `v3.15`       |
 
 
 
