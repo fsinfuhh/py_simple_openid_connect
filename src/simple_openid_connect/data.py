@@ -1,6 +1,7 @@
 """
 Datatypes and models for various OpenID messages
 """
+
 import enum
 import logging
 import time

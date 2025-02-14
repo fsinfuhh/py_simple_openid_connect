@@ -1,6 +1,7 @@
 """
 Django AppConfig for this app
 """
+
 import inspect
 import logging
 from functools import cached_property

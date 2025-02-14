@@ -9,6 +9,7 @@ These urls should be included into your project wherever you like via::
     ]
 
 """
+
 from django.urls import path
 
 from . import views

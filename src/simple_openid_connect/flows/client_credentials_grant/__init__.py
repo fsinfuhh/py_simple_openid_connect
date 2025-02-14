@@ -3,6 +3,7 @@ The `*Client Credentials Grant* <https://oauth.net/2/grant-types/client-credenti
 
 This grant enables a client to retrieve tokens dedicated to the client and not to a specific user.
 """
+
 import logging
 from typing import Union
 

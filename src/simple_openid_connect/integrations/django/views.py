@@ -1,6 +1,7 @@
 """
 View functions which handle openid authentication and their related callbacks
 """
+
 import logging
 import secrets
 from datetime import datetime, timedelta, timezone

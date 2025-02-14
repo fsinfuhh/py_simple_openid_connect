@@ -59,7 +59,7 @@ def access_token_required(
         _required_scopes = required_scopes
 
     def actual_decorator(
-        view_func: Callable[..., View_Return]
+        view_func: Callable[..., View_Return],
     ) -> Callable[..., View_Return]:
         @wraps(view_func)
         def wrapped_view(

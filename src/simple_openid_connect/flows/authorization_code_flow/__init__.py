@@ -5,6 +5,7 @@ The Authorization Server can also authenticate the Client before exchanging the 
 
 **The Authorization Code flow is suitable for Clients that can securely maintain a Client Secret between themselves and the Authorization Server.**
 """
+
 import copy
 import logging
 from typing import Literal, Optional, Union

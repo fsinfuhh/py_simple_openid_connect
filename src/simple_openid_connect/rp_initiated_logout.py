@@ -1,6 +1,7 @@
 """
 Implementation of Relying-Party initiated logout
 """
+
 from typing import Union
 
 from simple_openid_connect.data import RpInitiatedLogoutRequest

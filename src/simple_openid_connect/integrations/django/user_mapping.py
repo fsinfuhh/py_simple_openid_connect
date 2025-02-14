@@ -4,6 +4,7 @@ Default implementations for mapping tokens to user objects.
 This implementation can be overriden by extending the :class:`UserMapper` class and then setting the django settings
 variable ``OPENID_USER_MAPPER`` to an import string pointing to the newly created class.
 """
+
 import logging
 from typing import Any, Tuple, Union
 

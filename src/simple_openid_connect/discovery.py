@@ -1,6 +1,7 @@
 """
 Mechanisms for discovering information about an OpenID issuer
 """
+
 import requests
 
 from simple_openid_connect import utils

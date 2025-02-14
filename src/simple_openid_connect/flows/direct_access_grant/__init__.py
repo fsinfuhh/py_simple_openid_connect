@@ -7,6 +7,7 @@ Using this flow, a users credentials (i.e. username and password) are directly s
     This way of exchanging credentials for tokens is considered legacy and not recommended but some app designs may still require it.
     The latest `OAuth 2.0 Security Best Current Practices <https://oauth.net/2/oauth-best-practice/>`_ even disallows the password grant entirely.
 """
+
 import logging
 from typing import Union
 

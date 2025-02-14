@@ -1,6 +1,7 @@
 """
 Base data types which are extended with concrete OpenId data types in :mod:`simple_openid_connect.data`
 """
+
 import abc
 import logging
 from typing import List, Literal, Type, TypeVar
