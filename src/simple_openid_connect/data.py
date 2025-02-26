@@ -315,7 +315,7 @@ class JwtAccessToken(OpenidBaseModel):
     exp: int
     "The 'exp' (expiration time) claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing. The processing of the 'exp' claim requires that the current date/time MUST be before the expiration date/time listed in the 'exp' claim. Implementers MAY provide for some small leeway, usually no more than a few minutes, to account for clock skew. Its value MUST be a number containing a NumericDate value."
 
-    aud: Optional[str] = None
+    aud: Optional[Union[str, List[str]]] = None
     "The 'aud' (audience) claim identifies the recipients that the JWT is intended for. Each principal intended to process the JWT MUST identify itself with a value in the audience claim. If the principal processing the claim does not identify itself with a value in the 'aud' claim when this claim is present, then the JWT MUST be rejected. In the general case, the 'aud' value is an array of case-sensitive strings, each containing a StringOrURI value. In the special case when the JWT has one audience, the 'aud' value MAY be a single case-sensitive string containing a StringOrURI value. The interpretation of audience values is generally application specific."
 
     sub: Optional[str] = None
@@ -765,7 +765,7 @@ class BackChannelLogoutToken(OpenidBaseModel):
     sub: Optional[str] = None
     "OPTIONAL. Subject Identifier (user id)"
 
-    aud: str
+    aud: Union[str, List[str]]
     "REQUIRED. Audience(s)"
 
     iat: int
@@ -922,7 +922,7 @@ class TokenIntrospectionSuccessResponse(OpenidBaseModel):
     sub: Optional[str] = None
     "OPTIONAL. Subject of the token. Usually a machine-readable identifier of the resource owner who authorized this token (user id)."
 
-    aud: Optional[str] = None
+    aud: Optional[Union[str, List[str]]] = None
     "OPTIONAL. Service-specific string identifier or list of string identifiers representing the intended audience for this token."
 
     iss: Optional[str] = None
