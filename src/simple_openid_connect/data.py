@@ -342,12 +342,13 @@ class JwtAccessToken(OpenidBaseModel):
     scope: Optional[str] = None
     "OPTIONAL. Scopes to which the token grants access. Multiple scopes are encoded space separated. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present."
 
-    def validate_extern(self, issuer: str) -> None:
+    def validate_extern(self, issuer: str, client_id: str) -> None:
         """
         Validate this access token with external data for consistency.
 
         :param issuer: The issuer that this token is supposed to originate from.
             Should usually be :data:`ProviderMetadata.issuer`.
+        :param client_id: The client id of this client
         """
         # validate issuer
         validate_that(
@@ -357,6 +358,19 @@ class JwtAccessToken(OpenidBaseModel):
 
         # validate expiry
         validate_that(self.exp > time.time(), "The access token is expired")
+
+        # validate audience
+        if self.aud is not None:
+            if isinstance(self.aud, str):
+                validate_that(
+                    self.aud == client_id,
+                    "The access tokens audience does not contain own client_id",
+                )
+            elif isinstance(self.aud, list):
+                validate_that(
+                    client_id in self.aud,
+                    "The access tokens audience does not contain own client_id",
+                )
 
 
 class UserinfoRequest(OpenidBaseModel):
