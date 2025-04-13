@@ -10,7 +10,6 @@ from django.db import models
 from django.utils import timezone
 
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
-from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 
 
 def _calc_expiry(t: Optional[int]) -> Optional[datetime]:

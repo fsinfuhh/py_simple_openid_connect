@@ -6,7 +6,7 @@ import abc
 import logging
 from typing import List, Literal, Type, TypeVar
 
-from cryptojwt import JWK, JWS, JWT, KeyBundle, KeyJar
+from cryptojwt import JWK, JWS
 from furl import Query, furl
 from pydantic import BaseModel
 

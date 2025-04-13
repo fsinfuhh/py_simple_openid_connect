@@ -1,7 +1,6 @@
 import unittest
 from typing import Optional
 
-from furl import quote as urlquote
 from hypothesis import given
 
 from simple_openid_connect.data import OpenidBaseModel

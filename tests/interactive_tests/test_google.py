@@ -1,6 +1,6 @@
 import logging
 from http import HTTPStatus
-from typing import Mapping, Tuple
+from typing import Mapping, Tuple, Optional
 
 import pytest
 from furl import furl
@@ -20,7 +20,7 @@ def test_login_with_google(real_app_server, secrets):
         client_id=secrets["google_client_id"],
         client_secret=secrets["google_client_secret"],
     )
-    token_response: TokenSuccessResponse
+    token_response: Optional[TokenSuccessResponse] = None
 
     def on_login(_url: furl) -> Tuple[int, Mapping[str, str], str]:
         url = oidc_client.authorization_code_flow.start_authentication()
@@ -40,13 +40,14 @@ def test_login_with_google(real_app_server, secrets):
         assert isinstance(response, TokenSuccessResponse)
         token_response = response
         real_app_server.done()
-        return HTTPStatus.OK, {}, f"Success. You can close this tab."
+        return HTTPStatus.OK, {}, "Success. You can close this tab."
 
     # act (login)
     logger.info(f"Visit {real_app_server.login_url}")
     real_app_server.serve_until_done(on_login, on_login_callback)
 
     # act (decode id token)
+    assert token_response is not None
     id_token = oidc_client.decode_id_token(token_response.id_token)
     assert isinstance(id_token, IdToken)
     id_token.validate_extern(

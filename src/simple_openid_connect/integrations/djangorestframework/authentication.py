@@ -5,20 +5,13 @@ See the `DRF documentation on Setting the authentication scheme <https://www.dja
 """
 
 import logging
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Tuple, Union
 
-from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from simple_openid_connect.data import (
-    JwtAccessToken,
-    TokenIntrospectionErrorResponse,
-    TokenIntrospectionSuccessResponse,
-)
 from simple_openid_connect.exceptions import ValidationError
-from simple_openid_connect.integrations.django import models
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 from simple_openid_connect.integrations.django.user_mapping import FederatedUserData
 

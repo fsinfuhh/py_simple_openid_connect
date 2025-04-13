@@ -1,8 +1,5 @@
 import pickle
-import re
-from base64 import b64encode
 
-from responses import matchers
 
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (

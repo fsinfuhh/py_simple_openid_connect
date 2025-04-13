@@ -22,4 +22,4 @@ def test_session_ended_after_logout_view(
     response = dyn_client.get(resolve_url("simple_openid_connect:logout"))
 
     # assert
-    assert response.wsgi_request.user.is_authenticated == False
+    assert not response.wsgi_request.user.is_authenticated

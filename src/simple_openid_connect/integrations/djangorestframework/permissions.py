@@ -12,7 +12,6 @@ from django.http import HttpRequest
 from rest_framework.permissions import BasePermission
 
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
-from simple_openid_connect.integrations.django.models import OpenidSession
 from simple_openid_connect.integrations.djangorestframework.authentication import (
     AuthenticatedViaToken,
 )

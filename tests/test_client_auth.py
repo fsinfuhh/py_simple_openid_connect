@@ -2,7 +2,6 @@ from base64 import b64encode
 
 import pytest
 import requests
-from responses import RequestsMock
 
 from simple_openid_connect.client_authentication import ClientSecretBasicAuth, NoneAuth
 

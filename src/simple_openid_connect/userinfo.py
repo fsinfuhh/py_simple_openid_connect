@@ -35,7 +35,7 @@ def fetch_userinfo(
 
     if not utils.is_application_json(response.headers["Content-Type"]):
         raise OpenidProtocolError(
-            f"userinfo request was responded with invalid Content-Type", response
+            "userinfo request was responded with invalid Content-Type", response
         )
 
     if response.status_code == 200:

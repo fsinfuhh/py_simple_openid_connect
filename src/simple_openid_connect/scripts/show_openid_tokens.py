@@ -7,7 +7,8 @@ from collections import defaultdict
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from secrets import token_urlsafe
-from typing import Any, Dict, Optional
+from typing import Any, Dict
+from typing import Optional  # noqa: F401
 
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (

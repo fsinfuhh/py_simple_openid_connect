@@ -6,14 +6,12 @@ import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-from typing import Mapping
 
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.http import (
     HttpRequest,
     HttpResponse,
-    HttpResponseBadRequest,
     HttpResponseRedirect,
 )
 from django.shortcuts import resolve_url
@@ -23,7 +21,6 @@ from django.views import View
 from django.views.decorators.cache import cache_control
 
 from simple_openid_connect.data import (
-    FrontChannelLogoutNotification,
     IdToken,
     RpInitiatedLogoutRequest,
     TokenSuccessResponse,

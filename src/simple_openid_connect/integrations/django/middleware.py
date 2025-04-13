@@ -5,7 +5,6 @@ from typing import Callable
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import resolve_url
-from django.urls import reverse
 
 from simple_openid_connect.data import TokenSuccessResponse
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig

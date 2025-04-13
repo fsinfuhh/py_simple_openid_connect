@@ -101,7 +101,7 @@ def handle_authentication_result(
             copy.deepcopy(current_furl).remove(fragment=True, query=True)
         )
         logger.debug(
-            f"a redirect_uri value of 'auto' was specified. Reproducing redirect_uri (%s) from current_url (%s)",
+            "a redirect_uri value of 'auto' was specified. Reproducing redirect_uri (%s) from current_url (%s)",
             redirect_uri,
             current_furl,
         )

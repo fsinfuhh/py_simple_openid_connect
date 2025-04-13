@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Mapping, Optional, Union
 
 from furl import furl
 

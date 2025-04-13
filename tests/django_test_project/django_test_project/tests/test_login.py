@@ -195,7 +195,7 @@ def test_unsolicited_callback_csrf(
     # act
     # throws ConnectionError when the implementation tries to redeem the code
     with pytest.raises(InvalidAuthStateError):
-        response = dyn_client.get(
+        _response = dyn_client.get(
             "https://app.example.com"
             + resolve_url(settings.OPENID_REDIRECT_URI)
             + "?code=code.foobar123"

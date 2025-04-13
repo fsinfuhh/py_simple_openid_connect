@@ -86,9 +86,7 @@ class UserMapper:
             required_scopes = OpenidAppConfig.get_instance().safe_settings.OPENID_SCOPE
 
         # try to parse the raw token as JWT
-        user_data = (
-            None
-        )  # type: JwtAccessToken | TokenIntrospectionSuccessResponse | None
+        user_data = None  # type: JwtAccessToken | TokenIntrospectionSuccessResponse | None
         try:
             # parse an validate the general token structure
             token = JwtAccessToken.parse_jwt(

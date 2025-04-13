@@ -102,7 +102,7 @@ class OpenidClient:
                 self.client_auth = ClientSecretBasicAuth(client_id, client_secret)
             else:
                 raise NotImplementedError(
-                    f"a client secret was given but the issuer does not support client_secret_basic authentication which is the only supported method"
+                    "a client secret was given but the issuer does not support client_secret_basic authentication which is the only supported method"
                 )
 
     @classmethod

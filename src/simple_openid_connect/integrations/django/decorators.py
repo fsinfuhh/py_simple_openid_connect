@@ -7,12 +7,9 @@ from functools import wraps
 from http import HTTPStatus
 from typing import Any, Callable, Optional, TypeVar, Union
 
-from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
-from simple_openid_connect.data import JwtAccessToken, TokenIntrospectionErrorResponse
 from simple_openid_connect.exceptions import ValidationError
-from simple_openid_connect.integrations.django import models
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 from simple_openid_connect.utils import is_application_json
 
