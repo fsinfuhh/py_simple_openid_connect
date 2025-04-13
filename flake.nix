@@ -23,6 +23,7 @@
             python312
             python312Packages.ipython
             python312Packages.platformdirs
+            python312Packages.ruff
             uv
           ];
         };

@@ -12,5 +12,6 @@ pytest-django
 pytest-explicit
 pyyaml
 responses
+ruff
 sphinx
 types-requests
