@@ -95,7 +95,10 @@ class UserMapper:
                 access_token,
                 oidc_client.provider_keys,
             )
-            token.validate_extern(oidc_client.provider_config.issuer)
+            token.validate_extern(
+                oidc_client.provider_config.issuer,
+                oidc_client.client_auth.client_id,
+            )
 
             # validate token scope for required access
             if required_scopes != "":
