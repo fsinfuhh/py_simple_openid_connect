@@ -45,6 +45,12 @@ uv pip install -e .[django,djangorestframework] -r requirements.dev.txt
 source .venv/bin/activate
 ```
 
+You should also enable [pre-commit](https://pre-commit.com/) hooks to check for linting and type errors before committing:
+
+```shell
+pre-commit install
+```
+
 ## How to run the Tests
 
 ```shell
