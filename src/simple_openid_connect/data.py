@@ -900,7 +900,7 @@ class TokenIntrospectionRequest(OpenidBaseModel):
 
 class TokenIntrospectionSuccessResponse(OpenidBaseModel):
     """
-    A message with which an OP responds to :class:`TokenIntrospectionRequest`\s and which contains information about the provided token.
+    A message with which an OP responds to :class:`TokenIntrospectionRequest` and which contains information about the provided token.
 
     Specific implementations MAY extend this structure with their own service-specific response names as top-level members of this object.
 
@@ -948,7 +948,7 @@ class TokenIntrospectionSuccessResponse(OpenidBaseModel):
 
 class TokenIntrospectionErrorResponse(TokenErrorResponse):
     """
-    An error with which an OP responds to :class:`TokenIntrospectionRequest`\s and which describes why the request could not be fulfilled.
+    An error with which an OP responds to :class:`TokenIntrospectionRequest` and which describes why the request could not be fulfilled.
     """
 
     pass
