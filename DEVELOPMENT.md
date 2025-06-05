@@ -70,8 +70,13 @@ This can be done by running `make clean`.
 
 ## How to release
 
-In order to release a new version, the following steps are necessary:
+In order to release a new version, the following steps are necessary.
+Please keep in mind when picking a new version number that [Semantic Versioning](https://semver.org/) should be followed.
 
-1. Bump version in [\_\_init\_\_.py](./src/simple_openid_connect/__init__.py) and commit the change
-2. Tag the commit using `git tag -a -s v$version`
-3. Publish to pypi using `flit publish`
+1. Bump version in [\_\_init\_\_.py](./src/simple_openid_connect/__init__.py).
+2. Add entries regarding what changed to [CHANGELOG.md](./CHANGELOG.md).
+3. Commit both changes using `git commit -m "bump version to vX.Y.Z"`
+4. Tag the commit using `git tag -a -s vX.Y.Z`.
+
+   The tag name should be the same as the version number and the tag notes should contain a copy of the changelog entry of the new version.
+5. Publish to pypi using `flit publish`
