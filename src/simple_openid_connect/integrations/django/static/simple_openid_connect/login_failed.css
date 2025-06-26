@@ -1,0 +1,87 @@
+body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: oklch(98.5% 0 0);
+}
+
+h1,h2,h3,h4,h5 {
+    text-align: center;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+details {
+    width: 100%;
+    max-width: 100%;
+    background-color: oklch(92% 0.004 286.32);
+    border: 1px solid oklch(20.8% 0.042 265.755);
+}
+details > summary {
+    margin: 2px;
+    cursor: pointer;
+}
+details > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem 2rem;
+}
+
+#config-table th {
+    column-span: 2;
+}
+
+#easy-container {
+    background-color: oklch(96.9% 0.015 12.422);
+    border: 2px solid oklch(51.4% 0.222 16.935);
+    padding: 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+#generic-description {
+    margin-bottom: 2rem;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* small */
+@media (width >= 40rem) {
+
+}
+
+/* medium */
+@media (width >= 48rem) {
+    body {
+        padding-left: 6rem;
+        padding-right: 6rem;
+        margin-top: 4rem;
+    }
+}
+
+/* large */
+@media (width >= 64rem) {
+    body {
+        padding-left: 12rem;
+        padding-right: 12rem;
+    }
+}
+
+/* xl */
+@media (width >= 80rem) {
+
+}
+
+/* 2xl */
+@media (width >= 96rem) {
+
+}

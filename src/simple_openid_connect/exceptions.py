@@ -42,6 +42,11 @@ class AuthenticationFailedError(Exception):
     def __init__(self, error: "AuthenticationErrorResponse"):
         super().__init__(error)
 
+    @property
+    def error(self) -> str:
+        value = self.args[0]  # type: str
+        return value
+
 
 class ValidationError(AssertionError):
     """
@@ -50,3 +55,8 @@ class ValidationError(AssertionError):
 
     def __init__(self, msg: str):
         super().__init__(msg)
+
+    @property
+    def msg(self) -> str:
+        value = self.args[0]  # type: str
+        return value

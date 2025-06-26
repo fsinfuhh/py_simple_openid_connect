@@ -67,6 +67,33 @@ You can use the following credentials in keycloak:
 | master | `admin`  | `admin`     | Keycloak Admin   |
 | dev    | `dev`    | `foobar123` | Development User |
 
+### Get Dev-IDP tokens
+
+Test it out by starting the command below, opening the browser, and you will be shown your tokens in the response:
+```
+show-openid-tokens \
+   --issuer="http://localhost:8080/realms/dev" \
+   --client-id="django_test_project" \
+   --client-secret="J2GslOfIEISn3XLXESIjU1X6SR9iaHB5" \
+   --port=8000
+```
+
+## Developing the Django Integration
+
+Developing the django integration is slightly tricky because this project includes only a django app but is not intended to ship a full django project.
+For this reason, there exists an additional full django project inside `tests/django_test_project/` which uses our django integration just like any other third-party project.
+
+You can start the builtin django server with the following script:
+```shell
+export DJANGO_SETTINGS_MODULE=django_test_project.settings_dev
+./tests/django_test_project/manage.py runserver
+```
+
+### Releasing a Django-Migration
+
+When changing the django integrations database models, migrations need to be generated.
+For this reason, the main source also includes a `manage.py` and `settings.py`. !! Those are explicity only used during migration creation and not to start the integration during development !!
+
 ## How to run the Tests
 
 ```shell
