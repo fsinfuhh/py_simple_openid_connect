@@ -70,16 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "django_test_project.wsgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -91,11 +81,4 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = "default-after-login"
-
-OPENID_BASE_URI = "https://app.example.com"
-OPENID_ISSUER = "https://provider.example.com"
-OPENID_CLIENT_ID = "test-client-id"
-OPENID_CLIENT_SECRET = "test-client-secret"
-OPENID_SCOPE = "openid profile email"
-
 LOGIN_URL = "simple_openid_connect:login"

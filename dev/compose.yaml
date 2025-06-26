@@ -1,0 +1,90 @@
+name: simple_openid_connect
+
+services:
+  db:
+    image: docker.io/postgres:17
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${COMPOSE_PROJECT_NAME}
+      - POSTGRES_PASSWORD=${COMPOSE_PROJECT_NAME}
+      - POSTGRES_DB=${COMPOSE_PROJECT_NAME}
+
+  idp-db:
+    image: docker.io/postgres:17
+    volumes:
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_DB=keycloak
+
+  idp:
+    image: quay.io/keycloak/keycloak
+    depends_on: [ idp-db ]
+    volumes:
+      - "./keycloak_exports:/opt/keycloak/data/import:ro"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: idp-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_LOG_LEVEL: warn
+    ports:
+      - "8080:8080"
+    entrypoint:
+      - '/bin/bash'
+      - '-c'
+      - |
+        echo 'Importing realm data that was exported using /opt/keycloak/bin/kc.sh export --file /opt/keycloak/realm.json'
+        /opt/keycloak/bin/kc.sh import --file /opt/keycloak/data/import/realm.json
+        echo "Staring keycloak service"
+        exec /opt/keycloak/bin/kc.sh start
+
+#  webserver: &app
+#    build:
+#      context: ../
+#      dockerfile: dev/Containerfile
+#      target: deps
+#    restart: on-failure
+#    depends_on: [ backend, frontend ]
+#    volumes:
+#      - "../:/usr/local/src/timetrack/"
+#      - "./dev.nginx.conf:/etc/nginx/http.d/default.conf"
+#    env_file: [ dev.env ]
+#    network_mode: host
+#    entrypoint: [ "nginx", "-g", "daemon off;" ]
+#    develop:
+#      watch:
+#        - path: dev.nginx.conf
+#          target: /usr/local/src/timetrack/dev/dev.nginx.conf
+#          action: sync+restart
+
+#  backend:
+#    <<: *app
+#    depends_on: [ db ]
+#    entrypoint:
+#      - "sh"
+#      - "-c"
+#      - |
+#        set -e
+#        cd ./backend
+#        uv sync --active
+#        ./manage.py migrate
+#        exec ./manage.py runserver localhost:8081
+#    develop:
+#      watch:
+#        - path: ../backend/uv.lock
+#          action: rebuild
+
+volumes:
+  db:
+    name: "${COMPOSE_PROJECT_NAME}-dev-db"

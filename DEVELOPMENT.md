@@ -51,6 +51,22 @@ You should also enable [pre-commit](https://pre-commit.com/) hooks to check for 
 pre-commit install
 ```
 
+## Development IDP
+
+During development, a keycloak based OpenID provider can be started from the provided compose definition.
+It is made available from [http://localhost:8080/admin/master/](http://localhost:8080/admin/master/):
+
+```shell
+docker compose -f dev/compose.yaml up
+```
+
+You can use the following credentials in keycloak:
+
+| Realm  | Username | Password    | Purpose          |
+|--------|----------|-------------|------------------|
+| master | `admin`  | `admin`     | Keycloak Admin   |
+| dev    | `dev`    | `foobar123` | Development User |
+
 ## How to run the Tests
 
 ```shell
