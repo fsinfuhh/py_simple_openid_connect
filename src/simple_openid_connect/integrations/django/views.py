@@ -34,29 +34,6 @@ from simple_openid_connect.integrations.django.models import OpenidSession
 logger = logging.getLogger(__name__)
 
 
-class InvalidAuthStateError(Exception):
-    """
-    Exception that is thrown when the LoginCallbackView is served and the user-agent has no authentication procedure currently in progress
-    """
-
-    def __init__(self) -> None:
-        super().__init__(
-            self,
-            "User-Agent has no authentication procedures in progress so the login-callback will not be processed",
-        )
-
-
-class InvalidNonceError(Exception):
-    """
-    Exception that is thrown when an authentication response contains an invalid or no nonce value
-    """
-
-    def __init__(self) -> None:
-        super().__init__(
-            self, "Authentication response contained an invalid or no nonce value"
-        )
-
-
 class InitLoginView(View):
     """
     The view which handles initiating a login.

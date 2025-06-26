@@ -4,12 +4,12 @@ import sys
 from base64 import b64encode
 
 import pytest
+from pytest_django.asserts import assertContains
 from cryptojwt import JWS
 from django.shortcuts import resolve_url
 from responses import matchers
 
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
-from simple_openid_connect.integrations.django.views import InvalidAuthStateError
 
 
 @pytest.mark.django_db
@@ -193,12 +193,12 @@ def test_unsolicited_callback_csrf(
     settings = OpenidAppConfig.get_instance().safe_settings
 
     # act
-    # throws ConnectionError when the implementation tries to redeem the code
-    with pytest.raises(InvalidAuthStateError):
-        _response = dyn_client.get(
-            "https://app.example.com"
-            + resolve_url(settings.OPENID_REDIRECT_URI)
-            + "?code=code.foobar123"
-        )
+    # renders an error html page
+    response = dyn_client.get(
+        "https://app.example.com"
+        + resolve_url(settings.OPENID_REDIRECT_URI)
+        + "?code=code.foobar123"
+    )
 
     # assert
+    assertContains(response, "<h2>Invalid state</h2>", status_code=401, html=True)
