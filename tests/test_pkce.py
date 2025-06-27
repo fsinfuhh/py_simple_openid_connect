@@ -18,14 +18,14 @@ def test_get_code_challenge():
         ),
     ]
     for verifier, challenge in PKCE_PAIRS:
-        assert (
-            pkce.get_code_challenge(verifier) == challenge
-        ), "get_code_challenge() produced an unexpected challenge"
+        assert pkce.get_code_challenge(verifier) == challenge, (
+            "get_code_challenge() produced an unexpected challenge"
+        )
 
 
 def test_gen_pair_is_actual_pair():
     for _ in range(100):
         verifier, challenge = pkce.generate_pkce_pair()
-        assert (
-            challenge == pkce.get_code_challenge(verifier)
-        ), "pkce.generate_pkce_pair() returned a pair whose challenge cannot be reproduced from the verifier"
+        assert challenge == pkce.get_code_challenge(verifier), (
+            "pkce.generate_pkce_pair() returned a pair whose challenge cannot be reproduced from the verifier"
+        )

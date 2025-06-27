@@ -12,7 +12,6 @@ from typing import Optional  # noqa: F401
 
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (
-    TokenErrorResponse,
     TokenSuccessResponse,
 )
 
@@ -56,23 +55,20 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.path, state=session["state"]
         )
 
-        match response:
-            case TokenSuccessResponse():
-                access_token = response.access_token
-                id_token = client.decode_id_token(
-                    response.id_token, nonce=session["nonce"]
-                )
-                userinfo = client.fetch_userinfo(access_token)
-                self.return_json_response(
-                    {
-                        "token_response": response.model_dump(),
-                        "id_token": id_token.model_dump(),
-                        "userinfo": userinfo.model_dump(),
-                    }
-                )
+        if isinstance(response, TokenSuccessResponse):
+            access_token = response.access_token
+            id_token = client.decode_id_token(response.id_token, nonce=session["nonce"])
+            userinfo = client.fetch_userinfo(access_token)
+            self.return_json_response(
+                {
+                    "token_response": response.model_dump(),
+                    "id_token": id_token.model_dump(),
+                    "userinfo": userinfo.model_dump(),
+                }
+            )
 
-            case TokenErrorResponse():
-                self.return_json_response(response.model_dump())
+        else:
+            self.return_json_response(response.model_dump())
 
     def return_redirect(self, to: str, code: int = HTTPStatus.FOUND) -> None:
         self.send_response(code)

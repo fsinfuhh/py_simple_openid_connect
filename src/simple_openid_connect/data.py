@@ -51,10 +51,10 @@ class ProviderMetadata(OpenidBaseModel):
     "REQUIRED. JSON array containing a list of the OAuth 2.0 response_type values that this OP supports Dynamic OpenID Providers MUST support the code, id_token, and the token id_token Response Type values."
 
     response_modes_supported: Optional[List[str]] = ["query", "fragment"]
-    "OPTIONAL. JSON array containing a list of the OAuth 2.0 response_mode values that this OP supports, as specified in OAuth 2.0 Multiple Response Type Encoding Practices. " 'If omitted, the default for Dynamic OpenID Providers is ["query", "fragment"].'
+    'OPTIONAL. JSON array containing a list of the OAuth 2.0 response_mode values that this OP supports, as specified in OAuth 2.0 Multiple Response Type Encoding Practices. If omitted, the default for Dynamic OpenID Providers is ["query", "fragment"].'
 
     grant_types_supported: Optional[List[str]] = ["authorization_code", "implicit"]
-    "OPTIONAL. JSON array containing a list of the OAuth 2.0 Grant Type values that this OP supports Dynamic OpenID Providers MUST support the authorization_code and implicit Grant Type values and MAY support other Grant Types. " 'If omitted, the default value is ["authorization_code", "implicit"].'
+    'OPTIONAL. JSON array containing a list of the OAuth 2.0 Grant Type values that this OP supports Dynamic OpenID Providers MUST support the authorization_code and implicit Grant Type values and MAY support other Grant Types. If omitted, the default value is ["authorization_code", "implicit"].'
 
     acr_values_supported: Optional[List[str]] = None
     "OPTIONAL. JSON array containing a list of the Authentication Context Class References that this OP supports."
@@ -444,7 +444,7 @@ class AuthenticationRequest(OpenidBaseModel):
     "OPTIONAL. Maximum Authentication Age Specifies the allowable elapsed time in seconds since the last time the End-User was actively authenticated by the OP If the elapsed time is greater than this value, the OP MUST attempt to actively re-authenticate the End-User When max_age is used, the ID Token returned MUST include an auth_time Claim Value."
 
     ui_locales: Optional[List[str]] = None
-    "OPTIONAL. End-User's preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. " 'For instance, the value "fr-CA fr en" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). ' "An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider."
+    'OPTIONAL. End-User\'s preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. For instance, the value "fr-CA fr en" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider.'
 
     id_token_hint: Optional[str] = None
     "OPTIONAL. ID Token previously issued by the Authorization Server being passed as a hint about the End-User's current or past authenticated session with the Client If the End-User identified by the ID Token is logged in or is logged in by the request, then the Authorization Server returns a positive response; otherwise, it SHOULD return an error, such as login_required When possible, an id_token_hint SHOULD be present when prompt=none is used and an invalid_request error MAY be returned if it is not; however, the server SHOULD respond successfully when possible, even if it is not present The Authorization Server need not be listed as an audience of the ID Token when it is used as an id_token_hint value. "
@@ -611,26 +611,26 @@ class TokenRequest(OpenidBaseModel):
         cls, values: Mapping[str, Any]
     ) -> Mapping[str, Any]:
         if values["grant_type"] == "authorization_code":
-            assert (
-                values["code"] is not None
-            ), "code is required when grant_type is 'authorization_code'"
-            assert (
-                values["redirect_uri"] is not None
-            ), "redirect_uri is required when grant_type is 'authorization_code'"
+            assert values["code"] is not None, (
+                "code is required when grant_type is 'authorization_code'"
+            )
+            assert values["redirect_uri"] is not None, (
+                "redirect_uri is required when grant_type is 'authorization_code'"
+            )
         elif values["grant_type"] == "refresh_token":
-            assert (
-                values["refresh_token"] is not None
-            ), "refresh_token is required when grant_type is 'refresh_token'"
+            assert values["refresh_token"] is not None, (
+                "refresh_token is required when grant_type is 'refresh_token'"
+            )
         elif values["grant_type"] == "password":
-            assert (
-                values["username"] is not None
-            ), "username is required when grant_type is 'password'"
-            assert (
-                values["password"] is not None
-            ), "password is required when grant_type is 'password'"
-            assert (
-                values["scope"] is not None
-            ), "scope is required when grant_type is 'password'"
+            assert values["username"] is not None, (
+                "username is required when grant_type is 'password'"
+            )
+            assert values["password"] is not None, (
+                "password is required when grant_type is 'password'"
+            )
+            assert values["scope"] is not None, (
+                "scope is required when grant_type is 'password'"
+            )
 
         return values
 
@@ -682,7 +682,7 @@ class TokenErrorResponse(OpenidBaseModel):
         "The request is missing a required parameter, includes an unsupported parameter value (other than grant type), repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed."
 
         invalid_client = "invalid_client"
-        "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method). The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported. " 'If the client attempted to authenticate via the "Authorization" request header field, the authorization server MUST respond with an HTTP 401 (Unauthorized) status code and include the "WWW-Authenticate" response header field matching the authentication scheme used by the client.'
+        'Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method). The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported. If the client attempted to authenticate via the "Authorization" request header field, the authorization server MUST respond with an HTTP 401 (Unauthorized) status code and include the "WWW-Authenticate" response header field matching the authentication scheme used by the client.'
 
         invalid_grant = "invalid_grant"
         "The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client."
