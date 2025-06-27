@@ -30,22 +30,18 @@
             <h2>{{ technical_msg }}</h2>
             <p>{{ technical_description }}</p>
 
-            {% if auth_failed_error %}
-                <p>{{ e.msg }}</p>
+            {% if auth_failed_error.error_description %}
+                <p>{{ auth_failed_error.error_description }}</p>
+            {% endif %}
+            {% if auth_failed_error.error_uri %}
+                <p>See <i>{{ auth_failed_error.error_uri }}</i> for more information</p>
             {% endif %}
 
-            {% if token_error_response %}
-                <p>
-                    <i>{{ token_error_response.error }}</i>
-                    {% if token_error_response.error_description %}
-                        : <span>{{ token_error_response.error_description }}</span>
-                    {% endif %}
-                    {% if token_error_response.error_uri %}
-                        <br>
-                        <span>More info at <a
-                                href="{{ token_error_response.error_uri }}">token_error_response.error_uri</a></span>
-                    {% endif %}
-                </p>
+            {% if token_error_response.error_description %}
+                <p>{{ token_error_response.error_description }}</p>
+            {% endif %}
+            {% if token_error_response.error_uri %}
+                <p>See <i>{{ token_error_response.error_uri }}</i> for more information</p>
             {% endif %}
 
             {% if id_token_validation_error %}

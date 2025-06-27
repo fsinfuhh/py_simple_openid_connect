@@ -43,8 +43,8 @@ class AuthenticationFailedError(Exception):
         super().__init__(error)
 
     @property
-    def error(self) -> str:
-        value = self.args[0]  # type: str
+    def error(self) -> "AuthenticationErrorResponse":
+        value = self.args[0]  # type: AuthenticationErrorResponse
         return value
 
 

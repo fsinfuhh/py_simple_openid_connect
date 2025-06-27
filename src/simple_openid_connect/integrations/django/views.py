@@ -192,9 +192,9 @@ class LoginCallbackView(View):
         except AuthenticationFailedError as e:
             return self.render_error(
                 request,
-                "identity provider ran into an error during the authentication process",
+                "The Identity-Provider ran into an error during the authentication process",
                 "This can happen and is entirely in the discretion of the identity provider. See the additional message below for more info.",
-                auth_failed_error=e,
+                auth_failed_error=e.error,
             )
         if isinstance(token_response, TokenErrorResponse):
             return self.render_error(

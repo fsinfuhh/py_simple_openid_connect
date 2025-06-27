@@ -4,11 +4,13 @@ import sys
 from base64 import b64encode
 
 import pytest
-from pytest_django.asserts import assertContains
+from pytest_django.asserts import assertContains, assertInHTML
 from cryptojwt import JWS
 from django.shortcuts import resolve_url
+from django.utils.http import quote
 from responses import matchers
 
+from simple_openid_connect.data import TokenErrorResponse
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 
 
@@ -202,3 +204,132 @@ def test_unsolicited_callback_csrf(
 
     # assert
     assertContains(response, "<h2>Invalid state</h2>", status_code=401, html=True)
+
+
+@pytest.mark.django_db
+def test_redirect_to_callback_with_error(
+    monkeypatch,
+    dyn_client,
+    dummy_provider_config,
+    dummy_provider_settings,
+    response_mock,
+):
+    # arrange
+    settings = OpenidAppConfig.get_instance().safe_settings
+    SECRET_CONSTANT = "42"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: SECRET_CONSTANT)
+    response_mock.get(
+        url="https://provider.example.com/auth",
+        match=[
+            matchers.query_param_matcher(
+                {
+                    "client_id": settings.OPENID_CLIENT_ID,
+                    "redirect_uri": settings.OPENID_BASE_URI
+                    + resolve_url(settings.OPENID_REDIRECT_URI),
+                    "response_type": "code",
+                    "scope": settings.OPENID_SCOPE,
+                    "nonce": SECRET_CONSTANT,
+                    "state": SECRET_CONSTANT,
+                }
+            )
+        ],
+        status=302,
+        headers={
+            "Location": settings.OPENID_BASE_URI
+            + resolve_url(settings.OPENID_REDIRECT_URI)
+            + f"?error=unauthorized_client&error_description={quote('Client is currently disabled')}&error_uri={quote('https://provider.example/error.html')}"
+            + f"&state={SECRET_CONSTANT}"
+        },
+    )
+
+    # act
+    response = dyn_client.get(
+        "https://app.example.com" + resolve_url("simple_openid_connect:login"),
+        follow=True,
+    )
+
+    # assert
+    assert response.status_code == 401
+    response_html = response.content.decode("UTF-8")
+    assertInHTML("<h1>Could not log you in</h1>", response_html)
+    assertInHTML("<p>Client is currently disabled</p>", response_html)
+    assertInHTML("<i>https://provider.example/error.html</i>", response_html)
+
+
+@pytest.mark.django_db
+def test_error_during_code_exchange(
+    dyn_client,
+    dummy_provider_config,
+    dummy_provider_settings,
+    response_mock,
+    monkeypatch,
+):
+    # arrange
+    settings = OpenidAppConfig.get_instance().safe_settings
+    SECRET_CONSTANT = "42"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda len: SECRET_CONSTANT)
+    client_auth = b64encode(
+        f"{settings.OPENID_CLIENT_ID}:{settings.OPENID_CLIENT_SECRET}".encode()
+    ).decode()
+    response_mock.get(
+        url="https://provider.example.com/auth",
+        match=[
+            matchers.query_param_matcher(
+                {
+                    "client_id": settings.OPENID_CLIENT_ID,
+                    "redirect_uri": settings.OPENID_BASE_URI
+                    + resolve_url(settings.OPENID_REDIRECT_URI),
+                    "response_type": "code",
+                    "scope": settings.OPENID_SCOPE,
+                    "nonce": SECRET_CONSTANT,
+                    "state": SECRET_CONSTANT,
+                }
+            )
+        ],
+        status=302,
+        headers={
+            "Location": settings.OPENID_BASE_URI
+            + resolve_url(settings.OPENID_REDIRECT_URI)
+            + "?code=code.foobar123"
+            + f"&state={SECRET_CONSTANT}"
+        },
+    )
+    response_mock.post(
+        url="https://provider.example.com/token",
+        match=[
+            matchers.urlencoded_params_matcher(
+                {
+                    "client_id": settings.OPENID_CLIENT_ID,
+                    "code": "code.foobar123",
+                    "grant_type": "authorization_code",
+                    "redirect_uri": settings.OPENID_BASE_URI
+                    + resolve_url(settings.OPENID_REDIRECT_URI),
+                }
+            ),
+            matchers.header_matcher(
+                {
+                    "Authorization": f"Basic {client_auth}",
+                }
+            ),
+        ],
+        status=400,
+        json=TokenErrorResponse(
+            error=TokenErrorResponse.ErrorType.unsupported_grant_type,
+            error_description="Grant is dummy disabled",
+            error_uri="https://provider.example.com/error.html",
+        ).model_dump(),
+    )
+
+    # act
+    response = dyn_client.get(
+        "https://app.example.com" + resolve_url("simple_openid_connect:login"),
+        follow=True,
+    )
+
+    # assert
+    assert response.status_code == 401
+    response_html = response.content.decode("UTF-8")
+    assertInHTML("<h1>Could not log you in</h1>", response_html)
+    assertInHTML("<h2>unsupported_grant_type</h2>", response_html)
+    assertInHTML("<p>Grant is dummy disabled</p>", response_html)
+    assertInHTML("<i>https://provider.example.com/error.html</i>", response_html)
