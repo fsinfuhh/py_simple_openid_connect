@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.0
+
+### Notable features
+
+- (integrations) Highlights of this release are the newly supported integration versions. We now officially include support for *Django v5.2* and *django-rest-framework v3.16* . Support for *Django v5.0* has been removed since it is a deprecated django version since 02. Apr. 2025.
+
+- (integrations) The django integration now also ships with a proper error view which is displayed to an end-user whenever the OpenID authentication process fails. This view aims to explain in simple terms what went wrong and always offers the user a choice of action by displaying a button to try again. Technical information about the error can be revealed on-demand to allow developers to gain important insights.
+
 ## v2.0.0
 
 This release is mainly a maintenance release.
