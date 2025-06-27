@@ -37,10 +37,10 @@ We aim to follow pythons officially supported versions. This is currently python
 
 In addition to being an OpenID library from which one can build their own authentication solutaion, we also offer explicit integrations into the following frameworks and projects:
 
-| Name                                                            | Package Feature       | Integration Docs                                                                                   | Supported Versions     |
-|-----------------------------------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------|------------------------|
-| [Django](https://www.djangoproject.com/)                        | `django`              | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v4.2`, `v5.0`, `v5.1` |
-| [Django-Rest-Framework](https://www.django-rest-framework.org/) | `djangorestframework` | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/drf-integration.html)    | `v3.14`, `v3.15`       |
+| Name                                                            | Package Feature       | Integration Docs                                                                                   | Supported Versions        |
+|-----------------------------------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------|---------------------------|
+| [Django](https://www.djangoproject.com/)                        | `django`              | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/django-integration.html) | `v4.2`, `v5.1`, `v5.2`    |
+| [Django-Rest-Framework](https://www.django-rest-framework.org/) | `djangorestframework` | [Integration Docs](https://simple-openid-connect.readthedocs.io/en/stable/drf-integration.html)    | `v3.14`, `v3.15`, `v3.16` |
 
 
 
