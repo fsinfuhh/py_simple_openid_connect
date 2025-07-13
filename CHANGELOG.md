@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.2.0
+
+### Notable features
+
+- **SECURITY** (integrations) Fix a behavior of the `TokenVerificationMiddleware` which would previously always pass a request forward in the pipeline and only validate a sessions associated openid tokens after a response had been generated.
+  This behavior should not lead to exploitable applications since a session would have to be properly authenticated some time beforehand, but it would allow one single request on an already expired session.
+
+- (integrations) Add a django-admin site to display federated openid accounts and information about their sessions.
+
+- (integrations) Caching has been introduced to the django integration to skip mapping access tokens to internal user accounts if the token has recently already been handled.
+
+- (integrations) A django-management command has been added to allow clearing the database of expired openid sessions.
+
+- (docs) Documentation about the django integration has been enhanced with additional information about how the integration works internally and how a developer can use it.
+
 ## v2.1.0
 
 ### Notable features
