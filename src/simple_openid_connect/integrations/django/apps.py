@@ -65,6 +65,7 @@ class OpenidAppConfig(AppConfig):
     """
 
     name = "simple_openid_connect.integrations.django"
+    verbose_name = "Simple OpenID Connect"
     label = "simple_openid_connect_django"
 
     default_auto_field = "django.db.models.BigAutoField"

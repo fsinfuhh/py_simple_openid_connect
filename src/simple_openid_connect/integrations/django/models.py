@@ -89,6 +89,9 @@ class OpenidUser(models.Model):
             raw_id_token=token_response.id_token,
         )
 
+    def __str__(self) -> str:
+        return f"OpenID User {self.sub}"
+
 
 class OpenidSession(models.Model):
     """
@@ -124,3 +127,20 @@ class OpenidSession(models.Model):
         self.refresh_token = token_response.refresh_token or ""
         self.refresh_token_expiry = _calc_expiry(token_response.refresh_expires_in)
         self.raw_id_token = token_response.id_token
+
+    @property
+    def is_access_token_expired(self) -> bool:
+        return (
+            self.access_token_expiry is not None
+            and timezone.now() >= self.access_token_expiry
+        )
+
+    @property
+    def is_refresh_token_expired(self) -> bool:
+        return (
+            self.refresh_token_expiry is not None
+            and timezone.now() >= self.refresh_token_expiry
+        )
+
+    def __str__(self) -> str:
+        return f"OpenID Session {self.sid}"

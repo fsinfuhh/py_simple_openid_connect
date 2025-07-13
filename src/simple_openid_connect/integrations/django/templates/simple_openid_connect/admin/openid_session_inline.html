@@ -1,0 +1,78 @@
+<fieldset class="module aligned" aria-labelledby="{{ inline_admin_formset.formset.prefix }}-heading">
+  <h2 id="{{ inline_admin_formset.formset.prefix }}-heading" class="inline-heading">OpenID Sessions</h2>
+
+
+  {% for inline_admin_form in inline_admin_formset %}
+  {% with i_session=inline_admin_form.original %}
+  {% if i_session %}
+    <div class="inline-related">
+      <h3><span class="inline_label">{{ i_session }}</span></h3>
+      <div class="form-row">
+        <div class="flex-container">
+          <label for="openid-sessions-{{ forloop.counter0 }}--sid">Session ID</label>
+          <div id="openid-session-{{ forloop.counter0 }}--sid" class="readonly">{{ i_session.sid }}</div>
+        </div>
+
+        <div class="flex-container">
+          <label for="openid-sessions-{{ forloop.counter0 }}--scope">Scope</label>
+          <div id="openid-session-{{ forloop.counter0 }}--scope" class="readonly">{{ i_session.scope }}</div>
+        </div>
+
+        <div class="flex-container">
+          <label for="openid-sessions-{{ forloop.counter0 }}--access-token">Access Token</label>
+          <div id="openid-session-{{ forloop.counter0 }}--access-token" class="readonly" style="flex-shrink: 0;">
+            {% if i_session.is_access_token_expired %}
+              <span style="color: red;">Expired on {{ i_session.access_token_expiry | default:"-empty-" }}</span>
+            {% else %}
+              <span style="color: green;">Valid until {{ i_session.access_token_expiry | default:"-empty-" }}</span>
+            {% endif %}
+          </div>
+          <div style="margin-left: 2rem; min-width: 128px; padding: 6px 0;">
+            <details>
+              <summary>Token</summary>
+              <code style="display: block; padding: 8px; line-break: anywhere;">{{ i_session.access_token }}</code>
+          </details>
+          </div>
+        </div>
+
+        <div class="flex-container">
+          <label for="openid-sessions-{{ forloop.counter0 }}--refresh-token">Refresh Token</label>
+          <div id="openid-session-{{ forloop.counter0 }}--refresh-token" class="readonly" style="flex-shrink: 0;">
+            {% if i_session.is_refresh_token_expired %}
+              <span style="color: red;">Expired on {{ i_session.refresh_token_expiry | default:"-empty-" }}</span>
+            {% else %}
+              <span style="color: green;">Valid until {{ i_session.refresh_token_expiry | default:"-empty-" }}</span>
+            {% endif %}
+          </div>
+          <div style="margin-left: 2rem; min-width: 128px; padding: 6px 0;">
+            <details>
+              <summary>Token</summary>
+              <code style="display: block; padding: 8px; line-break: anywhere;">{{ i_session.refresh_token }}</code>
+          </details>
+          </div>
+        </div>
+
+        <div class="flex-container">
+          <label for="openid-sessions-{{ forloop.counter0 }}--id-token">ID Token</label>
+          <div style="flex-grow: 1;">
+            <div style="min-width: 128px; padding: 6px 0;">
+              <details>
+                <summary>Raw Token</summary>
+                <code style="display: block; padding: 8px; line-break: anywhere;">{{ i_session.raw_id_token }}</code>
+              </details>
+            </div>
+
+            <div style="min-width: 128px; padding: 6px 0;">
+              <details>
+                <summary>Decoded Token</summary>
+                <code style="display: block; padding: 8px; line-break: anywhere;">{{ i_session.id_token.json }}</code>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  {% endwith %}
+  {% endfor %}
+</fieldset>
