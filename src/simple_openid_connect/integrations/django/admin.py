@@ -26,12 +26,11 @@ class OpenidUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     def get_search_fields(self, request: HttpRequest) -> List[str]:
         result = ["sub"]
 
-        username_field = get_user_model().USERNAME_FIELD
-        if username_field:
-            result.append(f"user__{username_field}")
+        UserModel = get_user_model()
+        if hasattr(UserModel, "USERNAME_FIELD"):
+            result.append(f"user__{UserModel.USERNAME_FIELD}")
 
-        email_field = get_user_model().EMAIL_FIELD
-        if email_field:
-            result.append(f"user__{email_field}")
+        if hasattr(UserModel, "EMAIL_FIELD"):
+            result.append(f"user__{UserModel.EMAIL_FIELD}")
 
         return result
