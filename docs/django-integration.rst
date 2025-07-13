@@ -253,6 +253,15 @@ It can be changed by defining a custom template which overrides the relevant sec
       </div>
       {% endblock %}
 
+Clearing expired sessions
+-------------------------
+
+Depending on the OpenID Identity Provider, the federated sessions might be short lived and accumulate over time.
+To clear old and expired sessions, a django management command is provided.
+It can be run using the following command::
+
+  ./manage.py clear-expired-openid-sessions
+
 
 
 Resource Server Usage
