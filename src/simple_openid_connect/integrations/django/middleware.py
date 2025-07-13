@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime, timezone
 from typing import Callable
 
 from django.conf import settings
@@ -27,26 +26,28 @@ class TokenVerificationMiddleware:
         if not openid_session_id:
             return self.get_response(request)
 
-        # the refresh token has a long validity, the access token expires quickly
+        # if the access token is still valid, everything is fine
         openid_session = OpenidSession.objects.get(id=openid_session_id)
-        refresh_token = openid_session.refresh_token
-        session_valid_until = openid_session.access_token_expiry
-        access_token_valid = (
-            session_valid_until is not None
-            and session_valid_until > datetime.now(timezone.utc)
-        )
-        # if the access token is valid, everything is fine
-        if access_token_valid:
+        if not openid_session.is_access_token_expired:
             return self.get_response(request)
 
         # try to refresh the access token with the refresh token
         logger.debug("access token expired, trying to refresh")
-        client = OpenidAppConfig.get_instance().get_client(request)
-        exchange_response = client.exchange_refresh_token(refresh_token)
-        if isinstance(exchange_response, TokenSuccessResponse):
-            openid_session.update_session(exchange_response)
-            openid_session.save()
-            return self.get_response(request)
-        else:
-            # the refresh token is also expired, redirect to login
-            return HttpResponseRedirect(resolve_url(settings.LOGIN_URL))
+        if not openid_session.is_refresh_token_expired:
+            client = OpenidAppConfig.get_instance().get_client(request)
+            exchange_response = client.exchange_refresh_token(
+                openid_session.refresh_token
+            )
+            if isinstance(exchange_response, TokenSuccessResponse):
+                openid_session.update_session(exchange_response)
+                openid_session.save()
+                return self.get_response(request)
+            else:
+                logger.warning(
+                    "could not exchange refresh token for new access token: %s",
+                    exchange_response,
+                )
+
+        # if no response has been served until now, the request needs to be aborted because there is no way to restore
+        # a valid session
+        return HttpResponseRedirect(resolve_url(settings.LOGIN_URL))
