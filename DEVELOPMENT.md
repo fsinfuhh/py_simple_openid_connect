@@ -26,7 +26,13 @@ py_simple_openid_connect/
 
 If you use nix, this project provides a `flake.nix` file that defines a development shell with all dependencies installed.
 It can be entered by typing `nix develop`.
-Additionally, a [nix-direnv](https://github.com/nix-community/nix-direnv) configuration file is also present which also sets up a python environment suitable for development.
+
+Additionally, a [nix-direnv](https://github.com/nix-community/nix-direnv) configuration file is also distributed which also sets up a python environment suitable for development.
+If you use direnv, you can include the distributed one by including the following snippet into your own `.envrc` file or by copying the `.envrc.dist` file.
+
+```shell
+source_env .envrc.dist
+```
 
 ### Manually
 
