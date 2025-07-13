@@ -6,10 +6,14 @@ variable ``OPENID_USER_MAPPER`` to an import string pointing to the newly create
 """
 
 import logging
-from typing import Any, Tuple, Union
+from hashlib import sha256
+from typing import Any, Tuple, Union, Optional
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
+from django.core.cache import cache
 from django.db import transaction
+from django.utils import timezone
 
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (
@@ -30,13 +34,15 @@ FederatedUserData = Union[
 ]
 "Type alias for the different classes which can provide information about a federated user."
 
+UserModel = Any
+
 
 class UserMapper:
     """
     A base class which is responsible for mapping federated users into the local system.
     """
 
-    def handle_federated_userinfo(self, user_data: FederatedUserData) -> Any:
+    def handle_federated_userinfo(self, user_data: FederatedUserData) -> UserModel:
         """
         Entry point for dynamically creating or updating user data based on information obtained through OpenID.
 
@@ -65,7 +71,7 @@ class UserMapper:
         access_token: str,
         oidc_client: OpenidClient,
         required_scopes: Union[str, None] = None,
-    ) -> Tuple[Any, FederatedUserData]:
+    ) -> Tuple[UserModel, FederatedUserData]:
         """
         Entry point for dynamically creating or updating user data based on an access token which was provided by a user.
 
@@ -84,6 +90,12 @@ class UserMapper:
         """
         if required_scopes is None:
             required_scopes = OpenidAppConfig.get_instance().safe_settings.OPENID_SCOPE
+
+        # return cached data if it exists
+        if (
+            cached_data := self.get_cached_data(access_token, required_scopes)
+        ) is not None:
+            return cached_data
 
         # try to parse the raw token as JWT
         user_data = None  # type: JwtAccessToken | TokenIntrospectionSuccessResponse | None
@@ -152,7 +164,12 @@ class UserMapper:
             # the token is determined to be valid, so we can use it as user_data
             user_data = introspect_response
 
-        return self.handle_federated_userinfo(user_data), user_data
+        # call down into the actual user mapping handler
+        user = self.handle_federated_userinfo(user_data)
+
+        # populate cache and return result
+        self.populate_cache(access_token, required_scopes, user, user_data)
+        return user, user_data
 
     def automap_user_attrs(
         self,
@@ -192,3 +209,37 @@ class UserMapper:
             # family name
             if hasattr(user_data, "family_name") and hasattr(user, "last_name"):
                 user.last_name = user_data.family_name
+
+    def get_cached_data(
+        self, access_token: str, required_scopes: str
+    ) -> Optional[Tuple[UserModel, FederatedUserData]]:
+        input_hash = sha256(usedforsecurity=True)
+        input_hash.update(access_token.encode("UTF-8"))
+        input_hash.update(required_scopes.encode("UTF-8"))
+        cache_key = f"simple-openid-connect/user-of-token-{input_hash.hexdigest()}"
+
+        if (cached_data := cache.get(cache_key)) is not None:
+            user_id, federated_user_data = cached_data
+            user = get_user_model().objects.get(id=user_id)
+            return user, federated_user_data
+
+        return None
+
+    def populate_cache(
+        self,
+        access_token: str,
+        required_scopes: str,
+        user: UserModel,
+        federated_data: FederatedUserData,
+    ) -> None:
+        input_hash = sha256(usedforsecurity=True)
+        input_hash.update(access_token.encode("UTF-8"))
+        input_hash.update(required_scopes.encode("UTF-8"))
+        cache_key = f"simple-openid-connect/user-of-token-{input_hash.hexdigest()}"
+        cache_timeout = None
+
+        if exp := getattr(federated_data, "exp", None) is not None:
+            now = int(timezone.now().timestamp())
+            cache_timeout = max(0, exp - now)
+
+        cache.set(cache_key, (user.pk, federated_data), timeout=cache_timeout)
