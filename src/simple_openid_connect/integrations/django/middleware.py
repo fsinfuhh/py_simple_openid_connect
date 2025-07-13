@@ -2,7 +2,7 @@ import logging
 from typing import Callable
 
 from django.conf import settings
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
 from django.shortcuts import resolve_url
 
 from simple_openid_connect.data import TokenSuccessResponse
@@ -50,4 +50,9 @@ class TokenVerificationMiddleware:
 
         # if no response has been served until now, the request needs to be aborted because there is no way to restore
         # a valid session
-        return HttpResponseRedirect(resolve_url(settings.LOGIN_URL))
+        url_params = QueryDict(mutable=True)
+        if request.method == "GET":
+            url_params["next"] = request.get_full_path()
+        return HttpResponseRedirect(
+            f"{resolve_url(settings.LOGIN_URL)}?{url_params.urlencode()}"
+        )
