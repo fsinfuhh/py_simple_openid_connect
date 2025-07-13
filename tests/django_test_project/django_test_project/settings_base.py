@@ -29,6 +29,8 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "django_test_project",
+    "simple_openid_connect.integrations.django",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -36,7 +38,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "debug_toolbar",
-    "simple_openid_connect.integrations.django",
 ]
 
 MIDDLEWARE = [

@@ -200,6 +200,61 @@ You can access it like this::
     client = OpenidAppConfig.get_instance().get_client(request)
 
 
+Logging into Django-Admin
+-------------------------
+
+Generally, because this integration does not replace the normal django authentication system, django-admin works normally and admin users can just use it as-is.
+The standard ``is_superuser`` property of user objects still controls who can access the page and you can influence how that property is set by defining a custom User Mapper as described above.
+
+Sometimes though, for example if OpenID login is the only intended login method and accounts don't have a password set, the *Username & Password* form rendered by django-admin can be a bit annoying.
+It can be changed by defining a custom template which overrides the relevant sections.
+
+1. Ensure your django app is loaded before django-admin:
+
+   .. code-block:: python
+
+      # settings.py
+      INSTALLED_APPS = [
+          "my_awesome_app",
+          ...
+          "django.contrib.admin",
+      ]
+
+   This is needed because django searches through all installed apps for a given template name and you want to override the template provided by django-admin.
+
+2. Define your own ``admin/login.html`` template in your apps template directory.
+   The example below does not completely overwrite the template provided by django-admin but instead extends it and only replaces the part which renders a login form.
+   That way, all styles and themes are still applied correctly and the form looks consistent:
+
+   .. code-block:: jinja
+
+      {# my_awesome_app/templates/admin/login.html #}
+      {% extends "admin/login.html" %}
+      {% load i18n %}
+      {% block content %}
+      <div id="content-main">
+
+      {% if user.is_authenticated %}
+      <p class="errornote">
+      {% blocktranslate trimmed %}
+          You are authenticated as {{ username }}, but are not authorized to
+          access this page. Would you like to login to a different account?
+      {% endblocktranslate %}
+      </p>
+      {% endif %}
+
+      <form id="login-form" method="get" action="{% url 'simple_openid_connect:login' %}">
+        <input hidden name="next" value="{{ request.GET.next | default:"/admin/" }}">
+        <div class="submit-row">
+          <input type="submit" value="{% translate 'Log in with OpenID Connect' %}">
+        </div>
+      </form>
+
+      </div>
+      {% endblock %}
+
+
+
 Resource Server Usage
 =====================
 
