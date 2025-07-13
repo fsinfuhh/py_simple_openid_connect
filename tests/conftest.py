@@ -2,13 +2,10 @@ import logging
 import random
 import string
 from base64 import b64encode
-from pathlib import Path
-from typing import Mapping
 
 import pytest
 import requests
 import responses
-import yaml
 from cryptojwt import JWT, KeyBundle, KeyJar
 from cryptojwt.jwk.rsa import new_rsa_key
 from responses import matchers
@@ -272,10 +269,3 @@ def dummy_token_introspection_response(response_mock):
             "active": False,
         },
     )
-
-
-@pytest.fixture
-def secrets() -> Mapping[str, str]:
-    path = Path(__file__).parent / "secrets.yml"
-    with open(path, "r", encoding="UTF-8") as f:
-        return yaml.safe_load(f)
