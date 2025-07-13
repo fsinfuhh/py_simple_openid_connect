@@ -4,6 +4,57 @@ Django Integration
 This page describes how authentication can be done using the *Django* web framework.
 Much of the library internals have been abstracted away so that Openid authentication can easily be plugged into django projects.
 
+One of the goals of this integration is to be as unobtrusive as possible to existing django projects and to allow signing in (and registering) users into you django application via a single preconfigured OpenID-Connect Identity Provider.
+
+.. note::
+
+  If you require a more sophisticated setup with multiple authentication backend that allow a user to associate and unassociate their different upstream accounts, use something like `python-social-auth <https://python-social-auth.readthedocs.io/en/latest/configuration/django.html>`_ instead.
+
+
+How it Works
+============
+
+To follow the design goal outlined above, the integration is implemented only using views, middlewares (optional) and a few database models.
+Inner workings of django or the authentication system are not changed by this integration, i.e. there are no additional authentication backends or custom user models.
+
+The following models are added (relationships are visualized below):
+
+* :class:`OpenidUser <simple_openid_connect.integrations.django.models.OpenidUser>` which is the central tracking model for federated user data. It is linked to a projects user model and can be accessed by the ``openid`` property on the django user model.
+
+* :class:`OpenidSession <simple_openid_connect.integrations.django.models.OpenidUser>` to hold information relating to a concrete OpenID session.
+  A single OpenID user can have multiple sessions, even on the same device.
+  A session holds relevant tokens as well as expiry information.
+
+.. code-block:: text
+
+   ┌───────────────────┐           ┌───────────────────┐           ┌───────────────────┐
+   │ Django User Model │           │ OpenidUser        │           │ OpenidSession     │
+   ├───────────────────┤           ├───────────────────┤           ├───────────────────┤
+   │ username          │           │ sub               │     ╭┄┄N┄┄│ user              │
+   │ password          │     ╭┄┄1┄┄│ user              │     ┊     │ sid               │
+   │ …                 │     ┊     │ sessions          │┄┄1┄┄╯     │ scope             │
+   │ openid            │┄┄1┄┄╯     └───────────────────┘           │ access_token      │
+   └───────────────────┘                                           │ refresh_token     │
+                                                                   │ id_token          │
+                                                                   │ …                 │
+                                                                   └───────────────────┘
+
+Logging In
+----------
+
+When a user completes OpenID authentication via one of the routes provided by :mod:`simple_openid_connect.integrations.django.urls` (usually ``/auth/openid/login/``), the information from the identity provider is saved in these models and the current django session is authenticated via a call to :func:`django.contrib.auth.login`.
+
+The login view also supports a `?next` get parameter to influence where the user should be redirected after a successful login.
+If not specified, the ``LOGIN_REDIRECT_URL`` django setting is used.
+
+Logging Out
+-----------
+
+When a user visits the logout endpoint (usually ``/auth/openid/logout/``), the current django session is always immediately logged out via a call to :func:`django.contrib.auth.logout`.
+Afterwards, the user is redirected to the OpenID Identity Provider so that the logout intent can get federated through all OpenID connected apps.
+Unless the Identity Provider does something special, the user will return to the django app after this federated logout.
+
+
 Setup
 =====
 
@@ -90,6 +141,20 @@ objects as required and then authenticates the current session.
 It interoperates with Django's builtin authentication so things like the ``login_required`` decorator can still be used.
 
 If you want to authenticate a user via Openid, simply visit ``/auth/openid/login`` on your app.
+
+.. note::
+
+   Assuming, the URL setup from this documentation is followed, the following URLs are used by this integration:
+
+   .. list-table::
+      :header-rows: 1
+
+      * - Relative URL
+        - Purpose
+      * - ``/auth/openid/login-callback/``
+        - Redirect-URI to which the user is returned to during login
+      * - ``/auth/openid/logout/frontchannel-notify/``
+        - Notification endpoint to which an Identity Provider may send *Frontchannel Logout Notifications*
 
 
 Custom User Mapping
