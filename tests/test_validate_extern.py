@@ -1,4 +1,4 @@
-from simple_openid_connect.data import IdToken
+from simple_openid_connect.data import IdToken, JwtAccessToken
 import time
 
 import pytest
@@ -237,4 +237,66 @@ def test_id_token__auth_time():
             issuer="https://provider.example.com",
             client_id="test-client",
             min_auth_time=now,
+        )
+
+
+def test_jwt_access_token__issuer():
+    # arrange
+    now = int(time.time())
+    token = JwtAccessToken(
+        iss="https://provider.example.com",
+        exp=now + 60 * 5,
+    )
+
+    # assert
+    token.validate_extern(
+        issuer="https://provider.example.com",
+        client_id="test-client",
+    )
+    with pytest.raises(
+        ValidationError, match="The access token was issued from an unexpected issuer"
+    ):
+        token.validate_extern(
+            issuer="https://wrong.example.com",
+            client_id="test-client",
+        )
+
+
+def test_jwt_access_token__expiry():
+    # arrange
+    now = int(time.time())
+    token = JwtAccessToken(
+        iss="https://provider.example.com",
+        exp=now - 60,
+    )
+
+    # assert
+    with pytest.raises(ValidationError, match="The access token is expired"):
+        token.validate_extern(
+            issuer="https://provider.example.com",
+            client_id="test-client",
+        )
+
+
+def test_jwt_access_token__aud():
+    # arrange
+    now = int(time.time())
+    token = JwtAccessToken(
+        iss="https://provider.example.com",
+        exp=now + 60 * 5,
+        aud="test-client",
+    )
+
+    # assert
+    token.validate_extern(
+        issuer="https://provider.example.com",
+        client_id="test-client",
+    )
+    with pytest.raises(
+        ValidationError,
+        match="The access tokens audience does not contain own client_id",
+    ):
+        token.validate_extern(
+            issuer="https://provider.example.com",
+            client_id="wrong-client",
         )

@@ -353,10 +353,12 @@ class JwtAccessToken(OpenidBaseModel):
             Should usually be :data:`ProviderMetadata.issuer`.
         :param client_id: The client id of this client
         """
+        # implemented according to https://www.rfc-editor.org/rfc/rfc9068#name-validating-jwt-access-token
+
         # validate issuer
         validate_that(
             self.iss == issuer,
-            "The access token was issued from unexpected issuer",
+            "The access token was issued from an unexpected issuer",
         )
 
         # validate expiry
