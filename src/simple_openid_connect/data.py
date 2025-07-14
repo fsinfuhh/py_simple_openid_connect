@@ -246,7 +246,7 @@ class IdToken(OpenidBaseModel):
                 "ID-Token's audience does not contain own client_id",
             )
             validate_that(
-                all(i in extra_trusted_audiences for i in self.aud),
+                all((i in extra_trusted_audiences or i == client_id) for i in self.aud),
                 "Not all of the ID-Token's audience are trusted",
             )
 
