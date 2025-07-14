@@ -250,7 +250,7 @@ class IdToken(OpenidBaseModel):
             )
             validate_that(
                 all((i in extra_trusted_audiences or i == client_id) for i in self.aud),
-                "Not all of the ID-Token's audience are trusted",
+                "Not all of the ID-Token's audiences are trusted",
             )
 
         # 4. validate that an azp claim is present if required
