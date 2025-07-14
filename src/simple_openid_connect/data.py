@@ -206,6 +206,7 @@ class IdToken(OpenidBaseModel):
         min_iat: float = 0,
         validate_acr: Union[Callable[[str], None], None] = None,
         min_auth_time: float = 0,
+        expect_self_azp: bool = True,
     ) -> None:
         """
         Validate this ID-Token with external data for consistency
@@ -226,6 +227,8 @@ class IdToken(OpenidBaseModel):
             It basically means that if the user was authenticated very far in the past and reused their session, the time at which the original authentication took place must be greater than this value.
             This is only validated if the :data:`IdToken.auth_time` is present in the token.
             This value is a posix timestamp and default to 0 which allows arbitrarily old `auth_time` dates.
+        :param expect_self_azp: Dictate to the validation that when an :data:`IdToken.azp` claim is present in the token, that claim should match this client's own client_id.
+            If you know and accept that the token has been issued to a different client, set this value to ``False``.
 
         :raises ValidationError: if the validation fails
         """
@@ -258,7 +261,7 @@ class IdToken(OpenidBaseModel):
             )
 
         # 5. validate azp claim value
-        if self.azp is not None:
+        if self.azp is not None and expect_self_azp:
             validate_that(
                 self.azp == client_id,
                 "The ID-Token was not issued to this client (azp claim mismatch)",
