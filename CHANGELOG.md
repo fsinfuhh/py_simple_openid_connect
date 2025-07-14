@@ -1,5 +1,26 @@
 # Changelog
 
+## V2.3.0
+
+### Notable features
+
+- **core**: `IdToken.validate_extern()` now supports a `expect_self_azp` parameter.
+  This parameter allows a user to specify whether the `azp` claim of an IdToken should be the same as the users own client-id.
+  This is the case if the token was issued to that client but can differ if a token with multiple audiences was issued and the users client-id is just one of them.
+
+- **django integration**: The django login views now impose a tighter requirement on tokens `iat` claim to ensure that tokens are only accapted if they get issued after a login process has been started by an end-user.
+
+### Bug-Fixes
+
+- **core**: Fix a validation bug for `IdToken.validate_extern()` when multiple `aud` claims were present on the token.
+  Previously, the users own client-id was not considered as valid during this validation which would always lead to failures.
+
+- **SECURITY**, **core**: Fix `JwTAccessToken` compliance with [RFC 9068 (JWT for OAuth 2.0)](https://www.rfc-editor.org/rfc/rfc9068#section-2.2-2.6) in making required claims also required in our implementation. This is also according to [RFC 8725 (JWT Best Practices)](https://www.rfc-editor.org/rfc/rfc8725#section-3.9) which dictates that a tokens `aud` claim must be used if the token is intended for multiple principles. In the context of OpenID-Connect, this is always a possibility.
+
+  The security impact of the previous implementation is that a non-compliant identity providers tokens (ones without an `aud` claim) could be sent to applications using *simple_openid_connect* even though they were issued to a different client.
+
+- **django integration**: Fix an error in django-admin view where it would fail to render on custom user models that didn't include a `username` and `email` field.
+
 ## v2.2.0
 
 ### Notable features
