@@ -1,6 +1,7 @@
 import json
 import secrets
 import sys
+import time
 from base64 import b64encode
 
 import pytest
@@ -80,7 +81,8 @@ def test_directly_calling_login_endpoint(
                         "iss": "https://provider.example.com",
                         "sub": "user1",
                         "aud": settings.OPENID_CLIENT_ID,
-                        "iat": 0,
+                        "iat": int(time.time())
+                        + 60,  # fake token being issued 60 seconds in the future
                         "exp": sys.maxsize,
                         "nonce": SECRET_CONSTANT,
                     }
@@ -167,7 +169,8 @@ def test_directly_accessing_protected_resource(
                         "iss": "https://provider.example.com",
                         "sub": "user1",
                         "aud": settings.OPENID_CLIENT_ID,
-                        "iat": 0,
+                        "iat": int(time.time())
+                        + 60,  # fake token being issued 60 seconds in the future
                         "exp": sys.maxsize,
                         "nonce": SECRET_CONSTANT,
                     }

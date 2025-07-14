@@ -104,6 +104,11 @@ class LoginCallbackView(View):
         # perform the actual login
         self.perform_login(request, token_response, id_token)
 
+        # cleanup session variables used during the login process
+        del request.session["openid_auth_start_time"]
+        del request.session["openid_auth_state"]
+        del request.session["openid_auth_nonce"]
+
         # redirect to the next get parameter if present, otherwise to the configured default
         if "login_redirect_url" in request.session.keys():
             return HttpResponseRedirect(
@@ -172,7 +177,6 @@ class LoginCallbackView(View):
                 "For security reasons, loging in may only take a certain amount of time. Afterwards, the process must be restarted. This is done to prevent tricking a user into logging in when they did not request it right before.",
             )
 
-        del request.session["openid_auth_start_time"]
         return None
 
     def exchange_code_for_token(
@@ -219,6 +223,7 @@ class LoginCallbackView(View):
                 client.provider_config.issuer,
                 client.client_auth.client_id,
                 nonce=request.session["openid_auth_nonce"],
+                min_iat=request.session["openid_auth_start_time"],
             )
             return id_token
         except ValidationError as e:
