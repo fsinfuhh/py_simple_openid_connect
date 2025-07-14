@@ -300,14 +300,7 @@ class JwtAccessToken(OpenidBaseModel):
 
     The specification defines a profile for issuing access tokens in JSON Web Token (JWT) format.
     Authorization servers from different vendors may leverage this profile to issue access tokens in an interoperable
-    manner but they are in no way required to do so.
-
-    .. note::
-
-        While the RFC defines some fields to be required, some vendors issue tokens that look like they conform to the RFC
-        but in fact do not because some required fields are missing.
-        To allow usage of these tokens even though they do not strictly conform to the RFC, almost all fields are marked
-        optional.
+    manner, but they are in no way required to do so.
     """
 
     model_config = ConfigDict(extra="allow", frozen=True)
@@ -318,19 +311,19 @@ class JwtAccessToken(OpenidBaseModel):
     exp: int
     "The 'exp' (expiration time) claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing. The processing of the 'exp' claim requires that the current date/time MUST be before the expiration date/time listed in the 'exp' claim. Implementers MAY provide for some small leeway, usually no more than a few minutes, to account for clock skew. Its value MUST be a number containing a NumericDate value."
 
-    aud: Optional[Union[str, List[str]]] = None
+    aud: Union[str, List[str]]
     "The 'aud' (audience) claim identifies the recipients that the JWT is intended for. Each principal intended to process the JWT MUST identify itself with a value in the audience claim. If the principal processing the claim does not identify itself with a value in the 'aud' claim when this claim is present, then the JWT MUST be rejected. In the general case, the 'aud' value is an array of case-sensitive strings, each containing a StringOrURI value. In the special case when the JWT has one audience, the 'aud' value MAY be a single case-sensitive string containing a StringOrURI value. The interpretation of audience values is generally application specific."
 
-    sub: Optional[str] = None
+    sub: str
     "Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
 
-    client_id: Optional[str] = None
+    client_id: str
     "The client_id claim carries the client identifier of the OpenId client that requested the token."
 
-    iat: Optional[int] = None
+    iat: int
     "As defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at which the JWT access token was issued."
 
-    jti: Optional[str] = None
+    jti: str
     "Unique identifier for the token."
 
     auth_time: Optional[int] = None
@@ -365,17 +358,16 @@ class JwtAccessToken(OpenidBaseModel):
         validate_that(self.exp > time.time(), "The access token is expired")
 
         # validate audience
-        if self.aud is not None:
-            if isinstance(self.aud, str):
-                validate_that(
-                    self.aud == client_id,
-                    "The access tokens audience does not contain own client_id",
-                )
-            elif isinstance(self.aud, list):
-                validate_that(
-                    client_id in self.aud,
-                    "The access tokens audience does not contain own client_id",
-                )
+        if isinstance(self.aud, str):
+            validate_that(
+                self.aud == client_id,
+                "The access tokens audience does not contain own client_id",
+            )
+        elif isinstance(self.aud, list):
+            validate_that(
+                client_id in self.aud,
+                "The access tokens audience does not contain own client_id",
+            )
 
 
 class UserinfoRequest(OpenidBaseModel):

@@ -246,6 +246,11 @@ def test_jwt_access_token__issuer():
     token = JwtAccessToken(
         iss="https://provider.example.com",
         exp=now + 60 * 5,
+        aud="test-client",
+        sub="f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+        client_id="test-client",
+        iat=now,
+        jti="token-1",
     )
 
     # assert
@@ -267,6 +272,11 @@ def test_jwt_access_token__expiry():
     now = int(time.time())
     token = JwtAccessToken(
         iss="https://provider.example.com",
+        aud="test-client",
+        sub="f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+        client_id="test-client",
+        iat=now,
+        jti="token-1",
         exp=now - 60,
     )
 
@@ -283,7 +293,11 @@ def test_jwt_access_token__aud():
     now = int(time.time())
     token = JwtAccessToken(
         iss="https://provider.example.com",
+        sub="f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
         exp=now + 60 * 5,
+        client_id="test-client",
+        iat=now,
+        jti="token-1",
         aud="test-client",
     )
 
