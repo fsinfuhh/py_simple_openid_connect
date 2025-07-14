@@ -134,4 +134,6 @@ Please keep in mind when picking a new version number that [Semantic Versioning]
 4. Tag the commit using `git tag -a -s vX.Y.Z`.
 
    The tag name should be the same as the version number and the tag notes should contain a copy of the changelog entry of the new version.
-5. Publish to pypi using `flit publish`
+5. Push changes to GitHub `git push --tags`
+6. Create a release on GitHub ([link](https://github.com/fsinfuhh/py_simple_openid_connect/releases/new)). The release notes should be the same as the changelog & tag content.
+7. Publish to pypi using `flit publish`
