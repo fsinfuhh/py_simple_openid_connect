@@ -1,6 +1,13 @@
 # Changelog
 
-## V2.3.0
+## v2.3.1
+
+### Bug-Fixes
+
+- **core**: The previously changed requirements of `JwtAccessTokens` were causing some identity providers tokens (such as Keycloak) to not be accepted as valid anymore because those tokens included an `azp` claim instead of `client_id`.
+  Since those two contain semantically identical information, a deserialization alias was added to allow processing of these tokens.
+
+## v2.3.0
 
 ### Notable features
 
