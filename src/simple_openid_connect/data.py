@@ -7,7 +7,7 @@ import logging
 import time
 from typing import Any, Callable, List, Literal, Mapping, Optional, Union
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator, AliasChoices
 
 from simple_openid_connect.base_data import OpenidBaseModel
 from simple_openid_connect.utils import validate_that
@@ -301,6 +301,11 @@ class JwtAccessToken(OpenidBaseModel):
     The specification defines a profile for issuing access tokens in JSON Web Token (JWT) format.
     Authorization servers from different vendors may leverage this profile to issue access tokens in an interoperable
     manner, but they are in no way required to do so.
+
+    .. note::
+
+       Some Identity Providers encode an ``azp`` claim (similar to :data:`IdToken.azp`) instead of :data:`client_id <JwtAccessToken.client_id>`.
+       Since both claims semantically contain the same information, tokens with an ``azp`` claim are normalized to contain ``client_id`` instead.
     """
 
     model_config = ConfigDict(extra="allow", frozen=True)
@@ -317,8 +322,8 @@ class JwtAccessToken(OpenidBaseModel):
     sub: str
     "Subject Identifier A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, e.g., 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4 It MUST NOT exceed 255 ASCII characters in length The sub value is a case sensitive string."
 
-    client_id: str
-    "The client_id claim carries the client identifier of the OpenId client that requested the token."
+    client_id: str = Field(validation_alias=AliasChoices("client_id", "azp"))
+    "The client_id claim carries the client identifier of the OpenId client that requested the token. If a token contains an ``azp`` claim, that claim is deserialized into this field."
 
     iat: int
     "As defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at which the JWT access token was issued."
