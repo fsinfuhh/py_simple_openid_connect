@@ -3,6 +3,7 @@ View functions which handle openid authentication and their related callbacks
 """
 
 import logging
+import math
 import secrets
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
@@ -52,9 +53,9 @@ class InitLoginView(View):
         request.session["openid_auth_state"] = state
 
         # save the time at which authentication was started
-        request.session["openid_auth_start_time"] = datetime.now(
-            tz=timezone.utc
-        ).timestamp()
+        request.session["openid_auth_start_time"] = int(
+            math.floor(datetime.now(tz=timezone.utc).timestamp())
+        )
 
         # prevent replay attacks by generating and specifying a nonce
         # ref: https://simple-openid-connect.readthedocs.io/en/stable/nonce_and_state.html
@@ -219,11 +220,12 @@ class LoginCallbackView(View):
         client = OpenidAppConfig.get_instance().get_client(request)
         id_token = IdToken.parse_jwt(token_response.id_token, client.provider_keys)
         try:
+            allowed_clock_skew = 30  # seconds
             id_token.validate_extern(
                 client.provider_config.issuer,
                 client.client_auth.client_id,
                 nonce=request.session["openid_auth_nonce"],
-                min_iat=request.session["openid_auth_start_time"],
+                min_iat=request.session["openid_auth_start_time"] - allowed_clock_skew,
             )
             return id_token
         except ValidationError as e:
