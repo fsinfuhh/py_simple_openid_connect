@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3.2
+
+### Bug-Fixes
+
+- **django integration**: Fix django sometimes not allowing login due to tokens being issued too far in the past.
+  This was caused by how the security tightening introduced in v2.3.0 which sometimes prevented a user from logging in if the Identity Providers clock was out of sync with that of the application server. A 30-second window of allowed clock skew has now been introduced to remedy this.
+
 ## v2.3.1
 
 ### Bug-Fixes
@@ -15,7 +22,7 @@
   This parameter allows a user to specify whether the `azp` claim of an IdToken should be the same as the users own client-id.
   This is the case if the token was issued to that client but can differ if a token with multiple audiences was issued and the users client-id is just one of them.
 
-- **django integration**: The django login views now impose a tighter requirement on tokens `iat` claim to ensure that tokens are only accapted if they get issued after a login process has been started by an end-user.
+- **django integration**: The django login views now impose a tighter requirement on tokens `iat` claim to ensure that tokens are only accepted if they get issued after a login process has been started by an end-user.
 
 ### Bug-Fixes
 
