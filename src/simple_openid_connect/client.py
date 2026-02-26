@@ -14,10 +14,10 @@ from typing import (
     TypeVar,
     Union,
 )
+import time
 
 from cryptojwt import JWK
 from cryptojwt.jwk.jwk import key_from_jwk_dict
-
 from simple_openid_connect import (
     jwk,
     rp_initiated_logout,
@@ -62,7 +62,6 @@ class OpenidClient:
     """
 
     provider_config: ProviderMetadata
-    provider_keys: List[JWK]
     client_auth: ClientAuthenticationMethod
     scope: str
 
@@ -78,14 +77,19 @@ class OpenidClient:
     def __init__(
         self,
         provider_config: ProviderMetadata,
-        provider_keys: List[JWK],
-        authentication_redirect_uri: Optional[str],
-        client_id: str,
+        provider_keys: Optional[List[JWK]] = None,
+        authentication_redirect_uri: Optional[str] = None,
+        client_id: str = "",
         client_secret: Optional[str] = None,
         scope: str = "openid",
+        jwks_uri: Optional[str] = None,
+        jwks_cache_duration: int = 3600,  # how long to cache the provider keys in seconds, default is 1 hour
     ):
         self.provider_config = provider_config
-        self.provider_keys = provider_keys
+        self._provider_keys = provider_keys
+        self._jwks_uri = jwks_uri
+        self._jwks_cache_duration = jwks_cache_duration
+        self._jwks_generated_at = time.monotonic()
         self.authorization_code_flow = AuthorizationCodeFlowClient(self)
         self.direct_access_grant = DirectAccessGrantClient(self)
         self.client_credentials_grant = ClientCredentialsGrantClient(self)
@@ -113,6 +117,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
+        jwks_cache_duration: int = 3600,  # how long to cache the provider keys in seconds, default is 1 hour, 0 means no refreshes
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -128,7 +133,12 @@ class OpenidClient:
 
         config = discover_configuration_from_issuer(url)
         return cls.from_issuer_config(
-            config, authentication_redirect_uri, client_id, client_secret, scope
+            config,
+            authentication_redirect_uri,
+            client_id,
+            client_secret,
+            scope,
+            jwks_cache_duration,
         )
 
     @classmethod
@@ -139,6 +149,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
+        jwks_cache_duration: int = 3600,  # how long to cache the provider keys in seconds, default is 1 hour, 0 means no refreshes
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
@@ -153,10 +164,30 @@ class OpenidClient:
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
         """
-        keys = jwk.fetch_jwks(config.jwks_uri)
         return cls(
-            config, keys, authentication_redirect_uri, client_id, client_secret, scope
+            config,
+            None,
+            authentication_redirect_uri,
+            client_id,
+            client_secret,
+            scope,
+            config.jwks_uri,
+            jwks_cache_duration,
         )
+
+    @property
+    def provider_keys(self) -> List[JWK]:
+        if self._provider_keys is None or (
+            self._jwks_cache_duration > 0
+            and (time.monotonic() - self._jwks_generated_at) > self._jwks_cache_duration
+        ):
+            if self._jwks_uri is None:
+                raise UnsupportedByProviderError(
+                    f"The OpenID provider {self.provider_config.issuer} does not advertise a jwks_uri and no keys were given to the client, so there is no way to fetch the providers keys which are necessary for validating tokens and responses"
+                )
+            self._provider_keys = jwk.fetch_jwks(self._jwks_uri)
+            self._jwks_generated_at = time.monotonic()
+        return self._provider_keys
 
     @property
     def client_type(self) -> Literal["public", "confidential"]:
