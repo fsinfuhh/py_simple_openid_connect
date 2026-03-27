@@ -74,6 +74,9 @@ class OpenidClient:
     client_credentials_grant: ClientCredentialsGrantClient
     "*Client Credentials Grant* (or *Service Account Authentication*) functionality"
 
+    _jwks_max_age: int = -1
+    "jwks_max_age value get from the JWKS Cache-Control header"
+
     def __init__(
         self,
         provider_config: ProviderMetadata,
@@ -83,7 +86,7 @@ class OpenidClient:
         client_secret: Optional[str] = None,
         scope: str = "openid",
         jwks_uri: Optional[str] = None,
-        jwks_cache_duration: int = 3600,  # how long to cache the provider keys in seconds, default is 1 hour
+        jwks_cache_duration: int = -1,  # how long to cache the provider keys in seconds, default is -1 to respect the Cache-Control max-age header of the jwks response, 0 means no refreshes
     ):
         self.provider_config = provider_config
         self._provider_keys = provider_keys
@@ -117,7 +120,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
-        jwks_cache_duration: int = 3600,  # how long to cache the provider keys in seconds, default is 1 hour, 0 means no refreshes
+        jwks_cache_duration: int = -1,
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -129,6 +132,7 @@ class OpenidClient:
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
+        :param jwks_cache_duration: How long to cache the provider keys in seconds, default is -1 to respect the Cache-Control max-age header of the jwks response, 0 means no refreshes
         """
 
         config = discover_configuration_from_issuer(url)
@@ -149,7 +153,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
-        jwks_cache_duration: int = 3600,  # how long to cache the provider keys in seconds, default is 1 hour, 0 means no refreshes
+        jwks_cache_duration: int = -1,
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
@@ -163,6 +167,7 @@ class OpenidClient:
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
+        :param jwks_cache_duration: How long to cache the provider keys in seconds, default is -1 to respect the Cache-Control max-age header of the jwks response, 0 means no refreshes
         """
         return cls(
             config,
@@ -177,15 +182,22 @@ class OpenidClient:
 
     @property
     def provider_keys(self) -> List[JWK]:
+        effective_max_age = (
+            self._jwks_max_age
+            if self._jwks_cache_duration == -1
+            else self._jwks_cache_duration
+        )
         if self._provider_keys is None or (
-            self._jwks_cache_duration > 0
-            and (time.monotonic() - self._jwks_generated_at) > self._jwks_cache_duration
+            effective_max_age > 0
+            and (time.monotonic() - self._jwks_generated_at) > effective_max_age
         ):
             if self._jwks_uri is None:
                 raise UnsupportedByProviderError(
                     f"The OpenID provider {self.provider_config.issuer} does not advertise a jwks_uri and no keys were given to the client, so there is no way to fetch the providers keys which are necessary for validating tokens and responses"
                 )
-            self._provider_keys = jwk.fetch_jwks(self._jwks_uri)
+            self._provider_keys, self._jwks_max_age = jwk.fetch_jwks_max_age(
+                self._jwks_uri
+            )
             self._jwks_generated_at = time.monotonic()
         return self._provider_keys
 
