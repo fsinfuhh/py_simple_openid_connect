@@ -2,7 +2,8 @@
 JSON-Web-Key handling code
 """
 
-from typing import List, cast, Tuple, Any
+from typing import List, cast, Tuple, Any, Optional
+from datetime import datetime, timedelta, timezone
 
 from cryptojwt import JWK, KeyBundle
 
@@ -13,19 +14,25 @@ requests.request
 
 
 class _Httpc:
-    max_age = 0
+    """
+    A wrapper around ``requests.request`` which assigns a max_age parameter as instance variable for later retrieval  
+    """
+    max_age: Optional[datetime] = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> requests.Response:
-        """Wrapper around requests.request to allow mocking in tests."""
-
+        now = datetime.now(timezone.utc)
         response = requests.request(*args, **kwargs)
+
+        # extract Cache-Control header and save its value for later
         cache_control = response.headers.get("Cache-Control")
         if cache_control and "max-age" in cache_control:
-            self.max_age = int(cache_control.split("max-age=")[1].split(",")[0])
+            http_max_age = int(cache_control.split("max-age=")[1].split(",")[0])
+            self.max_age = now + timedelta(seconds=http_max_age)
+
         return response
 
 
-def fetch_jwks_max_age(jwks_uri: str) -> Tuple[List[JWK], int]:
+def fetch_jwks_max_age(jwks_uri: str) -> Tuple[List[JWK], Optional[datetime]]:
     """
     Fetch JSON web keys from the given jwks_uri.
     This uri is part of the provider configuration and used to validate responses and tokens sent by the provider.
