@@ -15,8 +15,9 @@ requests.request
 
 class _Httpc:
     """
-    A wrapper around ``requests.request`` which assigns a max_age parameter as instance variable for later retrieval  
+    A wrapper around ``requests.request`` which assigns a max_age parameter as instance variable for later retrieval
     """
+
     max_age: Optional[datetime] = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> requests.Response:

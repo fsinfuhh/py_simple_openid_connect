@@ -115,4 +115,3 @@ def test_pickling(dummy_provider_config):
     assert client._provider_keys is not None
     assert client2._provider_keys is not None
     assert client._provider_keys == client2._provider_keys
-

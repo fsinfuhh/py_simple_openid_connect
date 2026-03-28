@@ -89,19 +89,19 @@ class OpenidClient:
         client_id: str = "",
         client_secret: Optional[str] = None,
         scope: str = "openid",
-        min_jwks_cache_duration: timedelta = timedelta()
+        min_jwks_cache_duration: timedelta = timedelta(),
     ):
         """
         Construct a new client that is bound to an Identity-Provider.
 
         See :func:`from_issuer_url` for a more convenient factory that constructs a client instance.
-        
+
         :param provider_config: Configuration of the identity provider, probably fetched via autodiscovery
         :param authentication_redirect_uri: The URL that a User-Agent should be redirected to during the authentication process to reach this client
         :param client_id: The client_id for this client. This is assigned to you by the Identity-Provider
         :param client_secret: The client_secret for this client. This is assigned to you by the Identity-Provider and is recommended to set. If this client is not able to keep it's secret safe, it shoud however not be set.
         :param scope: The authorization scope this client should request from the Identity-Provider
-        :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully. 
+        :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
         """
         self.provider_config = provider_config
         self.scope = scope
@@ -114,7 +114,10 @@ class OpenidClient:
         self._provider_keys = None
 
         if provider_keys is not None:
-            warnings.warn("giving a provider_keys= parameter to the OpenidClient constructor and the parameter will be removed in a future release", DeprecationWarning)
+            warnings.warn(
+                "giving a provider_keys= parameter to the OpenidClient constructor and the parameter will be removed in a future release",
+                DeprecationWarning,
+            )
 
         if client_secret is None:
             self.client_auth = NoneAuth(client_id)
@@ -137,7 +140,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
-        min_jwks_cache_duration: timedelta = timedelta()
+        min_jwks_cache_duration: timedelta = timedelta(),
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -170,7 +173,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
-        min_jwks_cache_duration: timedelta = timedelta()
+        min_jwks_cache_duration: timedelta = timedelta(),
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
@@ -201,17 +204,21 @@ class OpenidClient:
         now = datetime.now(timezone.utc)
 
         # return the cached data if it is still valid
-        if self._provider_keys is not None and self._jwks_max_age is not None and now <= self._jwks_max_age:
+        if (
+            self._provider_keys is not None
+            and self._jwks_max_age is not None
+            and now <= self._jwks_max_age
+        ):
             return self._provider_keys
 
         # fetch new keys otherwise
         jwks, idp_max_age = jwk.fetch_jwks_max_age(self.provider_config.jwks_uri)
         self._provider_keys = jwks
-        
+
         # remember how long we can cache the retrieved keys
         # if the idp did not return any max-age information, interpret as expiring immediately but also cache for the minimum configured time
         self._jwks_max_age = max(idp_max_age or now, now + self.min_jwks_cache_duration)
-        
+
         return self._provider_keys
 
     @property
@@ -373,6 +380,7 @@ class OpenidClient:
         # this implements support for unpickling this class
         # it is basically the default pickle behavior but explicitly deserializes keys
         if state["_provider_keys"] is not None:
-            state["_provider_keys"] = [key_from_jwk_dict(k) for k in state["_provider_keys"]]
+            state["_provider_keys"] = [
+                key_from_jwk_dict(k) for k in state["_provider_keys"]
+            ]
         self.__dict__ = state
-
