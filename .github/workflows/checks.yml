@@ -27,18 +27,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        py_version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        drf_version: ["3.14", "3.15", "3.16"]
+        py_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        drf_version: ["3.15", "3.16", "3.17"]
         django_version:
           - "4.2" # LTS
-          - "5.1" # current
-          - "5.2" # current, LTS
+          - "5.2" # LTS
+          - "6.2" # LTS
         exclude:
-          # django 5.* requires python >3.9
-          - py_version: "3.9"
-            django_version: "5.1"
-          - py_version: "3.9"
-            django_version: "5.2"
+          # exclude new django versions with old python versions
+          - py_version: "3.10"
+            django_version: "6"
+          - py_version: "3.11"
+            django_version: "6"
+          # exclude old django versions with new python versions
+          - py_version: "3.14"
+            django_version: "4.2"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
