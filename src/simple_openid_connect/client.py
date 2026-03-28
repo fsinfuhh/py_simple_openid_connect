@@ -15,6 +15,7 @@ from typing import (
     Union,
 )
 from datetime import datetime, timedelta, timezone
+import warnings
 
 from cryptojwt import JWK
 from cryptojwt.jwk.jwk import key_from_jwk_dict
@@ -83,6 +84,7 @@ class OpenidClient:
     def __init__(
         self,
         provider_config: ProviderMetadata,
+        provider_keys: Optional[List[JWK]] = None,
         authentication_redirect_uri: Optional[str] = None,
         client_id: str = "",
         client_secret: Optional[str] = None,
@@ -110,6 +112,9 @@ class OpenidClient:
         self.client_credentials_grant = ClientCredentialsGrantClient(self)
         self._jwks_max_age = None
         self._provider_keys = None
+
+        if provider_keys is not None:
+            warnings.warn("giving a provider_keys= parameter to the OpenidClient constructor and the parameter will be removed in a future release", DeprecationWarning)
 
         if client_secret is None:
             self.client_auth = NoneAuth(client_id)
@@ -183,6 +188,7 @@ class OpenidClient:
         """
         return cls(
             config,
+            None,
             authentication_redirect_uri,
             client_id,
             client_secret,
