@@ -13,6 +13,15 @@ def test_load_mafiasi_jwks(known_provider_configs):
     assert all(isinstance(k, JWK) for k in keys)
     assert len(keys) == 1
     assert keys[0].kid == "JAehgk0O0uzTEht7KGCPVB_urwfsBGe22phHVDZezeo"
+    
+
+def test_load_hanse_jwks(known_provider_configs):
+    keys = fetch_jwks(
+        "https://auth.hanse.de/application/o/git/jwks/"
+    )
+    assert all(isinstance(k, JWK) for k in keys)
+    assert len(keys) == 1
+    assert keys[0].kid == "25bfaaaa8e5aed3a44d130d66ac81022"
 
 
 def test_load_dummy_jwks(dummy_provider_config):
