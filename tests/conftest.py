@@ -102,10 +102,21 @@ def dummy_provider_config(jwks, response_mock):
             id_token_signing_alg_values_supported=["RS256"],
         ).model_dump(exclude_defaults=True),
     )
+    
     response_mock.get(
         url="https://provider.example.com/jwks",
         body=jwks.jwks(),
         content_type="application/json",
+    )
+    
+    response_mock.get(
+        url="https://provider.example.com/jwks-with-expiry",
+        body=jwks.jwks(),
+        content_type="application/json",
+        headers={
+            # 60 second expiry with some other directives around that need to be stripped out
+            "Cache-Control": "no-transform, max-age=60, public",
+        },
     )
 
 

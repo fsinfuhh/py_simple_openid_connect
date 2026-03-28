@@ -10,6 +10,7 @@ mypy>=1.7.0
 pytest
 pytest-django
 pytest-explicit
+freezegun
 pyyaml
 responses
 ruff
