@@ -14,10 +14,11 @@ from typing import (
     TypeVar,
     Union,
 )
+from datetime import datetime, timedelta, timezone
+import warnings
 
 from cryptojwt import JWK
 from cryptojwt.jwk.jwk import key_from_jwk_dict
-
 from simple_openid_connect import (
     jwk,
     rp_initiated_logout,
@@ -62,8 +63,8 @@ class OpenidClient:
     """
 
     provider_config: ProviderMetadata
-    provider_keys: List[JWK]
     client_auth: ClientAuthenticationMethod
+    min_jwks_cache_duration: timedelta
     scope: str
 
     authorization_code_flow: AuthorizationCodeFlowClient
@@ -75,22 +76,48 @@ class OpenidClient:
     client_credentials_grant: ClientCredentialsGrantClient
     "*Client Credentials Grant* (or *Service Account Authentication*) functionality"
 
+    _jwks_max_age: Optional[datetime]
+    "Maximum time until the currently cached provider keys are valid"
+    _provider_keys: Optional[List[JWK]]
+    "Cached provider keys that can be used until they expire"
+
     def __init__(
         self,
         provider_config: ProviderMetadata,
-        provider_keys: List[JWK],
-        authentication_redirect_uri: Optional[str],
-        client_id: str,
+        provider_keys: Optional[List[JWK]] = None,
+        authentication_redirect_uri: Optional[str] = None,
+        client_id: str = "",
         client_secret: Optional[str] = None,
         scope: str = "openid",
+        min_jwks_cache_duration: timedelta = timedelta(),
     ):
+        """
+        Construct a new client that is bound to an Identity-Provider.
+
+        See :func:`from_issuer_url` for a more convenient factory that constructs a client instance.
+
+        :param provider_config: Configuration of the identity provider, probably fetched via autodiscovery
+        :param authentication_redirect_uri: The URL that a User-Agent should be redirected to during the authentication process to reach this client
+        :param client_id: The client_id for this client. This is assigned to you by the Identity-Provider
+        :param client_secret: The client_secret for this client. This is assigned to you by the Identity-Provider and is recommended to set. If this client is not able to keep it's secret safe, it shoud however not be set.
+        :param scope: The authorization scope this client should request from the Identity-Provider
+        :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
+        """
         self.provider_config = provider_config
-        self.provider_keys = provider_keys
+        self.scope = scope
+        self.authentication_redirect_uri = authentication_redirect_uri
+        self.min_jwks_cache_duration = min_jwks_cache_duration
         self.authorization_code_flow = AuthorizationCodeFlowClient(self)
         self.direct_access_grant = DirectAccessGrantClient(self)
         self.client_credentials_grant = ClientCredentialsGrantClient(self)
-        self.scope = scope
-        self.authentication_redirect_uri = authentication_redirect_uri
+        self._jwks_max_age = None
+        self._provider_keys = None
+
+        if provider_keys is not None:
+            warnings.warn(
+                "giving a provider_keys= parameter to the OpenidClient constructor and the parameter will be removed in a future release",
+                DeprecationWarning,
+            )
 
         if client_secret is None:
             self.client_auth = NoneAuth(client_id)
@@ -113,6 +140,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
+        min_jwks_cache_duration: timedelta = timedelta(),
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -124,11 +152,17 @@ class OpenidClient:
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
+        :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
         """
 
         config = discover_configuration_from_issuer(url)
         return cls.from_issuer_config(
-            config, authentication_redirect_uri, client_id, client_secret, scope
+            config,
+            authentication_redirect_uri,
+            client_id,
+            client_secret,
+            scope,
+            min_jwks_cache_duration,
         )
 
     @classmethod
@@ -139,6 +173,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
+        min_jwks_cache_duration: timedelta = timedelta(),
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
@@ -152,11 +187,39 @@ class OpenidClient:
         :param client_secret: Optionally a client secret which has been assigned to your client from the issuer.
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
+        :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
         """
-        keys = jwk.fetch_jwks(config.jwks_uri)
         return cls(
-            config, keys, authentication_redirect_uri, client_id, client_secret, scope
+            config,
+            None,
+            authentication_redirect_uri,
+            client_id,
+            client_secret,
+            scope,
+            min_jwks_cache_duration,
         )
+
+    @property
+    def provider_keys(self) -> List[JWK]:
+        now = datetime.now(timezone.utc)
+
+        # return the cached data if it is still valid
+        if (
+            self._provider_keys is not None
+            and self._jwks_max_age is not None
+            and now <= self._jwks_max_age
+        ):
+            return self._provider_keys
+
+        # fetch new keys otherwise
+        jwks, idp_max_age = jwk.fetch_jwks_max_age(self.provider_config.jwks_uri)
+        self._provider_keys = jwks
+
+        # remember how long we can cache the retrieved keys
+        # if the idp did not return any max-age information, interpret as expiring immediately but also cache for the minimum configured time
+        self._jwks_max_age = max(idp_max_age or now, now + self.min_jwks_cache_duration)
+
+        return self._provider_keys
 
     @property
     def client_type(self) -> Literal["public", "confidential"]:
@@ -309,11 +372,15 @@ class OpenidClient:
         # this implements support for pickling this class
         # it is basically the default pickle behavior but explicitly serializes keys because they are FFI backed and not normally picklable
         result = self.__dict__.copy()
-        result["provider_keys"] = [k.serialize() for k in self.provider_keys]
+        if self._provider_keys is not None:
+            result["_provider_keys"] = [k.serialize() for k in self._provider_keys]
         return result
 
     def __setstate__(self, state: Dict[str, Any]) -> None:
         # this implements support for unpickling this class
         # it is basically the default pickle behavior but explicitly deserializes keys
-        state["provider_keys"] = [key_from_jwk_dict(k) for k in state["provider_keys"]]
+        if state["_provider_keys"] is not None:
+            state["_provider_keys"] = [
+                key_from_jwk_dict(k) for k in state["_provider_keys"]
+            ]
         self.__dict__ = state

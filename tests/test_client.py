@@ -102,9 +102,16 @@ def test_token_introspection(dummy_provider_config, dummy_token_introspection_re
 
 
 def test_pickling(dummy_provider_config):
-    # arrange
+    # arrange (make client and ensure provider JWKs is fetched)
     client = make_client()
+    _ = client.provider_keys
+    assert client._provider_keys is not None
 
     # act (assert not throwing)
     enc = pickle.dumps(client)
-    _ = pickle.loads(enc)
+    client2 = pickle.loads(enc)
+
+    # assert provider key equality
+    assert client._provider_keys is not None
+    assert client2._provider_keys is not None
+    assert client._provider_keys == client2._provider_keys
