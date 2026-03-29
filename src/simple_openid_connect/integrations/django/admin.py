@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Any, Dict, Optional
 
 from django.contrib import admin
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from . import models
 
@@ -34,3 +35,17 @@ class OpenidUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
             result.append(f"user__{UserModel.EMAIL_FIELD}")
 
         return result
+
+    def change_view(
+        self,
+        request: Any,
+        object_id: Any,
+        form_url: Any = "",
+        extra_context: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        # add a settings.DEBUG context variable
+        extra_context = extra_context or dict()
+        extra_context.setdefault("settings", dict())
+        extra_context["settings"]["DEBUG"] = settings.DEBUG and True
+
+        return super().change_view(request, object_id, form_url, extra_context)

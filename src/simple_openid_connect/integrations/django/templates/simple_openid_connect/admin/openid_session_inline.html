@@ -1,7 +1,6 @@
 <fieldset class="module aligned" aria-labelledby="{{ inline_admin_formset.formset.prefix }}-heading">
   <h2 id="{{ inline_admin_formset.formset.prefix }}-heading" class="inline-heading">OpenID Sessions</h2>
 
-
   {% for inline_admin_form in inline_admin_formset %}
   {% with i_session=inline_admin_form.original %}
   {% if i_session %}
@@ -27,12 +26,14 @@
               <span style="color: green;">Valid until {{ i_session.access_token_expiry | default:"-empty-" }}</span>
             {% endif %}
           </div>
+          {% if settings.DEBUG %}
           <div style="margin-left: 2rem; min-width: 128px; padding: 6px 0;">
             <details>
               <summary>Token</summary>
               <code style="display: block; padding: 8px; line-break: anywhere;">{{ i_session.access_token }}</code>
-          </details>
+            </details>
           </div>
+          {% endif %}
         </div>
 
         <div class="flex-container">
@@ -44,12 +45,14 @@
               <span style="color: green;">Valid until {{ i_session.refresh_token_expiry | default:"-empty-" }}</span>
             {% endif %}
           </div>
+          {% if settings.DEBUG %}
           <div style="margin-left: 2rem; min-width: 128px; padding: 6px 0;">
             <details>
               <summary>Token</summary>
               <code style="display: block; padding: 8px; line-break: anywhere;">{{ i_session.refresh_token }}</code>
-          </details>
+            </details>
           </div>
+          {% endif %}
         </div>
 
         <div class="flex-container">
