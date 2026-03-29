@@ -89,7 +89,7 @@ class OpenidClient:
         client_id: str = "",
         client_secret: Optional[str] = None,
         scope: str = "openid",
-        min_jwks_cache_duration: timedelta = timedelta(),
+        min_jwks_cache_duration: timedelta = timedelta(minutes=10),
     ):
         """
         Construct a new client that is bound to an Identity-Provider.
@@ -140,7 +140,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
-        min_jwks_cache_duration: timedelta = timedelta(),
+        min_jwks_cache_duration: timedelta = timedelta(minutes=10),
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -173,7 +173,7 @@ class OpenidClient:
         client_id: str,
         client_secret: Union[str, None] = None,
         scope: str = "openid",
-        min_jwks_cache_duration: timedelta = timedelta(),
+        min_jwks_cache_duration: timedelta = timedelta(minutes=10),
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
