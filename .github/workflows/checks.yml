@@ -36,9 +36,9 @@ jobs:
         exclude:
           # exclude new django versions with old python versions
           - py_version: "3.10"
-            django_version: "6"
+            django_version: "6.2"
           - py_version: "3.11"
-            django_version: "6"
+            django_version: "6.2"
           # exclude old django versions with new python versions
           - py_version: "3.14"
             django_version: "4.2"
