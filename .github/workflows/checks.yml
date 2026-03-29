@@ -32,13 +32,13 @@ jobs:
         django_version:
           - "4.2" # LTS
           - "5.2" # LTS
-          - "6.2" # LTS
+          - "6" # current major version
         exclude:
           # exclude new django versions with old python versions
           - py_version: "3.10"
-            django_version: "6.2"
+            django_version: "6"
           - py_version: "3.11"
-            django_version: "6.2"
+            django_version: "6"
           # exclude old django versions with new python versions
           - py_version: "3.14"
             django_version: "4.2"
