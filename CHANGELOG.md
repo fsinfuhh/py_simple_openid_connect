@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.4.0
+
+### Notable Features
+
+- JSON-Web-Keys of Identity-Providers are not cached indefinitely anymore.
+  In previous versions, when using the *client-style* API of this library, any instance of `OpenidClient` would fetch JSON-Web-Keys from the configured identity provider during initialization and then keep them forever. This has been changed so that JWKs are now only fetched on demand and cached based on the Identity-Providers HTTP `Cache-Control` header information. Because many Identity-Provider implementations don't send 'Cache-Control' headers, a default minimum cache of 10 minutes has also been implemented.
+
+### Minor Changes
+
+- The supported list of python and integration versions has been updated to match currently supported upstream ones.
+- The included django admin view now only displays raw tokens when djangos debug mode is enabled.
+
 ## v2.3.2
 
 ### Bug-Fixes
