@@ -33,7 +33,7 @@ Simple and opinionated OpenID-Connect relying party and resource server implemen
 
 ## Language & Framework Support
 
-We aim to follow pythons officially supported versions. This is currently python `v3.9`, `v3.10`, `v3.11`, `v3.12` and `v3.13`.
+We aim to follow pythons officially supported versions. This is currently python `v3.10`, `v3.11`, `v3.12`, `v3.13` and `v3.14`.
 
 In addition to being an OpenID library from which one can build their own authentication solutaion, we also offer explicit integrations into the following frameworks and projects:
 
