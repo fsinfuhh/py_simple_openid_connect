@@ -16,7 +16,7 @@ from simple_openid_connect.data import (
 )
 
 # initialize a session object (which is very primitive but works)
-session = defaultdict(lambda: "")
+session = defaultdict(lambda: "")  # type: Dict[str, Any]
 client = None  # type: Optional[OpenidClient]
 
 
