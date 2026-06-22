@@ -27,8 +27,11 @@ class TokenVerificationMiddleware:
             return self.get_response(request)
 
         # if the access token is still valid, everything is fine
-        openid_session = OpenidSession.objects.get(id=openid_session_id)
-        if not openid_session.is_access_token_expired:
+        try:
+            openid_session = OpenidSession.objects.get(id=openid_session_id)
+            if not openid_session.is_access_token_expired:
+                return self.get_response(request)
+        except OpenidSession.DoesNotExist:
             return self.get_response(request)
 
         # try to refresh the access token with the refresh token
