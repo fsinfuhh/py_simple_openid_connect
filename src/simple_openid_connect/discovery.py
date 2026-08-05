@@ -2,6 +2,7 @@
 Mechanisms for discovering information about an OpenID issuer
 """
 
+from typing import Optional
 import requests
 
 from simple_openid_connect import utils
@@ -9,7 +10,9 @@ from simple_openid_connect.data import ProviderMetadata
 from simple_openid_connect.exceptions import OpenidProtocolError
 
 
-def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
+def discover_configuration_from_issuer(
+    issuer: str, session: Optional[requests.Session] = None
+) -> ProviderMetadata:
     """
     Retrieve configuration information about an OpenID provider (issuer)
 
@@ -18,13 +21,15 @@ def discover_configuration_from_issuer(issuer: str) -> ProviderMetadata:
     :param issuer: The base url of the provider
         This url will be appended with `/.well-known/openid-configuration` to retrieve the provider configuration so
         that must be a valid URL for your provider.
+    :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
     :returns: The well-formed and validated configuration of the given issuer
     :raises OpenidProtocolError: When the communication with the provider was not possible or the response was not in an
         expected format
     """
+    session = session or requests.Session()
     issuer = issuer.rstrip("/")
     config_url = f"{issuer}/.well-known/openid-configuration"
-    response = requests.get(config_url)
+    response = session.get(config_url)
 
     if not utils.is_application_json(response.headers["Content-Type"]):
         raise OpenidProtocolError(

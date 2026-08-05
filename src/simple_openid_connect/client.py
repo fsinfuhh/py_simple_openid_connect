@@ -19,6 +19,7 @@ import warnings
 
 from cryptojwt import JWK
 from cryptojwt.jwk.jwk import key_from_jwk_dict
+import requests
 from simple_openid_connect import (
     jwk,
     rp_initiated_logout,
@@ -81,6 +82,9 @@ class OpenidClient:
     _provider_keys: Optional[List[JWK]]
     "Cached provider keys that can be used until they expire"
 
+    session: requests.Session
+    "requests.Session to be used for all HTTP requests. Can be used to tune certificate verification for example."
+
     def __init__(
         self,
         provider_config: ProviderMetadata,
@@ -90,6 +94,7 @@ class OpenidClient:
         client_secret: Optional[str] = None,
         scope: str = "openid",
         min_jwks_cache_duration: timedelta = timedelta(minutes=10),
+        session: Optional[requests.Session] = None,
     ):
         """
         Construct a new client that is bound to an Identity-Provider.
@@ -102,6 +107,7 @@ class OpenidClient:
         :param client_secret: The client_secret for this client. This is assigned to you by the Identity-Provider and is recommended to set. If this client is not able to keep it's secret safe, it shoud however not be set.
         :param scope: The authorization scope this client should request from the Identity-Provider
         :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
+        :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
         """
         self.provider_config = provider_config
         self.scope = scope
@@ -112,6 +118,7 @@ class OpenidClient:
         self.client_credentials_grant = ClientCredentialsGrantClient(self)
         self._jwks_max_age = None
         self._provider_keys = None
+        self.session = session or requests.Session()
 
         if provider_keys is not None:
             warnings.warn(
@@ -141,6 +148,7 @@ class OpenidClient:
         client_secret: Union[str, None] = None,
         scope: str = "openid",
         min_jwks_cache_duration: timedelta = timedelta(minutes=10),
+        session: Optional[requests.Session] = None,
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -153,9 +161,11 @@ class OpenidClient:
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
         :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
+        :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
         """
 
-        config = discover_configuration_from_issuer(url)
+        session = session or requests.Session()
+        config = discover_configuration_from_issuer(url, session=session)
         return cls.from_issuer_config(
             config,
             authentication_redirect_uri,
@@ -163,6 +173,7 @@ class OpenidClient:
             client_secret,
             scope,
             min_jwks_cache_duration,
+            session,
         )
 
     @classmethod
@@ -174,6 +185,7 @@ class OpenidClient:
         client_secret: Union[str, None] = None,
         scope: str = "openid",
         min_jwks_cache_duration: timedelta = timedelta(minutes=10),
+        session: Optional[requests.Session] = None,
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
@@ -188,6 +200,7 @@ class OpenidClient:
             If not supplied, this client is assumed to be *public* which means it has not client secret because it cannot be kept safe (e.g. a web-app).
         :param scope: Which scopes to request from the OP
         :param min_jwks_cache_duration: Minimum time this client will cache JWKs responses from the Identity-Provider. If set to 0, the Identity-Providers Cache-Control HTTP headers will be resepcted fully.
+        :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
         """
         return cls(
             config,
@@ -197,6 +210,7 @@ class OpenidClient:
             client_secret,
             scope,
             min_jwks_cache_duration,
+            session,
         )
 
     @property
@@ -212,7 +226,9 @@ class OpenidClient:
             return self._provider_keys
 
         # fetch new keys otherwise
-        jwks, idp_max_age = jwk.fetch_jwks_max_age(self.provider_config.jwks_uri)
+        jwks, idp_max_age = jwk.fetch_jwks_max_age(
+            self.provider_config.jwks_uri, self.session
+        )
         self._provider_keys = jwks
 
         # remember how long we can cache the retrieved keys
@@ -253,7 +269,7 @@ class OpenidClient:
             )
 
         return userinfo.fetch_userinfo(
-            self.provider_config.userinfo_endpoint, access_token
+            self.provider_config.userinfo_endpoint, access_token, session=self.session
         )
 
     def decode_id_token(
@@ -320,6 +336,7 @@ class OpenidClient:
             token_endpoint=self.provider_config.token_endpoint,
             refresh_token=refresh_token,
             client_authentication=self.client_auth,
+            session=self.session,
         )
 
     def initiate_logout(
@@ -366,6 +383,7 @@ class OpenidClient:
             token=token,
             auth=self.client_auth,
             token_type_hint=token_type_hint,
+            session=self.session,
         )
 
     def __getstate__(self) -> Mapping[str, Any]:

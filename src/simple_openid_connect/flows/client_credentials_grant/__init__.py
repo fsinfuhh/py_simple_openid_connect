@@ -5,7 +5,7 @@ This grant enables a client to retrieve tokens dedicated to the client and not t
 """
 
 import logging
-from typing import Union
+from typing import Optional, Union
 
 import requests
 
@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 def authenticate(
-    token_endpoint: str, scope: str, client_authentication: ClientAuthenticationMethod
+    token_endpoint: str,
+    scope: str,
+    client_authentication: ClientAuthenticationMethod,
+    session: Optional[requests.Session] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Retrieve a token that is dedicated to the authenticated client from the provider.
@@ -35,11 +38,12 @@ def authenticate(
     logger.debug(
         f"requesting access via client credentials grant as client {client_authentication.client_id}"
     )
+    session = session or requests.Session()
     request_msg = TokenRequest(
         grant_type="client_credentials",
         scope=scope,
     )
-    response = requests.post(
+    response = session.post(
         token_endpoint,
         data=request_msg.encode_x_www_form_urlencoded(),
         headers={"Content-Type": "application/x-www-form-urlencoded"},

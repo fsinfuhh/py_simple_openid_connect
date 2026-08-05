@@ -2,7 +2,7 @@
 `OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_ implementation.
 """
 
-from typing import Union
+from typing import Optional, Union
 
 import requests
 
@@ -19,6 +19,7 @@ def introspect_token(
     token: str,
     auth: ClientAuthenticationMethod,
     token_type_hint: Union[str, None] = None,
+    session: Optional[requests.Session] = None,
 ) -> Union[TokenIntrospectionSuccessResponse, TokenIntrospectionErrorResponse]:
     """
     Introspect the given token at the OP.
@@ -27,10 +28,12 @@ def introspect_token(
     :param token: The token to introspect.
     :param auth: Method with which this request is authenticated to the OP.
     :param token_type_hint: Which type of token this is e.g. `refresh_token` or `access_token`.
+    :param session: a `session.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
     :return: The OPs response
     """
+    session = session or requests.Session()
     request = TokenIntrospectionRequest(token=token, token_type_hint=token_type_hint)
-    response = requests.post(
+    response = session.post(
         introspection_endpoint,
         request.encode_x_www_form_urlencoded(),
         auth=auth,

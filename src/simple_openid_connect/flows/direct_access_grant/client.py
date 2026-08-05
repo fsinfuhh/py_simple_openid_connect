@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional, Union
+
+import requests
 
 from simple_openid_connect.data import TokenErrorResponse, TokenSuccessResponse
 from simple_openid_connect.exceptions import UnsupportedByProviderError
@@ -19,11 +21,15 @@ class DirectAccessGrantClient:
         self._base_client = base_client
 
     def authenticate(
-        self, username: str, password: str
+        self,
+        username: str,
+        password: str,
+        session: Optional[requests.Session] = None,
     ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
         """
         Exchange a given username and password for access, refresh and id tokens.
 
+        :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
         :returns: The result of the exchange
         """
         if self._base_client.provider_config.token_endpoint is None:
@@ -37,4 +43,5 @@ class DirectAccessGrantClient:
             username=username,
             password=password,
             client_authentication=self._base_client.client_auth,
+            session=session,
         )

@@ -2,7 +2,7 @@
 Userinfo implementation
 """
 
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import requests
 
@@ -20,14 +20,16 @@ def fetch_userinfo(
     userinfo_endpoint: str,
     access_token: str,
     http_method: Literal["GET", "POST"] = "GET",
+    session: Optional[requests.Session] = None,
 ) -> Union[UserinfoSuccessResponse, UserinfoErrorResponse]:
     request = UserinfoRequest()
     auth = AccessTokenBearerAuth(access_token)
+    session = session or requests.Session()
 
     if http_method == "GET":
-        response = requests.get(request.encode_url(userinfo_endpoint), auth=auth)
+        response = session.get(request.encode_url(userinfo_endpoint), auth=auth)
     elif http_method == "POST":
-        response = requests.post(
+        response = session.post(
             userinfo_endpoint, request.encode_x_www_form_urlencoded(), auth=auth
         )
     else:

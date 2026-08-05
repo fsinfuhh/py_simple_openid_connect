@@ -72,6 +72,7 @@ def handle_authentication_result(
     code_verifier: Optional[str] = None,
     code_challenge: Optional[str] = None,
     code_challenge_method: Optional[str] = None,
+    session: Optional[requests.Session] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
@@ -84,6 +85,7 @@ def handle_authentication_result(
     :param redirect_uri: The `redirect_uri` that was specified during the authentication initiation.
         If the special value `auto` is used, it is assumed that `current_url` is the that callback and it is stripped of query parameters and fragments to reproduce the originally supplied one.
     :param state: The `state` that was specified during the authentication initiation.
+    :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
 
     :raises AuthenticationFailedError: If the current url indicates an authentication failure that prevents an access token from being retrieved.
     :raises ValidationError: If the returned state does not match the given state.
@@ -119,6 +121,7 @@ def handle_authentication_result(
         code_verifier=code_verifier,
         code_challenge=code_challenge,
         code_challenge_method=code_challenge_method,
+        session=session,
     )
 
 
@@ -130,6 +133,7 @@ def exchange_code_for_tokens(
     code_verifier: Optional[str] = None,
     code_challenge: Optional[str] = None,
     code_challenge_method: Optional[str] = None,
+    session: Optional[requests.Session] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Exchange a received code for access, refresh and id tokens.
@@ -142,10 +146,12 @@ def exchange_code_for_tokens(
         the OP.
     :param redirect_uri: The callback URI that was specified during the authentication initiation.
     :param client_authentication: A way for the client to authenticate itself
+    :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
 
     :returns: The result of the token exchange
     """
     logger.debug("exchanging authentication code for tokens")
+    session = session or requests.Session()
     request_msg = TokenRequest(
         code=authentication_response.code,
         redirect_uri=redirect_uri,
@@ -155,7 +161,7 @@ def exchange_code_for_tokens(
         code_challenge=code_challenge,
         code_challenge_method=code_challenge_method,
     )
-    response = requests.post(
+    response = session.post(
         token_endpoint,
         data=request_msg.encode_x_www_form_urlencoded(),
         headers={

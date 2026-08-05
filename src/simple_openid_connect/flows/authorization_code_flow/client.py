@@ -119,6 +119,7 @@ class AuthorizationCodeFlowClient:
             code_verifier=code_verifier,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
+            session=self._base_client.session,
         )
 
     def exchange_code_for_tokens(
@@ -150,4 +151,5 @@ class AuthorizationCodeFlowClient:
             authentication_response=authentication_response,
             redirect_uri=self._base_client.authentication_redirect_uri,
             client_authentication=self._base_client.client_auth,
+            session=self._base_client.session,
         )

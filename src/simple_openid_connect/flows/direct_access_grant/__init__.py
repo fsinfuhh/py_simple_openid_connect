@@ -9,7 +9,7 @@ Using this flow, a users credentials (i.e. username and password) are directly s
 """
 
 import logging
-from typing import Union
+from typing import Optional, Union
 
 import requests
 
@@ -29,6 +29,7 @@ def authenticate(
     username: str,
     password: str,
     client_authentication: ClientAuthenticationMethod,
+    session: Optional[requests.Session] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Exchange a given username and password for access, refresh and id tokens.
@@ -43,13 +44,14 @@ def authenticate(
     :returns: The result of the exchange
     """
     logger.debug("exchanging username/password for tokens")
+    session = session or requests.Session()
     request_msg = TokenRequest(
         grant_type="password",
         scope=scope,
         username=username,
         password=password,
     )
-    response = requests.post(
+    response = session.post(
         token_endpoint,
         data=request_msg.encode_x_www_form_urlencoded(),
         headers={"Content-Type": "application/x-www-form-urlencoded"},

@@ -3,7 +3,7 @@ Refresh token exchange implementation.
 """
 
 import logging
-from typing import Union
+from typing import Optional, Union
 
 import requests
 
@@ -21,6 +21,7 @@ def exchange_refresh_token(
     token_endpoint: str,
     refresh_token: str,
     client_authentication: ClientAuthenticationMethod,
+    session: Optional[requests.Session] = None,
 ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
     """
     Exchange a refresh token for new tokens
@@ -29,14 +30,16 @@ def exchange_refresh_token(
         Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid_connect.data.ProviderMetadata.token_endpoint>`
     :param refresh_token: The refresh token to use
     :param client_authentication: A way for the client to authenticate itself
+    :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
     """
     logger.debug("exchanging refresh token for new tokens")
+    session = session or requests.Session()
     request_msg = TokenRequest(
         grant_type="refresh_token",
         refresh_token=refresh_token,
         client_id=client_authentication.client_id,
     )
-    response = requests.post(
+    response = session.post(
         token_endpoint,
         data=request_msg.encode_x_www_form_urlencoded(),
         headers={
