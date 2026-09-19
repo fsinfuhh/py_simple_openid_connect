@@ -19,13 +19,19 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
+          strictDeps = true;
+          nativeBuildInputs = with pkgs; [
             python312
             python312Packages.ipython
             python312Packages.platformdirs
             python312Packages.ruff
             uv
+            pre-commit
           ];
+          # we want the dependencies provided by uv
+          shellHook = ''
+            unset PYTHONPATH
+          '';
         };
       }
     );

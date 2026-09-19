@@ -40,7 +40,9 @@ Ensure you have the following system dependencies installed:
 - `python~=3.9`
 - a python virtual environment manager. This document assumes [uv](https://github.com/astral-sh/uv).
 
-Afterwards, follow the below commands to set up your development environment:
+### In both cases
+
+After you obtained python via nix or manually, follow the below commands to set up your development environment:
 
 ```shell
 # create a virtual python environment
@@ -56,6 +58,15 @@ You should also enable [pre-commit](https://pre-commit.com/) hooks to check for 
 ```shell
 pre-commit install
 ```
+
+## Reproducing CI
+
+You can reproduce some parts of CI locally as follows:
+```
+nix develop --ignore-environment -c bash -c 'uv venv && uv pip install -e .[django,djangorestframework] -r requirements.dev.txt && source .venv/bin/activate && pytest && pre-commit run --show-diff-on-failure --color=always --all-files'
+```
+
+This notably does not test all the python vs django versions matrix but covers pre-commit hooks.
 
 ## Development IDP
 
