@@ -27,21 +27,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        py_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        drf_version: ["3.15", "3.16", "3.17"]
+        py_version: ["3.11", "3.12", "3.13", "3.14"]
+        drf_version: ["3.16", "3.17", "3.18"]
         django_version:
-          - "4.2" # LTS
           - "5.2" # LTS
-          - "6" # current major version
+          - "6.0" # current major
+          - "6.1" # current major version
         exclude:
           # exclude new django versions with old python versions
-          - py_version: "3.10"
-            django_version: "6"
           - py_version: "3.11"
-            django_version: "6"
-          # exclude old django versions with new python versions
-          - py_version: "3.14"
-            django_version: "4.2"
+            django_version: "6.0"
+          - py_version: "3.11"
+            django_version: "6.1"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -54,6 +51,6 @@ jobs:
             requirements.dev.txt
       - name: Install dependencies
         run: |
-          pip install .[django,djangorestframework] -r requirements.dev.txt django==${{ matrix.django_version }} djangorestframework==${{ matrix.drf_version }}
+          pip install .[django,djangorestframework] django==${{ matrix.django_version }} djangorestframework==${{ matrix.drf_version }} --group=dev
       - name: Run tests
         run: pytest
