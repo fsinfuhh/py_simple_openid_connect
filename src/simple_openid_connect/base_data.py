@@ -4,16 +4,13 @@ Base data types which are extended with concrete OpenId data types in :mod:`simp
 
 import abc
 import logging
-from typing import List, Literal, Type, TypeVar
+from typing import Literal, Self
 
 from cryptojwt import JWK, JWS
 from furl import Query, furl
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
-
-
-Self = TypeVar("Self", bound="OpenidBaseModel")
 
 
 class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
@@ -48,17 +45,17 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         return url_parsed.tostr()  # type: ignore # because furl has no typedefs, but we know what this returns
 
     @classmethod
-    def parse_x_www_form_urlencoded(cls: Type[Self], s: str) -> Self:
+    def parse_x_www_form_urlencoded(cls: type[Self], s: str) -> Self:
         """
         Parse a received message that is parsed from the given `x-www-form-urlencoded` formatted string.
         """
         query = Query(s)
-        one_value_params = {key: query.params[key] for key in query.params.keys()}
+        one_value_params = {key: query.params[key] for key in query.params}
         return cls.model_validate(one_value_params)
 
     @classmethod
     def parse_url(
-        cls: Type[Self],
+        cls: type[Self],
         url: str,
         location: Literal["query", "fragment", "auto"] = "auto",
     ) -> Self:
@@ -77,7 +74,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
         elif location == "auto":
             try:
                 return cls.parse_url(url, location="fragment")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(
                     "Could not parse %s from fragment, trying query string: %s",
                     cls.__name__,
@@ -88,7 +85,7 @@ class OpenidBaseModel(BaseModel, metaclass=abc.ABCMeta):
             raise ValueError(f"invalid location value {location}")
 
     @classmethod
-    def parse_jwt(cls: Type[Self], value: str, signing_keys: List[JWK]) -> Self:
+    def parse_jwt(cls: type[Self], value: str, signing_keys: list[JWK]) -> Self:
         """
         Parse received data that is encoded as a signed Json-Web-Signature (JWS).
 

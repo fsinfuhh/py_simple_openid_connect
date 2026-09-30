@@ -1,6 +1,7 @@
 import requests
 import responses
 import responses.matchers
+
 from simple_openid_connect.client import OpenidClient
 
 CUSTOM_HEADER = "x-custom-test-header"

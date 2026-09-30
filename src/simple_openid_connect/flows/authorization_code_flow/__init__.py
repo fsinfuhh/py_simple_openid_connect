@@ -8,7 +8,7 @@ The Authorization Server can also authenticate the Client before exchanging the 
 
 import copy
 import logging
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import requests
 from furl import furl
@@ -32,11 +32,11 @@ def start_authentication(
     scope: str,
     client_id: str,
     redirect_uri: str,
-    state: Optional[str] = None,
-    nonce: Optional[str] = None,
-    prompt: Optional[list[str]] = None,
-    code_challenge: Optional[str] = None,
-    code_challenge_method: Optional[str] = None,
+    state: str | None = None,
+    nonce: str | None = None,
+    prompt: list[str] | None = None,
+    code_challenge: str | None = None,
+    code_challenge_method: str | None = None,
 ) -> str:
     """
     Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
@@ -67,13 +67,13 @@ def handle_authentication_result(
     current_url: str,
     token_endpoint: str,
     client_authentication: ClientAuthenticationMethod,
-    redirect_uri: Union[Literal["auto"], str] = "auto",
-    state: Optional[str] = None,
-    code_verifier: Optional[str] = None,
-    code_challenge: Optional[str] = None,
-    code_challenge_method: Optional[str] = None,
-    session: Optional[requests.Session] = None,
-) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    redirect_uri: Literal["auto"] | str = "auto",
+    state: str | None = None,
+    code_verifier: str | None = None,
+    code_challenge: str | None = None,
+    code_challenge_method: str | None = None,
+    session: requests.Session | None = None,
+) -> TokenSuccessResponse | TokenErrorResponse:
     """
     Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
 
@@ -93,7 +93,7 @@ def handle_authentication_result(
     :returns: The result of the token exchange
     """
     current_furl = furl(current_url)
-    if "error" in current_furl.query.params.keys():
+    if "error" in current_furl.query.params:
         raise AuthenticationFailedError(
             AuthenticationErrorResponse.parse_url(str(current_furl))
         )
@@ -130,11 +130,11 @@ def exchange_code_for_tokens(
     authentication_response: AuthenticationSuccessResponse,
     redirect_uri: str,
     client_authentication: ClientAuthenticationMethod,
-    code_verifier: Optional[str] = None,
-    code_challenge: Optional[str] = None,
-    code_challenge_method: Optional[str] = None,
-    session: Optional[requests.Session] = None,
-) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    code_verifier: str | None = None,
+    code_challenge: str | None = None,
+    code_challenge_method: str | None = None,
+    session: requests.Session | None = None,
+) -> TokenSuccessResponse | TokenErrorResponse:
     """
     Exchange a received code for access, refresh and id tokens.
 

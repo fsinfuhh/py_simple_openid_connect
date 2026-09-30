@@ -30,7 +30,7 @@ class DynClient(DjangoClient):
         from django.conf import settings
 
         if (
-            "SERVER_NAME" not in request.keys()
+            "SERVER_NAME" not in request
             or request["SERVER_NAME"] in settings.ALLOWED_HOSTS
         ):
             return super().request(**request)

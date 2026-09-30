@@ -7,16 +7,21 @@ from collections import defaultdict
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from secrets import token_urlsafe
-from typing import Any, Dict
-from typing import Optional  # noqa: F401
+from typing import (
+    TYPE_CHECKING,
+    Any,
+)
 
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (
     TokenSuccessResponse,
 )
 
+if TYPE_CHECKING:
+    from typing import Optional  # noqa: F401
+
 # initialize a session object (which is very primitive but works)
-session = defaultdict(lambda: "")  # type: Dict[str, Any]
+session = defaultdict(lambda: "")  # type: dict[str, Any]
 client = None  # type: Optional[OpenidClient]
 
 
@@ -31,8 +36,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.return_redirect("/")
 
     def _handle_initial(self) -> None:
-        global session
-        global client
         assert client is not None
 
         # setup authorization code flow
@@ -46,8 +49,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.return_redirect(login_url)
 
     def _handle_callback(self) -> None:
-        global session
-        global client
         assert client is not None
 
         # parse callback
@@ -75,7 +76,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header("location", to)
         self.end_headers()
 
-    def return_json_response(self, content: Dict[Any, Any]) -> None:
+    def return_json_response(self, content: dict[Any, Any]) -> None:
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "application/json")
         self.end_headers()

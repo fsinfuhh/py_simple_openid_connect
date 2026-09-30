@@ -1,21 +1,20 @@
 import time
 import unittest
-from typing import Optional
 
 from hypothesis import given
 
-from simple_openid_connect.data import OpenidBaseModel, JwtAccessToken
+from simple_openid_connect.data import JwtAccessToken, OpenidBaseModel
 
 
 class DummyMessage(OpenidBaseModel):
     required_field: str
-    optional_field: Optional[str]
-    optional_with_default: Optional[str] = "default value"
+    optional_field: str | None
+    optional_with_default: str | None = "default value"
 
 
 class XwwwFormEncodingTestCase(unittest.TestCase):
     @given(a=..., b=..., c=...)
-    def test_encode_does_not_throw(self, a: str, b: Optional[str], c: Optional[str]):
+    def test_encode_does_not_throw(self, a: str, b: str | None, c: str | None):
         # setup
         msg = DummyMessage(required_field=a, optional_field=b, optional_with_default=c)
 
@@ -23,7 +22,7 @@ class XwwwFormEncodingTestCase(unittest.TestCase):
         msg.encode_x_www_form_urlencoded()
 
     @given(a=..., b=..., c=...)
-    def test_encode_can_be_decoded(self, a: str, b: Optional[str], c: Optional[str]):
+    def test_encode_can_be_decoded(self, a: str, b: str | None, c: str | None):
         # setup
         original_msg = DummyMessage(
             required_field=a, optional_field=b, optional_with_default=c

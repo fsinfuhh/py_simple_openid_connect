@@ -10,7 +10,6 @@ For more information visit `Section 9 of OpenID Connect Core 1.0 <https://openid
 """
 
 import abc
-from typing import Any
 
 from requests import models
 from requests.auth import AuthBase, HTTPBasicAuth
@@ -85,10 +84,10 @@ class AccessTokenBearerAuth(AuthBase):
         super().__init__()
         self.access_token = access_token
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return self.access_token == getattr(other, "access_token", None)
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self == other
 
     def __call__(self, r: models.PreparedRequest) -> models.PreparedRequest:

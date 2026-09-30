@@ -5,10 +5,10 @@ import time
 from base64 import b64encode
 
 import pytest
-from pytest_django.asserts import assertContains, assertInHTML
 from cryptojwt import JWS
 from django.shortcuts import resolve_url
 from django.utils.http import quote
+from pytest_django.asserts import assertContains, assertInHTML
 from responses import matchers
 
 from simple_openid_connect.data import TokenErrorResponse

@@ -5,7 +5,6 @@ This grant enables a client to retrieve tokens dedicated to the client and not t
 """
 
 import logging
-from typing import Optional, Union
 
 import requests
 
@@ -23,8 +22,8 @@ def authenticate(
     token_endpoint: str,
     scope: str,
     client_authentication: ClientAuthenticationMethod,
-    session: Optional[requests.Session] = None,
-) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    session: requests.Session | None = None,
+) -> TokenSuccessResponse | TokenErrorResponse:
     """
     Retrieve a token that is dedicated to the authenticated client from the provider.
 

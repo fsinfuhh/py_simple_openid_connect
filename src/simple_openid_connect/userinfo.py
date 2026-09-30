@@ -2,7 +2,7 @@
 Userinfo implementation
 """
 
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import requests
 
@@ -20,8 +20,8 @@ def fetch_userinfo(
     userinfo_endpoint: str,
     access_token: str,
     http_method: Literal["GET", "POST"] = "GET",
-    session: Optional[requests.Session] = None,
-) -> Union[UserinfoSuccessResponse, UserinfoErrorResponse]:
+    session: requests.Session | None = None,
+) -> UserinfoSuccessResponse | UserinfoErrorResponse:
     request = UserinfoRequest()
     auth = AccessTokenBearerAuth(access_token)
     session = session or requests.Session()

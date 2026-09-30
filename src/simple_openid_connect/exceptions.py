@@ -23,15 +23,11 @@ class ImpossibleOperationError(OpenidProtocolError):
     configuration
     """
 
-    pass
-
 
 class UnsupportedByProviderError(OpenidProtocolError):
     """
     This error indicates that a desired feature is not supported by the OpenID Provider
     """
-
-    pass
 
 
 class AuthenticationFailedError(Exception):

@@ -2,7 +2,7 @@
 Internal utilities
 """
 
-from typing import Iterator
+from collections.abc import Iterator
 
 from simple_openid_connect.exceptions import ValidationError
 

@@ -1,6 +1,5 @@
 import pickle
 
-
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (
     RpInitiatedLogoutRequest,

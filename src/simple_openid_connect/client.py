@@ -2,24 +2,19 @@
 A more contiguous client implementation of the Openid-Connect protocol that offers simpler APIs at the cost of losing some flexibility.
 """
 
+import warnings
+from collections.abc import Callable, Mapping
+from datetime import UTC, datetime, timedelta
 from typing import (
     Any,
-    Callable,
-    Dict,
-    List,
     Literal,
-    Mapping,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
+    Self,
 )
-from datetime import datetime, timedelta, timezone
-import warnings
 
+import requests
 from cryptojwt import JWK
 from cryptojwt.jwk.jwk import key_from_jwk_dict
-import requests
+
 from simple_openid_connect import (
     jwk,
     rp_initiated_logout,
@@ -55,8 +50,6 @@ from simple_openid_connect.flows.direct_access_grant.client import (
     DirectAccessGrantClient,
 )
 
-Self = TypeVar("Self", bound="OpenidClient")
-
 
 class OpenidClient:
     """
@@ -77,9 +70,9 @@ class OpenidClient:
     client_credentials_grant: ClientCredentialsGrantClient
     "*Client Credentials Grant* (or *Service Account Authentication*) functionality"
 
-    _jwks_max_age: Optional[datetime]
+    _jwks_max_age: datetime | None
     "Maximum time until the currently cached provider keys are valid"
-    _provider_keys: Optional[List[JWK]]
+    _provider_keys: list[JWK] | None
     "Cached provider keys that can be used until they expire"
 
     session: requests.Session
@@ -88,13 +81,13 @@ class OpenidClient:
     def __init__(
         self,
         provider_config: ProviderMetadata,
-        provider_keys: Optional[List[JWK]] = None,
-        authentication_redirect_uri: Optional[str] = None,
+        provider_keys: list[JWK] | None = None,
+        authentication_redirect_uri: str | None = None,
         client_id: str = "",
-        client_secret: Optional[str] = None,
+        client_secret: str | None = None,
         scope: str = "openid",
         min_jwks_cache_duration: timedelta = timedelta(minutes=10),
-        session: Optional[requests.Session] = None,
+        session: requests.Session | None = None,
     ):
         """
         Construct a new client that is bound to an Identity-Provider.
@@ -141,14 +134,14 @@ class OpenidClient:
 
     @classmethod
     def from_issuer_url(
-        cls: Type[Self],
+        cls: type[Self],
         url: str,
-        authentication_redirect_uri: Optional[str],
+        authentication_redirect_uri: str | None,
         client_id: str,
-        client_secret: Union[str, None] = None,
+        client_secret: str | None = None,
         scope: str = "openid",
         min_jwks_cache_duration: timedelta = timedelta(minutes=10),
-        session: Optional[requests.Session] = None,
+        session: requests.Session | None = None,
     ) -> Self:
         """
         Create a new client instance with an issuer url as base, automatically discovering information about the issuer in the process.
@@ -178,14 +171,14 @@ class OpenidClient:
 
     @classmethod
     def from_issuer_config(
-        cls: Type[Self],
+        cls: type[Self],
         config: ProviderMetadata,
-        authentication_redirect_uri: Optional[str],
+        authentication_redirect_uri: str | None,
         client_id: str,
-        client_secret: Union[str, None] = None,
+        client_secret: str | None = None,
         scope: str = "openid",
         min_jwks_cache_duration: timedelta = timedelta(minutes=10),
-        session: Optional[requests.Session] = None,
+        session: requests.Session | None = None,
     ) -> Self:
         """
         Create a new client instance with a resolved issuer configuration as base.
@@ -214,8 +207,8 @@ class OpenidClient:
         )
 
     @property
-    def provider_keys(self) -> List[JWK]:
-        now = datetime.now(timezone.utc)
+    def provider_keys(self) -> list[JWK]:
+        now = datetime.now(UTC)
 
         # return the cached data if it is still valid
         if (
@@ -251,7 +244,7 @@ class OpenidClient:
 
     def fetch_userinfo(
         self, access_token: str
-    ) -> Union[UserinfoSuccessResponse, UserinfoErrorResponse]:
+    ) -> UserinfoSuccessResponse | UserinfoErrorResponse:
         """
         Fetch user information from the OP by doing a userinfo request.
 
@@ -275,10 +268,10 @@ class OpenidClient:
     def decode_id_token(
         self,
         raw_token: str,
-        nonce: Union[str, None] = None,
-        extra_trusted_audiences: List[str] = [],
+        nonce: str | None = None,
+        extra_trusted_audiences: list[str] | None = None,
         min_iat: float = 0,
-        validate_acr: Union[Callable[[str], None], None] = None,
+        validate_acr: Callable[[str], None] | None = None,
         min_auth_time: float = 0,
     ) -> IdToken:
         """
@@ -305,6 +298,9 @@ class OpenidClient:
 
         :raises ValidationError: if the validation fails
         """
+        if extra_trusted_audiences is None:
+            extra_trusted_audiences = []
+
         token = IdToken.parse_jwt(raw_token, self.provider_keys)
         token.validate_extern(
             issuer=self.provider_config.issuer,
@@ -319,7 +315,7 @@ class OpenidClient:
 
     def exchange_refresh_token(
         self, refresh_token: str
-    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    ) -> TokenSuccessResponse | TokenErrorResponse:
         """
         Exchange a refresh token for new tokens
 
@@ -339,9 +335,7 @@ class OpenidClient:
             session=self.session,
         )
 
-    def initiate_logout(
-        self, request: Union[RpInitiatedLogoutRequest, None] = None
-    ) -> str:
+    def initiate_logout(self, request: RpInitiatedLogoutRequest | None = None) -> str:
         """
         Initiate user logout as a Relying-Party
 
@@ -361,8 +355,8 @@ class OpenidClient:
         )
 
     def introspect_token(
-        self, token: str, token_type_hint: Union[str, None] = None
-    ) -> Union[TokenIntrospectionSuccessResponse, TokenIntrospectionErrorResponse]:
+        self, token: str, token_type_hint: str | None = None
+    ) -> TokenIntrospectionSuccessResponse | TokenIntrospectionErrorResponse:
         """
         Introspect the given token at the OP.
 
@@ -394,7 +388,7 @@ class OpenidClient:
             result["_provider_keys"] = [k.serialize() for k in self._provider_keys]
         return result
 
-    def __setstate__(self, state: Dict[str, Any]) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         # this implements support for unpickling this class
         # it is basically the default pickle behavior but explicitly deserializes keys
         if state["_provider_keys"] is not None:

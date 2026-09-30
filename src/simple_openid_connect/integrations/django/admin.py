@@ -1,9 +1,11 @@
-from typing import List, Any, Dict, Optional
+# ruff: noqa: RUF012
 
-from django.contrib import admin
-from django.http import HttpRequest
-from django.contrib.auth import get_user_model
+from typing import Any
+
 from django.conf import settings
+from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.http import HttpRequest
 
 from . import models
 
@@ -24,7 +26,7 @@ class OpenidUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
 
     search_help_text = "Search for the user by sub (OpenID ID), username or email"
 
-    def get_search_fields(self, request: HttpRequest) -> List[str]:
+    def get_search_fields(self, request: HttpRequest) -> list[str]:
         result = ["sub"]
 
         UserModel = get_user_model()
@@ -41,11 +43,11 @@ class OpenidUserAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
         request: Any,
         object_id: Any,
         form_url: Any = "",
-        extra_context: Optional[Dict[str, Any]] = None,
+        extra_context: dict[str, Any] | None = None,
     ) -> Any:
         # add a settings.DEBUG context variable
-        extra_context = extra_context or dict()
-        extra_context.setdefault("settings", dict())
+        extra_context = extra_context or {}
+        extra_context.setdefault("settings", {})
         extra_context["settings"]["DEBUG"] = settings.DEBUG and True
 
         return super().change_view(request, object_id, form_url, extra_context)

@@ -1,5 +1,4 @@
-from typing import TYPE_CHECKING, Union
-
+from typing import TYPE_CHECKING
 
 from simple_openid_connect.data import TokenErrorResponse, TokenSuccessResponse
 from simple_openid_connect.exceptions import UnsupportedByProviderError
@@ -23,7 +22,7 @@ class DirectAccessGrantClient:
         self,
         username: str,
         password: str,
-    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    ) -> TokenSuccessResponse | TokenErrorResponse:
         """
         Exchange a given username and password for access, refresh and id tokens.
 

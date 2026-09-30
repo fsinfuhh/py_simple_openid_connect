@@ -1,8 +1,8 @@
-from simple_openid_connect.data import IdToken, JwtAccessToken
 import time
 
 import pytest
 
+from simple_openid_connect.data import IdToken, JwtAccessToken
 from simple_openid_connect.exceptions import ValidationError
 
 

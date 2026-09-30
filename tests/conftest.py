@@ -37,11 +37,11 @@ def jwt(jwks) -> JWT:
 
 
 class DummyUserAgent(requests.Session):
-    def naviagte_to(self, url: str, *args, **kwargs) -> requests.Response:
+    def naviagte_to(self, url: str, **kwargs) -> requests.Response:
         """
         Mimic navigating to the given URL
         """
-        return self.get(url, allow_redirects=True, *args, **kwargs)
+        return self.get(url, allow_redirects=True, **kwargs)
 
 
 @pytest.fixture

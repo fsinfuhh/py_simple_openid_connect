@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Mapping, Optional, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from furl import furl
 
@@ -29,11 +30,11 @@ class AuthorizationCodeFlowClient:
 
     def start_authentication(
         self,
-        state: Optional[str] = None,
-        nonce: Optional[str] = None,
-        prompt: Optional[list[str]] = None,
-        code_challenge: Optional[str] = None,
-        code_challenge_method: Optional[str] = None,
+        state: str | None = None,
+        nonce: str | None = None,
+        prompt: list[str] | None = None,
+        code_challenge: str | None = None,
+        code_challenge_method: str | None = None,
     ) -> str:
         """
         Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
@@ -72,12 +73,12 @@ class AuthorizationCodeFlowClient:
     def handle_authentication_result(
         self,
         current_url: str,
-        additional_redirect_args: Optional[Mapping[str, str]] = None,
-        state: Optional[str] = None,
-        code_verifier: Optional[str] = None,
-        code_challenge: Optional[str] = None,
-        code_challenge_method: Optional[str] = None,
-    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+        additional_redirect_args: Mapping[str, str] | None = None,
+        state: str | None = None,
+        code_verifier: str | None = None,
+        code_challenge: str | None = None,
+        code_challenge_method: str | None = None,
+    ) -> TokenSuccessResponse | TokenErrorResponse:
         """
         Handle an authentication result that is communicated to the RP in form of the user agents current url after having started an authentication process via :func:`start_authentication`.
 
@@ -124,7 +125,7 @@ class AuthorizationCodeFlowClient:
 
     def exchange_code_for_tokens(
         self, authentication_response: AuthenticationSuccessResponse
-    ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    ) -> TokenSuccessResponse | TokenErrorResponse:
         """
         Exchange a received code for access, refresh and id tokens.
 

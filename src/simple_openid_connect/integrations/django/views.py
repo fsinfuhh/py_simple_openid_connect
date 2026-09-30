@@ -5,9 +5,9 @@ View functions which handle openid authentication and their related callbacks
 import logging
 import math
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
-from typing import Optional, Union, Any
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import login, logout
@@ -25,10 +25,10 @@ from django.views.decorators.cache import cache_control
 from simple_openid_connect.data import (
     IdToken,
     RpInitiatedLogoutRequest,
-    TokenSuccessResponse,
     TokenErrorResponse,
+    TokenSuccessResponse,
 )
-from simple_openid_connect.exceptions import ValidationError, AuthenticationFailedError
+from simple_openid_connect.exceptions import AuthenticationFailedError, ValidationError
 from simple_openid_connect.integrations.django.apps import OpenidAppConfig
 from simple_openid_connect.integrations.django.models import OpenidSession
 
@@ -44,7 +44,7 @@ class InitLoginView(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         logout(request)
-        if "next" in request.GET.keys():
+        if "next" in request.GET:
             request.session["login_redirect_url"] = request.GET["next"]
 
         # save the login state into the session to prevent CSRF attacks
@@ -53,8 +53,8 @@ class InitLoginView(View):
         request.session["openid_auth_state"] = state
 
         # save the time at which authentication was started
-        request.session["openid_auth_start_time"] = int(
-            math.floor(datetime.now(tz=timezone.utc).timestamp())
+        request.session["openid_auth_start_time"] = math.floor(
+            datetime.now(tz=UTC).timestamp()
         )
 
         # prevent replay attacks by generating and specifying a nonce
@@ -111,7 +111,7 @@ class LoginCallbackView(View):
         del request.session["openid_auth_nonce"]
 
         # redirect to the next get parameter if present, otherwise to the configured default
-        if "login_redirect_url" in request.session.keys():
+        if "login_redirect_url" in request.session:
             return HttpResponseRedirect(
                 redirect_to=request.session["login_redirect_url"]
             )
@@ -145,7 +145,7 @@ class LoginCallbackView(View):
             status=HTTPStatus.UNAUTHORIZED,
         )
 
-    def check_auth_state(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def check_auth_state(self, request: HttpRequest) -> HttpResponse | None:
         """
         Prevent CSRF attacks by verifying the requests state parameter
 
@@ -160,17 +160,15 @@ class LoginCallbackView(View):
 
         return None
 
-    def check_login_timeout(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def check_login_timeout(self, request: HttpRequest) -> HttpResponse | None:
         """
         Don't allow login completion if the process was started too long ago
         """
         app_settings = OpenidAppConfig.get_instance().safe_settings
 
         if request.session.get("openid_auth_start_time", None) is None or (
-            datetime.now(tz=timezone.utc)
-            - datetime.fromtimestamp(
-                request.session["openid_auth_start_time"], tz=timezone.utc
-            )
+            datetime.now(tz=UTC)
+            - datetime.fromtimestamp(request.session["openid_auth_start_time"], tz=UTC)
         ) > timedelta(seconds=app_settings.OPENID_LOGIN_TIMEOUT):
             return self.render_error(
                 request,
@@ -182,7 +180,7 @@ class LoginCallbackView(View):
 
     def exchange_code_for_token(
         self, request: HttpRequest
-    ) -> Union[HttpResponse, TokenSuccessResponse]:
+    ) -> HttpResponse | TokenSuccessResponse:
         """
         Exchange the code encoded in the current URL for an access token
         """
@@ -213,7 +211,7 @@ class LoginCallbackView(View):
 
     def extract_id(
         self, request: HttpRequest, token_response: TokenSuccessResponse
-    ) -> Union[HttpResponse, IdToken]:
+    ) -> HttpResponse | IdToken:
         """
         Extract the validated ID token from the given token response
         """

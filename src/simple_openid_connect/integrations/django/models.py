@@ -3,7 +3,6 @@ simple_openid_connect database models
 """
 
 from datetime import datetime, timedelta
-from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -12,7 +11,7 @@ from django.utils import timezone
 from simple_openid_connect.data import IdToken, TokenSuccessResponse
 
 
-def _calc_expiry(t: Optional[int]) -> Optional[datetime]:
+def _calc_expiry(t: int | None) -> datetime | None:
     if t is not None:
         return timezone.now() + timedelta(seconds=t)
     return None

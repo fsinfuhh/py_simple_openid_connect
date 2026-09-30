@@ -6,5 +6,5 @@ Django REST Framework integration for :mod:`simple_openid_connect`.
 # we do this import because of its side effect which defines openapi metadata for the authentication classes used in this integration
 try:
     import simple_openid_connect.integrations.djangorestframework.drf_spectacular_schema  # noqa: F401
-except Exception:
+except Exception:  # noqa: BLE001, S110
     pass

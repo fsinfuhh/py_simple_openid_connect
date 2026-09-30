@@ -3,9 +3,10 @@ View-function decorators
 """
 
 import logging
+from collections.abc import Callable
 from functools import wraps
 from http import HTTPStatus
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
@@ -19,9 +20,7 @@ View_Return = TypeVar("View_Return", bound=HttpResponse)
 
 
 def _invalid_token_response(request: HttpRequest) -> HttpResponse:
-    if "Accept" in request.headers.keys() and is_application_json(
-        request.headers["Accept"]
-    ):
+    if "Accept" in request.headers and is_application_json(request.headers["Accept"]):
         return JsonResponse(
             status=HTTPStatus.UNAUTHORIZED,
             headers={"WWW-Authenticate": "Bearer"},
@@ -39,8 +38,8 @@ def _invalid_token_response(request: HttpRequest) -> HttpResponse:
 
 
 def access_token_required(
-    *, required_scopes: Optional[str] = None
-) -> Callable[..., Union[HttpResponse, View_Return]]:
+    *, required_scopes: str | None = None
+) -> Callable[..., HttpResponse | View_Return]:
     """
     Decorator for views that checks that the request is authenticated using a valid access token, early-returning an
     appropriate http error response if necessary.
@@ -61,9 +60,9 @@ def access_token_required(
         @wraps(view_func)
         def wrapped_view(
             request: HttpRequest, *args: Any, **kwargs: Any
-        ) -> Union[HttpResponse, View_Return]:
+        ) -> HttpResponse | View_Return:
             # verify that an Authorization Header of type Bearer is present
-            if "Authorization" not in request.headers.keys() or not request.headers[
+            if "Authorization" not in request.headers or not request.headers[
                 "Authorization"
             ].startswith("Bearer "):
                 return HttpResponse(

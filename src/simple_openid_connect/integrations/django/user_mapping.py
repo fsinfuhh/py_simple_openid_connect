@@ -7,7 +7,7 @@ variable ``OPENID_USER_MAPPER`` to an import string pointing to the newly create
 
 import logging
 from hashlib import sha256
-from typing import Any, Tuple, Union, Optional
+from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
@@ -29,9 +29,12 @@ from simple_openid_connect.integrations.django.models import OpenidUser
 
 logger = logging.getLogger(__name__)
 
-FederatedUserData = Union[
-    IdToken, UserinfoSuccessResponse, TokenIntrospectionSuccessResponse, JwtAccessToken
-]
+FederatedUserData = (
+    IdToken
+    | UserinfoSuccessResponse
+    | TokenIntrospectionSuccessResponse
+    | JwtAccessToken
+)
 "Type alias for the different classes which can provide information about a federated user."
 
 UserModel = Any
@@ -70,8 +73,8 @@ class UserMapper:
         self,
         access_token: str,
         oidc_client: OpenidClient,
-        required_scopes: Union[str, None] = None,
-    ) -> Tuple[UserModel, FederatedUserData]:
+        required_scopes: str | None = None,
+    ) -> tuple[UserModel, FederatedUserData]:
         """
         Entry point for dynamically creating or updating user data based on an access token which was provided by a user.
 
@@ -100,7 +103,7 @@ class UserMapper:
         # try to parse the raw token as JWT
         user_data = None  # type: JwtAccessToken | TokenIntrospectionSuccessResponse | None
         try:
-            # parse an validate the general token structure
+            # parse and validate the general token structure
             token = JwtAccessToken.parse_jwt(
                 access_token,
                 oidc_client.provider_keys,
@@ -128,7 +131,7 @@ class UserMapper:
             user_data = token
 
         # fall back to introspecting the token at the issuer
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.debug(
                 "could not parse access token as JWT, falling back to calling the providers token introspection endpoint"
             )
@@ -212,7 +215,7 @@ class UserMapper:
 
     def get_cached_data(
         self, access_token: str, required_scopes: str
-    ) -> Optional[Tuple[UserModel, FederatedUserData]]:
+    ) -> tuple[UserModel, FederatedUserData] | None:
         input_hash = sha256(usedforsecurity=True)
         input_hash.update(access_token.encode("UTF-8"))
         input_hash.update(required_scopes.encode("UTF-8"))

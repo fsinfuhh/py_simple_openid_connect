@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from freezegun import freeze_time
 from cryptojwt import JWK
+from freezegun import freeze_time
 
 from simple_openid_connect.jwk import fetch_jwks, fetch_jwks_max_age
 
@@ -43,5 +43,5 @@ def test_load_dummy_jwks_max_age_with_cache_header(dummy_provider_config):
     assert all(isinstance(k, JWK) for k in keys)
     assert len(keys) == 1
     assert max_age == datetime(
-        year=2026, month=1, day=1, hour=0, minute=1, second=0, tzinfo=timezone.utc
+        year=2026, month=1, day=1, hour=0, minute=1, second=0, tzinfo=UTC
     )

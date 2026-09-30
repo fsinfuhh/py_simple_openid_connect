@@ -3,7 +3,6 @@ Refresh token exchange implementation.
 """
 
 import logging
-from typing import Optional, Union
 
 import requests
 
@@ -21,8 +20,8 @@ def exchange_refresh_token(
     token_endpoint: str,
     refresh_token: str,
     client_authentication: ClientAuthenticationMethod,
-    session: Optional[requests.Session] = None,
-) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    session: requests.Session | None = None,
+) -> TokenSuccessResponse | TokenErrorResponse:
     """
     Exchange a refresh token for new tokens
 

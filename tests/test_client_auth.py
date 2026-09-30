@@ -19,7 +19,7 @@ def test_none_auth(mock_empty_response):
     response = requests.get("https://example.com", auth=auth)
 
     # assert
-    assert "Authorization" not in response.request.headers.keys()
+    assert "Authorization" not in response.request.headers
 
 
 def test_client_secret_basic_auth(mock_empty_response):

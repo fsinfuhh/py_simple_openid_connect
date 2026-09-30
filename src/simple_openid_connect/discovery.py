@@ -2,7 +2,6 @@
 Mechanisms for discovering information about an OpenID issuer
 """
 
-from typing import Optional
 import requests
 
 from simple_openid_connect import utils
@@ -11,7 +10,7 @@ from simple_openid_connect.exceptions import OpenidProtocolError
 
 
 def discover_configuration_from_issuer(
-    issuer: str, session: Optional[requests.Session] = None
+    issuer: str, session: requests.Session | None = None
 ) -> ProviderMetadata:
     """
     Retrieve configuration information about an OpenID provider (issuer)

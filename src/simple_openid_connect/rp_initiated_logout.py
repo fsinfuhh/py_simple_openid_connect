@@ -2,13 +2,11 @@
 Implementation of Relying-Party initiated logout
 """
 
-from typing import Union
-
 from simple_openid_connect.data import RpInitiatedLogoutRequest
 
 
 def initiate_logout(
-    logout_endpoint: str, request: Union[RpInitiatedLogoutRequest, None] = None
+    logout_endpoint: str, request: RpInitiatedLogoutRequest | None = None
 ) -> str:
     """
     Initiate user logout as a Relying-Party

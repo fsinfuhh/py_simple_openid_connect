@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from simple_openid_connect.data import TokenErrorResponse, TokenSuccessResponse
 from simple_openid_connect.exceptions import UnsupportedByProviderError
@@ -18,7 +18,7 @@ class ClientCredentialsGrantClient:
     def __init__(self, base_client: "OpenidClient"):
         self._base_client = base_client
 
-    def authenticate(self) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    def authenticate(self) -> TokenSuccessResponse | TokenErrorResponse:
         """
         Retrieve a token that is dedicated to the authenticated client from the provider.
 

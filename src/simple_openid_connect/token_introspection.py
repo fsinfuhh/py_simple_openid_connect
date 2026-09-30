@@ -2,8 +2,6 @@
 `OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_ implementation.
 """
 
-from typing import Optional, Union
-
 import requests
 
 from simple_openid_connect.client_authentication import ClientAuthenticationMethod
@@ -18,9 +16,9 @@ def introspect_token(
     introspection_endpoint: str,
     token: str,
     auth: ClientAuthenticationMethod,
-    token_type_hint: Union[str, None] = None,
-    session: Optional[requests.Session] = None,
-) -> Union[TokenIntrospectionSuccessResponse, TokenIntrospectionErrorResponse]:
+    token_type_hint: str | None = None,
+    session: requests.Session | None = None,
+) -> TokenIntrospectionSuccessResponse | TokenIntrospectionErrorResponse:
     """
     Introspect the given token at the OP.
 

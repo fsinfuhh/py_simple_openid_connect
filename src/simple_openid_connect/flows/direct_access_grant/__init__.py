@@ -9,7 +9,6 @@ Using this flow, a users credentials (i.e. username and password) are directly s
 """
 
 import logging
-from typing import Optional, Union
 
 import requests
 
@@ -29,8 +28,8 @@ def authenticate(
     username: str,
     password: str,
     client_authentication: ClientAuthenticationMethod,
-    session: Optional[requests.Session] = None,
-) -> Union[TokenSuccessResponse, TokenErrorResponse]:
+    session: requests.Session | None = None,
+) -> TokenSuccessResponse | TokenErrorResponse:
     """
     Exchange a given username and password for access, refresh and id tokens.
 

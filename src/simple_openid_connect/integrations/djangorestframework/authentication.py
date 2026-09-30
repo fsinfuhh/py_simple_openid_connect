@@ -5,7 +5,7 @@ See the `DRF documentation on Setting the authentication scheme <https://www.dja
 """
 
 import logging
-from typing import Any, Tuple, Union
+from typing import Any
 
 from django.http import HttpRequest
 from rest_framework.authentication import BaseAuthentication
@@ -43,9 +43,9 @@ class AccessTokenAuthentication(BaseAuthentication):
 
     def authenticate(
         self, request: HttpRequest
-    ) -> Union[Tuple[Any, AuthenticatedViaToken], None]:
+    ) -> tuple[Any, AuthenticatedViaToken] | None:
         # abort if no authentication is intended
-        if "Authorization" not in request.headers.keys() or not request.headers[
+        if "Authorization" not in request.headers or not request.headers[
             "Authorization"
         ].startswith("Bearer "):
             return None

@@ -1,4 +1,3 @@
-# ruff: noqa: F405, F403        allow the * import
 from .settings_base import *
 
 # Database

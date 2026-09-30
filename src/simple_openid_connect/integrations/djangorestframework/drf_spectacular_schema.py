@@ -2,7 +2,7 @@
 Automatic OpenAPI schema generation for drf_spectacular.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 
@@ -19,7 +19,7 @@ class AccessTokenScheme(OpenApiAuthenticationExtension):  # type: ignore  # igno
 
     def get_security_definition(
         self, auto_schema: "AutoSchema"
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    ) -> dict[str, Any] | list[dict[str, Any]]:
         return {
             "type": "openIdConnect",
             "description": "Authentication with OpenID Access token",
