@@ -1,6 +1,5 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
-import requests
 
 from simple_openid_connect.data import TokenErrorResponse, TokenSuccessResponse
 from simple_openid_connect.exceptions import UnsupportedByProviderError
