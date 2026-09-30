@@ -3,36 +3,26 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          strictDeps = true;
-          nativeBuildInputs = with pkgs; [
-            python312
-            python312Packages.ipython
-            python312Packages.platformdirs
-            python312Packages.ruff
-            uv
-            pre-commit
-          ];
-          # we want the dependencies provided by uv
-          shellHook = ''
-            unset PYTHONPATH
-          '';
-        };
-      }
-    );
+  outputs = { self, nixpkgs }: {
+
+    devShells = builtins.mapAttrs (system: pkgs: {
+      default = pkgs.mkShell {
+        strictDeps = true;
+        packages = with pkgs; [
+          python3
+          python3Packages.ipython
+          python3Packages.platformdirs
+          python3Packages.ruff
+          uv
+          pre-commit
+        ];
+        shellHook = ''
+          # ensure we use dependencies installed via uv since this flake is only required for binary packages
+          unset PYTHONPATH
+        '';
+      };
+    }) nixpkgs.legacyPackages;
+  };
 }
