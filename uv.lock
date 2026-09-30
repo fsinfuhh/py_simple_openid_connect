@@ -1757,8 +1757,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cryptojwt", specifier = "~=1.8" },
-    { name = "django", marker = "extra == 'django'", specifier = ">=4.2" },
-    { name = "djangorestframework", marker = "extra == 'djangorestframework'", specifier = "~=3.14" },
+    { name = "django", marker = "extra == 'django'", specifier = ">=5.2" },
+    { name = "djangorestframework", marker = "extra == 'djangorestframework'", specifier = "~=3.16" },
     { name = "furl", specifier = "~=2.1" },
     { name = "pydantic", specifier = "~=2.6" },
     { name = "requests", specifier = "~=2.31" },
