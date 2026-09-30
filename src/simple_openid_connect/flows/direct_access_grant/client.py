@@ -24,7 +24,6 @@ class DirectAccessGrantClient:
         self,
         username: str,
         password: str,
-        session: Optional[requests.Session] = None,
     ) -> Union[TokenSuccessResponse, TokenErrorResponse]:
         """
         Exchange a given username and password for access, refresh and id tokens.
@@ -43,5 +42,5 @@ class DirectAccessGrantClient:
             username=username,
             password=password,
             client_authentication=self._base_client.client_auth,
-            session=session,
+            session=self._base_client.session,
         )
