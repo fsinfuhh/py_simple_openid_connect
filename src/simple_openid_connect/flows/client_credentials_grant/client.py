@@ -33,4 +33,5 @@ class ClientCredentialsGrantClient:
             token_endpoint=self._base_client.provider_config.token_endpoint,
             scope=self._base_client.scope,
             client_authentication=self._base_client.client_auth,
+            session=self._base_client.session,
         )

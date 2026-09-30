@@ -32,6 +32,7 @@ def authenticate(
         Corresponds to :data:`ProviderMetadata.token_endpoint <simple_openid_connect.data.ProviderMetadata.token_endpoint>`.
     :param scope: The scope requested by the application.
     :param client_authentication: A way for the client to authenticate itself.
+    :param session: a `requests.Session` object used to perform all HTTP requests. It can be used to customize certificate verification for example.
 
     :returns: The result of the exchange
     """
