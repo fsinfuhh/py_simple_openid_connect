@@ -12,9 +12,7 @@
         strictDeps = true;
         packages = with pkgs; [
           python3
-          python3Packages.ipython
-          python3Packages.platformdirs
-          python3Packages.ruff
+          python3Packages.ruff   # required because the python package ships a non-nix binary
           uv
           pre-commit
         ];

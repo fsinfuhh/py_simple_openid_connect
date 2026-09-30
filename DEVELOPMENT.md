@@ -48,7 +48,7 @@ After you obtained python via nix or manually, follow the below commands to set 
 # create a virtual python environment
 uv venv
 # install this project + its dev dependencies into the virtual environment
-uv pip install -e .[django,djangorestframework] -r requirements.dev.txt
+uv sync --all-extras
 # activate the venv python interpreter for use (use the correct activation script for your shell though)
 source .venv/bin/activate
 ```
@@ -63,7 +63,7 @@ pre-commit install
 
 You can reproduce some parts of CI locally as follows:
 ```
-nix develop --ignore-environment -c bash -c 'uv venv && uv pip install -e .[django,djangorestframework] -r requirements.dev.txt && source .venv/bin/activate && pytest && pre-commit run --show-diff-on-failure --color=always --all-files'
+nix develop --ignore-environment -c bash -c 'uv venv && uv sync --all-extras && source .venv/bin/activate && pytest && pre-commit run --show-diff-on-failure --color=always --all-files'
 ```
 
 This notably does not test all the python vs django versions matrix but covers pre-commit hooks.
