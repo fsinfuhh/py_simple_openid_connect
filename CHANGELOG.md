@@ -1,5 +1,24 @@
 # Changelog
 
+## v2.5.0
+
+### Notable Features
+
+- Add possibility to customize outgoing HTTP requests.
+  This feature has been implemented so that e.g. custom CA validation logic can be configured.
+  The way it works is that all HTTP related functions now accept a `session` argument which must be a `requests.session` object. The object is dynamically created when the argument is absent but it allows deep customization of request internals.
+  Users of the *client* abstraction can instead pass a session on client creation.
+
+### Minor Changes
+
+- Version constraints have been updated to currently supported dependency releases.
+  Supported pythons versions are now `v3.11`, `v3.12`, `v3.13` and `v3.14`.
+  The integration now support `v5.2`, `v6.0`, `v6.1` for django and `v3.16`, `v3.17`, `v3.18` for Django-Rest-Framework.
+
+### Bug-Fixes
+
+- Catch django model errors relating to expired OpenIdSession objects
+
 ## v2.4.0
 
 ### Notable Features
