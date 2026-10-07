@@ -45,6 +45,7 @@ def exchange_refresh_token(
             "Content-Type": "application/x-www-form-urlencoded",
         },
         auth=client_authentication,
+        timeout=30,
     )
 
     if response.status_code == 200:

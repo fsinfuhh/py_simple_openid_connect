@@ -28,7 +28,7 @@ def discover_configuration_from_issuer(
     session = session or requests.Session()
     issuer = issuer.rstrip("/")
     config_url = f"{issuer}/.well-known/openid-configuration"
-    response = session.get(config_url)
+    response = session.get(config_url, timeout=30)
 
     if not utils.is_application_json(response.headers["Content-Type"]):
         raise OpenidProtocolError(

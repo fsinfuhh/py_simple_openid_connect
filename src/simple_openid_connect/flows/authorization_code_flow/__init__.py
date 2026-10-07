@@ -168,6 +168,7 @@ def exchange_code_for_tokens(
             "Content-Type": "application/x-www-form-urlencoded",
         },
         auth=client_authentication,
+        timeout=30,
     )
 
     if response.status_code == 200:

@@ -49,6 +49,7 @@ def authenticate(
         data=request_msg.encode_x_www_form_urlencoded(),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         auth=client_authentication,
+        timeout=30,
     )
 
     if response.status_code == 200:

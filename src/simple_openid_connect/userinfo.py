@@ -27,10 +27,15 @@ def fetch_userinfo(
     session = session or requests.Session()
 
     if http_method == "GET":
-        response = session.get(request.encode_url(userinfo_endpoint), auth=auth)
+        response = session.get(
+            request.encode_url(userinfo_endpoint), auth=auth, timeout=30
+        )
     elif http_method == "POST":
         response = session.post(
-            userinfo_endpoint, request.encode_x_www_form_urlencoded(), auth=auth
+            userinfo_endpoint,
+            request.encode_x_www_form_urlencoded(),
+            auth=auth,
+            timeout=30,
         )
     else:
         raise ValueError(f"argument http_method has unsupported value {http_method}")
