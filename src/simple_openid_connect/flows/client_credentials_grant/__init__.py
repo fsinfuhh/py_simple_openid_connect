@@ -10,9 +10,10 @@ import requests
 
 from simple_openid_connect.client_authentication import ClientAuthenticationMethod
 from simple_openid_connect.data import (
+    OauthTokenSuccessResponse,
     TokenErrorResponse,
     TokenRequest,
-    TokenSuccessResponse,
+    TokenSuccessResponse,  # noqa: F401 to preserve legacy import-compatibility
 )
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ def authenticate(
     scope: str,
     client_authentication: ClientAuthenticationMethod,
     session: requests.Session | None = None,
-) -> TokenSuccessResponse | TokenErrorResponse:
+) -> OauthTokenSuccessResponse | TokenErrorResponse:
     """
     Retrieve a token that is dedicated to the authenticated client from the provider.
 
@@ -51,6 +52,6 @@ def authenticate(
     )
 
     if response.status_code == 200:
-        return TokenSuccessResponse.model_validate_json(response.content)
+        return OauthTokenSuccessResponse.model_validate_json(response.content)
     else:
         return TokenErrorResponse.model_validate_json(response.content)

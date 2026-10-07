@@ -637,12 +637,14 @@ class TokenRequest(OpenidBaseModel):
         return values
 
 
-class TokenSuccessResponse(OpenidBaseModel):
+class OauthTokenSuccessResponse(OpenidBaseModel):
     """
-    After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an ID Token and an Access Token
+    After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an Access Token.
+    Crucially, this response model is compliant with base OAuth2 endpoints.
+    For specific OIDC functionality, see :class:<`TokenSuccessResponse <TokenSuccessResponse>`> instead.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="allow")
 
     access_token: str
     "REQUIRED. The access token issued by the authorization server."
@@ -661,6 +663,12 @@ class TokenSuccessResponse(OpenidBaseModel):
 
     scope: str | None = None
     "OPTIONAL, if identical to the scope requested by the client; otherwise, REQUIRED. The scope of the access token."
+
+
+class TokenSuccessResponse(OauthTokenSuccessResponse):
+    """
+    After receiving and validating a valid and authorized :class:`TokenRequest <TokenRequest>` from the Client, the Authorization Server returns a successful response that includes an ID Token and an Access Token
+    """
 
     id_token: str
     "ID Token value associated with the authenticated session."

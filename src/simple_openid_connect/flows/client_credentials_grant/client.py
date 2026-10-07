@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING
 
-from simple_openid_connect.data import TokenErrorResponse, TokenSuccessResponse
+from simple_openid_connect.data import (
+    OauthTokenSuccessResponse,
+    TokenErrorResponse,
+    TokenSuccessResponse,  # noqa: F401 to preserve legacy import-compatibility
+)
 from simple_openid_connect.exceptions import UnsupportedByProviderError
 from simple_openid_connect.flows import client_credentials_grant as impl
 
@@ -18,7 +22,7 @@ class ClientCredentialsGrantClient:
     def __init__(self, base_client: "OpenidClient"):
         self._base_client = base_client
 
-    def authenticate(self) -> TokenSuccessResponse | TokenErrorResponse:
+    def authenticate(self) -> OauthTokenSuccessResponse | TokenErrorResponse:
         """
         Retrieve a token that is dedicated to the authenticated client from the provider.
 
