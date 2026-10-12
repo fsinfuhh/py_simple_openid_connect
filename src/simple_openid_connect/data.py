@@ -153,6 +153,12 @@ class ProviderMetadata(OpenidBaseModel):
     introspection_endpoint: str | None = None
     "OPTIONAL. URL that the OpenID Provider provides to resource servers to introspect access tokens in accordance to `RFC7662: OAuth 2.0 Token Introspection <https://www.rfc-editor.org/rfc/rfc7662>`_."
 
+    pushed_authorization_request_endpoint: str | None = None
+    "OPTIONAL. The URL of the pushed authorization request endpoint at which a client can post an authorization request to exchange for a request_uri value usable at the authorization server. See `RFC9126: OAuth 2.0 Pushed Authorization Requests <https://datatracker.ietf.org/doc/html/rfc9126>`."
+
+    require_pushed_authorization_requests: bool = Field(default=False)
+    "OPTIONAL. Boolean parameter indicating whether the authorization server accepts authorization request data only via PAR. If omitted, the default value is false."
+
 
 class IdToken(OpenidBaseModel):
     """
