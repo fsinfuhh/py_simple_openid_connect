@@ -18,6 +18,7 @@ from simple_openid_connect.data import (
     AuthenticationErrorResponse,
     AuthenticationRequest,
     AuthenticationSuccessResponse,
+    PushedAuthorizationRequestResponse,
     TokenErrorResponse,
     TokenRequest,
     TokenSuccessResponse,
@@ -25,6 +26,9 @@ from simple_openid_connect.data import (
 from simple_openid_connect.exceptions import AuthenticationFailedError, ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: add function overload to specify which combination of parameters are optional
 
 
 def start_authentication(
@@ -37,6 +41,7 @@ def start_authentication(
     prompt: list[str] | None = None,
     code_challenge: str | None = None,
     code_challenge_method: str | None = None,
+    par_request_uri: str | None = None,
 ) -> str:
     """
     Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
@@ -46,6 +51,8 @@ def start_authentication(
     :param nonce: String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
     :param prompt: Specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
         The defined values are: "none", "login", "consent" and "select_account", multiple may be given as a list.
+
+    TODO: add missing function parameters
 
     :returns: A URL to which the user agent should be redirected
     """
@@ -59,8 +66,58 @@ def start_authentication(
         prompt=prompt,
         code_challenge=code_challenge,
         code_challenge_method=code_challenge_method,
+        request_uri=par_request_uri,
     )
     return request.encode_url(authorization_endpoint)
+
+
+def push_authorization_request(
+    pushed_authorization_request_endoint: str,
+    scope: str,
+    redirect_uri: str,
+    client_authentication: ClientAuthenticationMethod,
+    state: str | None = None,
+    nonce: str | None = None,
+    prompt: list[str] | None = None,
+    code_challenge: str | None = None,
+    code_challenge_method: str | None = None,
+    session: requests.Session | None = None,
+) -> PushedAuthorizationRequestResponse | TokenErrorResponse:
+    """
+    Push an authorization request to the OIDC provider in preperation for a later call to :fun:`start_authentication`.
+
+    TODO: description how one would exactly use this method
+
+    TODO: parameter description
+    """
+    logger.debug("pushing authorization request to providers PAR endpoint")
+    request = AuthenticationRequest(
+        scope=scope,
+        client_id=client_authentication.client_id,
+        redirect_uri=redirect_uri,
+        response_type="code",
+        state=state,
+        nonce=nonce,
+        prompt=prompt,
+        code_challenge=code_challenge,
+        code_challenge_method=code_challenge_method,
+    )
+    session = session or requests.Session()
+    response = session.post(
+        pushed_authorization_request_endoint,
+        data=request.encode_x_www_form_urlencoded(),
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        auth=client_authentication,
+        timeout=30,
+    )
+
+    if response.status_code == 201:
+        return PushedAuthorizationRequestResponse.model_validate_json(response.content)
+    else:
+        return TokenErrorResponse.model_validate_json(response.content)
+    
 
 
 def handle_authentication_result(

@@ -471,6 +471,9 @@ class AuthenticationRequest(OpenidBaseModel):
     code_challenge_method: str | None = None
     "OPTIONAL. Code Challenge Method. This parameter is intended for use with Proof Key for Code Exchange (PKCE) [RFC7636], to be used with code_challenge."
 
+    request_uri: str | None = None
+    "OPTIONAL. RFC9126 Pushed-Authorization-Request locator. See TODO:function-ref for an explanation about using this parameter."
+
 
 class AuthenticationSuccessResponse(OpenidBaseModel):
     """
@@ -968,3 +971,18 @@ class TokenIntrospectionErrorResponse(TokenErrorResponse):
     """
     An error with which an OP responds to :class:`TokenIntrospectionRequest` and which describes why the request could not be fulfilled.
     """
+
+
+class PushedAuthorizationRequestResponse(OpenidBaseModel):
+    """
+    A successful response regarding a pushed authorization request.
+
+    See TODO for more information about the usage of this model.
+    """
+    
+    request_uri: str
+    "The request URI corresponding to the authorization request posted. This URI is a single-use reference to the respective request data in the subsequent authorization request. The way the authorization process obtains the authorization request data is at the discretion of the authorization server and is out of scope of this specification. There is no need to make the authorization request data available to other parties via this URI."
+
+    expires_in: int
+    "A JSON number that represents the lifetime of the request URI in seconds as a positive integer. The request URI lifetime is at the discretion of the authorization server but will typically be relatively short (e.g., between 5 and 600 seconds)."
+    
