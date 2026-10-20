@@ -15,6 +15,7 @@ from typing import (
 from simple_openid_connect.client import OpenidClient
 from simple_openid_connect.data import (
     TokenSuccessResponse,
+    PushedAuthorizationRequestResponse,
 )
 
 if TYPE_CHECKING:
@@ -41,9 +42,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         # setup authorization code flow
         session["state"] = token_urlsafe(16)
         session["nonce"] = token_urlsafe(16)
-        login_url = client.authorization_code_flow.start_authentication(
-            state=session["state"], nonce=session["nonce"]
-        )
+        resp = client.authorization_code_flow.push_authorization_request(state=session["state"], nonce=session["nonce"])
+        assert isinstance(resp, PushedAuthorizationRequestResponse)
+        login_url = client.authorization_code_flow.start_authentication(par_request_uri=resp.request_uri)
 
         # send response
         self.return_redirect(login_url)

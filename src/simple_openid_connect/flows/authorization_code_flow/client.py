@@ -5,6 +5,7 @@ from furl import furl
 
 from simple_openid_connect.data import (
     AuthenticationSuccessResponse,
+    PushedAuthorizationRequestResponse,
     TokenErrorResponse,
     TokenSuccessResponse,
 )
@@ -35,6 +36,7 @@ class AuthorizationCodeFlowClient:
         prompt: list[str] | None = None,
         code_challenge: str | None = None,
         code_challenge_method: str | None = None,
+        par_request_uri: str | None = None,
     ) -> str:
         """
         Start the authentication process by constructing an appropriate :class:`AuthenticationRequest`, serializing it and
@@ -68,7 +70,42 @@ class AuthorizationCodeFlowClient:
             prompt=prompt,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
+            par_request_uri=par_request_uri,
         )
+    
+    def push_authorization_request(
+        self,
+        state: str | None = None,
+        nonce: str | None = None,
+        prompt: list[str] | None = None,
+        code_challenge: str | None = None,
+        code_challenge_method: str | None = None,
+    ) -> PushedAuthorizationRequestResponse | TokenErrorResponse:
+        if self._base_client.provider_config.pushed_authorization_request_endpoint is None:
+            raise UnsupportedByProviderError(
+                f"The OpenID provider {self._base_client.provider_config.issuer} does not support RFC9126 Pushed-Authorization-Requests since it does not have an appropriate endpoint"
+            )
+
+        if self._base_client.authentication_redirect_uri is None:
+            raise ImpossibleOperationError(
+                "The client has no redirect_uri configured so no authentication flow can be started"
+            )
+
+        redirect_uri = furl(self._base_client.authentication_redirect_uri)
+
+        return impl.push_authorization_request(
+            self._base_client.provider_config.pushed_authorization_request_endpoint,
+            self._base_client.scope,
+            redirect_uri.tostr(),
+            self._base_client.client_auth,
+            state=state,
+            nonce=nonce,
+            prompt=prompt,
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method,
+            session=self._base_client.session,
+        )
+        
 
     def handle_authentication_result(
         self,
